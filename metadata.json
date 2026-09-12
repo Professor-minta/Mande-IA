@@ -1,0 +1,10 @@
+{
+  "name": "Mande-IA",
+  "description": "Assistant IA centré sur le Bamanankan (Bambara), multilingue (Bamanankan, Français, Anglais), avec Agent Core, API Djelia.cloud pour la lecture vocale, recherche web Exa et passerelle OpenRouter.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
