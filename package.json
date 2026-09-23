@@ -1,0 +1,24 @@
+{
+  "name": "mande-ia-v2",
+  "version": "2.0.0",
+  "description": "Mande-IA — assistant vocal Bambara",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.6.2",
+    "connect-sqlite3": "^0.9.16",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2"
+  }
+}

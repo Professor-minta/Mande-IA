@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google" content="notranslate">
+    <meta name="theme-color" content="#113c37">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/icons/mande-ia.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/mande-ia.svg">
+    <link rel="stylesheet" href="/style.css">
+    <title>Mande-IA</title>
+    <meta name="description" content="Mande-IA est un assistant d'intelligence artificielle pour écrire et parler en bambara.">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://ia.mintaservices.com/#app",
+            "name": "Mande-IA",
+            "url": "https://ia.mintaservices.com/",
+            "description": "Assistant d'intelligence artificielle pour écrire et parler en bambara.",
+            "applicationCategory": "EducationalApplication",
+            "applicationSubCategory": "Assistant IA en bambara",
+            "operatingSystem": "Web",
+            "isAccessibleForFree": true,
+            "inLanguage": ["bm", "fr"],
+            "author": {
+              "@type": "Person",
+              "@id": "https://www.mintaservices.com/#person",
+              "name": "Issa Minta",
+              "alternateName": "Professor Minta",
+              "url": "https://www.mintaservices.com/"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "@id": "https://www.mintaservices.com/#organization",
+              "name": "Minta Services",
+              "url": "https://www.mintaservices.com/"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body class="notranslate" translate="no">
+    <aside id="sidebar">
+      <div class="brand"><img class="mark" src="/icons/mande-ia.svg" alt=""><span>Mande-IA</span></div>
+      <button id="new-chat" class="new-chat">＋ Nouvelle discussion</button>
+      <div id="conversation-list" aria-label="Conversations"></div>
+      <button id="login-button" class="outline">Se connecter</button>
+    </aside>
+    <main>
+      <header><div><strong>Mande-IA</strong><small id="status">Écrivez en Bambara — micro bêta</small></div><div class="header-actions"><button id="mobile-new" class="icon-button mobile-tool" aria-label="Nouvelle discussion" title="Nouvelle discussion">＋</button><button id="mobile-history" class="icon-button mobile-tool" aria-label="Historique" title="Historique">☰</button><button id="settings-button" class="icon-button" aria-label="Réglages" title="Réglages">⚙️</button><button id="mobile-login" class="outline">Compte</button></div></header>
+      <section id="welcome" class="welcome">
+        <div class="orb">🎙️</div>
+        <h1>I ni ce!</h1>
+        <img class="welcome-logo" src="/icons/mande-ia.svg" alt="Logo Mande-IA">
+        <p>Parlez ou écrivez à Mande‑IA en Bambara.</p>
+        <p class="muted">Vous pouvez essayer sans compte. Créez un compte pour sauvegarder vos conversations.</p>
+      </section>
+      <section id="messages" aria-live="polite"></section>
+      <section class="composer">
+        <button id="mic" class="mic" aria-label="Parler (bêta)" title="Microphone bêta : écrivez si la transcription ne fonctionne pas">🎙️</button>
+        <textarea id="prompt" rows="1" placeholder="Écrivez en Bambara…"></textarea>
+        <button id="send" class="send">Envoyer</button>
+      </section>
+      <section id="upgrade-gate" class="upgrade-gate" hidden>
+        <strong>Limite gratuite atteinte</strong>
+        <span>Revenez demain ou passez à Pro pour continuer.</span>
+        <a id="upgrade-link" target="_blank" rel="noopener">Passer à Pro sur WhatsApp</a>
+      </section>
+      <p id="usage" class="usage"></p>
+    </main>
+    <dialog id="auth-dialog">
+      <button id="close-dialog" class="close" aria-label="Fermer">×</button>
+      <h2>Gardez vos conversations</h2>
+      <p id="account-state">Créez un compte gratuit ou connectez-vous.</p>
+      <label>E-mail <input id="email" type="email" autocomplete="email"></label>
+      <label>Mot de passe <input id="password" type="password" minlength="8" autocomplete="current-password"></label>
+      <p id="auth-error" class="error"></p>
+      <button id="register" class="send full">Créer mon compte</button>
+      <button id="login" class="outline full">Se connecter</button>
+      <button id="logout" class="link hidden">Se déconnecter</button>
+    </dialog>
+    <dialog id="settings-dialog">
+      <button id="close-settings" class="close" aria-label="Fermer">×</button>
+      <h2>Réglages</h2>
+      <p class="settings-intro">Personnalisez Mande‑IA sur cet appareil.</p>
+      <label class="setting-row"><span><strong>Thème sombre</strong><small>Confort visuel le soir</small></span><input id="theme-toggle" type="checkbox"></label>
+      <label class="setting-row"><span><strong>Langue des réponses</strong><small>Choisissez la langue souhaitée</small></span><select id="language-select"><option value="bm">Bambara</option><option value="fr">Français</option></select></label>
+      <label class="setting-row"><span><strong>Lire les réponses</strong><small id="voice-description">Disponible après configuration de Djelía</small></span><input id="voice-toggle" type="checkbox"></label>
+      <button id="install-app" class="outline full hidden">Installer Mande‑IA</button>
+      <button id="share-app" class="outline full">Partager l’application</button>
+      <a class="setting-link" id="support-link" target="_blank" rel="noopener">💬 Contacter le support WhatsApp</a>
+      <a class="setting-link" id="feedback-link" target="_blank" rel="noopener">📝 Envoyer un avis</a>
+      <button id="about-app" class="outline full">À propos de Mande‑IA</button>
+      <button id="delete-conversation" class="danger full">Effacer cette discussion</button>
+      <p class="settings-note">Les discussions sont protégées par votre compte. L’effacement est définitif.</p>
+    </dialog>
+    <dialog id="history-dialog">
+      <button id="close-history" class="close" aria-label="Fermer">×</button>
+      <h2>Discussions</h2>
+      <button id="history-new" class="new-chat full">＋ Nouvelle discussion</button>
+      <div id="mobile-conversation-list" class="dialog-conversations"></div>
+      <p id="history-empty" class="settings-note">Connectez-vous pour sauvegarder et retrouver vos discussions.</p>
+    </dialog>
+    <dialog id="about-dialog">
+      <button id="close-about" class="close" aria-label="Fermer">×</button>
+      <h2 id="about-title">À propos de Mande‑IA</h2>
+      <select id="about-language" class="about-language"><option value="bm">Bambara</option><option value="fr">Français</option><option value="en">English</option></select>
+      <article id="about-content" class="about-content"></article>
+    </dialog>
+    <script src="/app.js"></script>
+  </body>
+</html>

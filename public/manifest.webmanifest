@@ -1,0 +1,17 @@
+{
+  "name": "Mande-IA",
+  "short_name": "Mande-IA",
+  "description": "Assistant vocal Bambara pour le Mali.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f0",
+  "theme_color": "#113c37",
+  "icons": [
+    {
+      "src": "/icons/mande-ia.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+[
+  { "triggers": ["bonjour", "salut", "hello"], "bambara": "I ni ce" },
+  { "triggers": ["merci", "thanks"], "bambara": "I ni ce" },
+  { "triggers": ["au revoir", "bye"], "bambara": "K'an ben" }
+]

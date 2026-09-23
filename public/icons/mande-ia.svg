@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mande-IA">
+  <rect width="512" height="512" rx="108" fill="#0d2030"/>
+  <g transform="translate(86 118)" stroke-linecap="round">
+    <rect x="0" y="101" width="46" height="75" rx="23" fill="#22b573"/>
+    <rect x="58" y="65" width="46" height="147" rx="23" fill="#22b573"/>
+    <rect x="116" y="31" width="46" height="215" rx="23" fill="#f5bd35"/>
+    <rect x="174" y="0" width="46" height="278" rx="23" fill="#fffaf0"/>
+    <rect x="232" y="31" width="46" height="215" rx="23" fill="#f5bd35"/>
+    <rect x="290" y="65" width="46" height="147" rx="23" fill="#df4439"/>
+  </g>
+</svg>
