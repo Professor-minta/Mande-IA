@@ -52,18 +52,18 @@
       <button id="login-button" class="outline">Se connecter</button>
     </aside>
     <main>
-      <header><div><strong>Mande-IA</strong><small id="status">Écrivez en Bambara — micro bêta</small></div><div class="header-actions"><button id="mobile-new" class="icon-button mobile-tool" aria-label="Nouvelle discussion" title="Nouvelle discussion">＋</button><button id="mobile-history" class="icon-button mobile-tool" aria-label="Historique" title="Historique">☰</button><button id="settings-button" class="icon-button" aria-label="Réglages" title="Réglages">⚙️</button><button id="mobile-login" class="outline">Compte</button></div></header>
+      <header><div><strong>Mande-IA</strong><small id="status">Écrivez dans votre langue — micro bêta</small></div><div class="header-actions"><button id="mobile-new" class="icon-button mobile-tool" aria-label="Nouvelle discussion" title="Nouvelle discussion">＋</button><button id="mobile-history" class="icon-button mobile-tool" aria-label="Historique" title="Historique">☰</button><button id="settings-button" class="icon-button" aria-label="Réglages" title="Réglages">⚙️</button><button id="mobile-login" class="outline">Compte</button></div></header>
       <section id="welcome" class="welcome">
         <div class="orb">🎙️</div>
         <h1>I ni ce!</h1>
         <img class="welcome-logo" src="/icons/mande-ia.svg" alt="Logo Mande-IA">
-        <p>Parlez ou écrivez à Mande‑IA en Bambara.</p>
+        <p>Parlez ou écrivez à Mande‑IA en Bambara, français ou anglais.</p>
         <p class="muted">Vous pouvez essayer sans compte. Créez un compte pour sauvegarder vos conversations.</p>
       </section>
       <section id="messages" aria-live="polite"></section>
       <section class="composer">
         <button id="mic" class="mic" aria-label="Parler (bêta)" title="Microphone bêta : écrivez si la transcription ne fonctionne pas">🎙️</button>
-        <textarea id="prompt" rows="1" placeholder="Écrivez en Bambara…"></textarea>
+        <textarea id="prompt" rows="1" placeholder="Écrivez en Bambara, français ou anglais…"></textarea>
         <button id="send" class="send">Envoyer</button>
       </section>
       <section id="upgrade-gate" class="upgrade-gate" hidden>
@@ -89,7 +89,7 @@
       <h2>Réglages</h2>
       <p class="settings-intro">Personnalisez Mande‑IA sur cet appareil.</p>
       <label class="setting-row"><span><strong>Thème sombre</strong><small>Confort visuel le soir</small></span><input id="theme-toggle" type="checkbox"></label>
-      <label class="setting-row"><span><strong>Langue des réponses</strong><small>Choisissez la langue souhaitée</small></span><select id="language-select"><option value="bm">Bambara</option><option value="fr">Français</option></select></label>
+      <label class="setting-row"><span><strong>Langue des réponses</strong><small>Automatique répond dans la langue de votre message</small></span><select id="language-select"><option value="auto">Automatique</option><option value="bm">Bambara</option><option value="fr">Français</option><option value="en">English</option></select></label>
       <label class="setting-row"><span><strong>Lire les réponses</strong><small id="voice-description">Disponible après configuration de Djelía</small></span><input id="voice-toggle" type="checkbox"></label>
       <button id="install-app" class="outline full hidden">Installer Mande‑IA</button>
       <button id="share-app" class="outline full">Partager l’application</button>

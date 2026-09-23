@@ -194,6 +194,50 @@ function selectedConversation(req, conversationId) {
   return db.prepare('SELECT id, title FROM conversations WHERE id = ? AND user_id = ?').get(conversationId, req.session.userId);
 }
 
+function languageInstruction(preference) {
+  if (preference === 'bm') {
+    return 'Réponds uniquement en Bambara (bamanankan), avec un bambara malien simple, naturel et court. N’utilise le français ou l’anglais que si l’utilisateur le demande explicitement.';
+  }
+  if (preference === 'fr') return 'Réponds uniquement en français simple, clair et court.';
+  if (preference === 'en') return 'Reply only in clear, concise English.';
+  return 'Détecte la langue principale du dernier message de l’utilisateur et réponds dans cette même langue : Bambara si le message est en Bambara, français s’il est en français, anglais s’il est en anglais. Ne traduis pas et ne changes pas de langue sauf si l’utilisateur le demande. Pour un message mélangé, utilise la langue la plus présente.';
+}
+
+async function askClaude(messages, preference = 'auto', maxTokens = 300) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    const error = new Error('La clé Claude n’est pas encore configurée.');
+    error.status = 503;
+    throw error;
+  }
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
+      max_tokens: maxTokens,
+      system: `Tu es Mande-IA, un assistant utile pour le Mali. ${languageInstruction(preference)} Sois concis, respectueux et honnête si tu ne sais pas.`,
+      messages
+    })
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    const error = new Error(data?.error?.message || 'Erreur externe.');
+    error.status = 502;
+    throw error;
+  }
+  const reply = (data.content || []).filter((block) => block.type === 'text').map((block) => block.text).join('\n').trim();
+  if (!reply) {
+    const error = new Error('Claude a envoyé une réponse vide.');
+    error.status = 502;
+    throw error;
+  }
+  return reply;
+}
+
 app.post('/api/ai', aiLimit, async (req, res, next) => {
   try {
     const user = req.session.userId ? getUser(req.session.userId) : null;
@@ -203,25 +247,13 @@ app.post('/api/ai', aiLimit, async (req, res, next) => {
     }
     const usage = consumeQuestion(req, user);
     if (!usage) return res.status(429).json({ error: 'Limite quotidienne atteinte. Passez à Pro ou revenez demain.', usage: usageFor(req, user) });
-    if (!process.env.ANTHROPIC_API_KEY) return res.status(503).json({ error: 'La clé Claude n’est pas encore configurée.' });
-
-    const language = req.body?.language === 'fr'
-      ? 'français simple'
-      : `Bambara (bamanankan) uniquement. Règle absolue : écris toute la réponse en bambara, sans phrases ni explications en français ou en anglais. Même si l’utilisateur écrit quelques mots français, réponds en bambara. N’utilise le français ou l’anglais que si l’utilisateur le demande explicitement. Emploie un bambara malien simple, naturel et court. Si la demande est ambiguë, pose une courte question en bambara; ne demande jamais une reformulation en français.`;
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
-        system: `Tu es Mande-IA, un assistant utile pour le Mali. Réponds en ${language}. Sois concis, respectueux et honnête si tu ne sais pas.`,
-        messages
-      })
-    });
-    const data = await response.json();
-    if (!response.ok) return res.status(502).json({ error: 'Claude n’a pas répondu.', detail: data?.error?.message || 'Erreur externe.' });
-    const reply = (data.content || []).filter((block) => block.type === 'text').map((block) => block.text).join('\n').trim();
-    if (!reply) return res.status(502).json({ error: 'Claude a envoyé une réponse vide.' });
+    const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
+    let reply;
+    try {
+      reply = await askClaude(messages, preference);
+    } catch (error) {
+      return res.status(error.status || 502).json({ error: error.status === 503 ? error.message : 'Claude n’a pas répondu.', detail: error.status === 503 ? undefined : error.message });
+    }
 
     const conversation = selectedConversation(req, req.body?.conversationId);
     if (conversation) {
@@ -341,8 +373,18 @@ app.post('/api/whatsapp/webhook', (req, res) => {
           if (String(error.message).includes('UNIQUE constraint failed')) continue;
           throw error;
         }
-        console.log(`WhatsApp test reçu de ${from}: ${String(message.text.body).slice(0, 120)}`);
-        await sendWhatsAppText(from, 'Aw ni ce! Mande-IA WhatsApp ka demo bɛ se. A bɛ bamanankan dɛmɛ.');
+        const incomingText = String(message.text.body).trim();
+        console.log(`WhatsApp test reçu de ${from}: ${incomingText.slice(0, 120)}`);
+        let reply;
+        try {
+          // WhatsApp inherits the automatic language mode: Bambara in, Bambara out;
+          // French in, French out; English in, English out.
+          reply = await askClaude([{ role: 'user', content: incomingText.slice(0, 4000) }], 'auto', 220);
+        } catch (error) {
+          console.error('WhatsApp AI reply failed:', error.message);
+          reply = 'Mande-IA est momentanément indisponible. Réessayez dans quelques minutes.';
+        }
+        await sendWhatsAppText(from, reply.slice(0, 3500));
       }
     }
   }).catch((error) => console.error('WhatsApp webhook error:', error.message));
