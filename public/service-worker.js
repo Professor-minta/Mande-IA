@@ -1,4 +1,4 @@
-const CACHE = 'mande-ia-shell-v9';
+const CACHE = 'mande-ia-shell-v10';
 const SHELL = ['/', '/index.html', '/style.css', '/app.js', '/bambara-demo.js', '/manifest.webmanifest', '/icons/mande-ia.svg'];
 
 self.addEventListener('install', (event) => {
