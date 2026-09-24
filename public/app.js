@@ -7,7 +7,45 @@ const text = (value) => document.createTextNode(value);
 
 function applyPreferences() { document.documentElement.dataset.theme = preferences.theme; $('#theme-toggle').checked = preferences.theme === 'dark'; $('#language-select').value = preferences.language; $('#voice-toggle').checked = preferences.voice; $('#voice-description').textContent = state.djelia ? 'Moussa lira la réponse dans sa langue' : 'Disponible après configuration de Djelía'; }
 function renderUsage() { const usage = state.usage; const remaining = Number(usage?.remaining); const limitReached = Boolean(usage?.limit) && Number.isFinite(remaining) && remaining <= 0; $('#usage').textContent = usage?.limit ? `${remaining} question${remaining === 1 ? '' : 's'} gratuite${remaining === 1 ? '' : 's'} restante${remaining === 1 ? '' : 's'} aujourd’hui.` : state.user?.plan === 'pro' ? '⭐ Plan Pro — questions illimitées.' : ''; const composer=$('.composer'); const gate=$('#upgrade-gate'); composer.hidden=limitReached; composer.style.display=limitReached?'none':'flex'; gate.hidden=!limitReached; gate.style.display=limitReached?'grid':'none'; $('#login-button').textContent = state.user ? state.user.email : 'Se connecter'; $('#mobile-login').textContent = state.user ? state.user.email.split('@')[0] : 'Compte'; $('#logout').classList.toggle('hidden', !state.user); $('#delete-conversation').disabled = !state.user || !state.conversationId; }
-function addMessage(role, content) { $('#welcome').hidden = true; const item = document.createElement('article'); item.className = `message ${role}`; item.append(text(content)); if (role === 'assistant') { const speak = document.createElement('button'); speak.textContent = '🔊'; speak.title = 'Écouter la réponse'; speak.setAttribute('aria-label', 'Écouter la réponse'); speak.onclick = () => say(content, speak); item.prepend(speak); } $('#messages').append(item); item.scrollIntoView({ block: 'end', behavior: 'smooth' }); return item; }
+async function copyText(content, button) {
+  try {
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(content);
+    else {
+      const helper = document.createElement('textarea');
+      helper.value = content; helper.style.position = 'fixed'; helper.style.opacity = '0';
+      document.body.append(helper); helper.select(); document.execCommand('copy'); helper.remove();
+    }
+    if (button) { const original = button.textContent; button.textContent = '✓ Copié'; setTimeout(() => { button.textContent = original; }, 1400); }
+    $('#status').textContent = 'Message copié.';
+  } catch { $('#status').textContent = 'Impossible de copier ce message.'; }
+}
+async function shareText(content, button) {
+  const share = { title: 'Mande-IA', text: content };
+  if (navigator.share) {
+    try { await navigator.share(share); return; } catch (error) { if (error.name === 'AbortError') return; }
+  }
+  await copyText(content, button);
+}
+function messageAction(label, title, handler) {
+  const button = document.createElement('button');
+  button.type = 'button'; button.className = 'message-action'; button.textContent = label;
+  button.title = title; button.setAttribute('aria-label', title); button.onclick = () => handler(button);
+  return button;
+}
+function addMessage(role, content) {
+  $('#welcome').hidden = true;
+  const item = document.createElement('article'); item.className = `message ${role}`;
+  const body = document.createElement('div'); body.className = 'message-text'; body.append(text(content)); item.append(body);
+  const actions = document.createElement('div'); actions.className = 'message-actions';
+  if (role === 'assistant') {
+    const speak = messageAction('🔊', 'Écouter la réponse', (button) => say(content, button));
+    actions.append(speak);
+  }
+  actions.append(messageAction('📋 Copier', 'Copier ce message', (button) => copyText(content, button)));
+  actions.append(messageAction('↗ Partager', 'Partager ce message', (button) => shareText(content, button)));
+  item.append(actions);
+  $('#messages').append(item); item.scrollIntoView({ block: 'end', behavior: 'smooth' }); return item;
+}
 function renderMessages() { $('#messages').replaceChildren(); if (!state.messages.length) { $('#welcome').hidden = false; return; } state.messages.forEach((message) => addMessage(message.role, message.content)); }
 async function checkHealth() { const data = await api('/api/health'); state.djelia = Boolean(data.djelia); applyPreferences(); }
 async function checkAuth() { const data = await api('/api/auth', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({action:'check'}) }); state.user=data.user; state.usage=data.usage; renderUsage(); if (state.user) await loadConversations(); }
