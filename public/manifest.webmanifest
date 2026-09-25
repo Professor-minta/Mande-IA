@@ -4,8 +4,8 @@
   "description": "Assistant vocal Bambara pour le Mali.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fbf8f0",
-  "theme_color": "#113c37",
+  "background_color": "#0b0f16",
+  "theme_color": "#0b0f16",
   "icons": [
     {
       "src": "/icons/mande-ia.svg",
