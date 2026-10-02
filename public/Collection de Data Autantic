@@ -1,0 +1,185 @@
+[
+  { "triggers": ["bonjour", "salut", "hello"], "bambara": "I ni ce" },
+  { "triggers": ["merci", "thanks"], "bambara": "I ni ce" },
+  { "triggers": ["au revoir", "bye"], "bambara": "K'an ben" },
+  
+  {  "triggers": ["compter jusqu'à dix", "count to ten", "les chiffres"],
+    "bambara": "Kelen, fila, saba, naani, duuru, wɔɔrɔ, wolonwula, seegin, kɔnɔntɔn, tan"
+},
+{
+    "triggers": ["ma famille", "my family", "la famille"],
+    "bambara": "Denbaya kɔnɔ: fa, ba, denmisɛnw, balimaw"
+},
+{
+    "triggers": ["comment dire merci", "how to say thank you"],
+    "bambara": "I ni ce, walima Barka"
+},
+{
+    "triggers": ["bon appétit", "enjoy your meal"],
+    "bambara": "Aw ni ce dumuni na"
+},
+{
+    "triggers": ["félicitations", "congratulations"],
+    "bambara": "I ni ce kosɛbɛ, aw ni waso"
+},
+{
+    "triggers": ["je suis fatigué", "i am tired", "je suis fatiguée"],
+    "bambara": "N sɛgɛnna"
+},
+{
+    "triggers": ["je suis content", "i am happy", "je suis heureux"],
+    "bambara": "N ni ka nisɔndiya"
+},
+{
+    "triggers": ["j'ai faim", "i am hungry"],
+    "bambara": "N kɔngɔla"
+},
+{
+    "triggers": ["j'ai soif", "i am thirsty"],
+    "bambara": "Mindiya bɛ n na"
+},
+{
+    "triggers": ["quelle heure est-il", "what time is it"],
+    "bambara": "I bɛ waati fɔ n ye wa?"
+},
+{
+    "triggers": ["aujourd'hui", "today"],
+    "bambara": "Bi"
+},
+{
+    "triggers": ["demain", "tomorrow"],
+    "bambara": "Sini"
+},
+{
+    "triggers": ["hier", "yesterday"],
+    "bambara": "Kunun"
+},
+{
+    "triggers": ["ordinateur", "computer"],
+    "bambara": "Ɔridinatɛri"
+},
+{
+    "triggers": ["téléphone", "phone"],
+    "bambara": "Telefɔni"
+},
+{
+    "triggers": ["internet", "l'internet"],
+    "bambara": "Ɛntɛrinɛti"
+},
+{
+    "triggers": ["travail", "work", "le travail"],
+    "bambara": "Baara"
+},
+{
+    "triggers": ["argent", "money"],
+    "bambara": "Wari"
+},
+{
+    "triggers": ["école", "school"],
+    "bambara": "Kalanso"
+},
+{
+    "triggers": ["maison", "house"],
+    "bambara": "Bon walima So"
+},
+{
+    "triggers": ["eau", "water"],
+    "bambara": "Ji"
+},
+{
+    "triggers": ["comment apprendre le bambara", "how to learn bambara"],
+    "bambara": "I ka se ka bamanankan kalan ni ɲininkali caman ye, n bɛ yan ka i dɛmɛ"
+},
+{
+    "triggers": ["merci pour ton aide", "thank you for your help"],
+    "bambara": "I ni ce dɛmɛ la,"
+},
+{
+    "triggers": ["nourriture malienne", "malian food", "que mange-t-on au mali"],
+    "bambara": "Malidenw bɛ tigadegena, jɛ, ni to dun ka caya"
+},
+{
+    "triggers": ["le tô", "to", "qu'est-ce que le  tô"],
+    "bambara": "To ye Mali balo kɔrɔ ye, a bɛ dilan ni nɔɔ ye, a bɛ dun ni na ye"
+},
+{
+    "triggers": ["fêtes maliennes", "malian festivals", "festival au mali"],
+    "bambara": "Festival sur Niger ye fɛti belebeleba ye Ségou la, a bɛ dɔnkili ni fɔli kɛ"
+},
+{
+    "triggers": ["religion au mali", "religion in mali"],
+    "bambara": "Silamɛya ye diinɛ caman ye Mali la, nka Krista ni laadala diinɛw fana bɛ yen"
+},
+{
+    "triggers": ["climat du mali", "mali climate", "quel temps fait-il"],
+    "bambara": "Mali funteni ka bon, sanjida bɛ juyu ni ut kalo cɛ"
+},
+{
+    "triggers": ["population du mali", "mali population", "combien d'habitants"],
+    "bambara": "Mali mɔgɔw ka caya ni miliyɔn 20 ye"
+},
+{
+    "triggers": ["agriculture au mali", "farming in mali", "que cultive-t-on"],
+    "bambara": "Malidenw bɛ malo, ɲɔ, ni kaba sɛnɛ kosɛbɛ"
+},
+{
+    "triggers": ["sport au mali", "football malien", "mali football"],
+    "bambara": "Ntolatan (foot) ye jamana ka jɛ fɛn min ka di mɔgɔw ye kosɛbɛ"
+},
+{
+    "triggers": ["capitale du mali", "capital of mali", "quelle est la capitale"],
+    "bambara": "Bamako ye Mali jamana faaba ye"
+},
+{
+    "triggers": ["histoire du mali", "history of mali", "empire du mali"],
+    "bambara": "Mali kɔrɔ tun ye masaya belebeleba ye, Timbuktu ni Sunjata Keita tɔgɔ bɔra a la"
+},
+{
+    "triggers": ["tombouctou", "timbuktu"],
+    "bambara": "Tombouctou ye dugu kɔrɔba ye, a kalanso ni kitabu kɔrɔw tɔgɔ bɔra duniya kɔnɔ"
+},
+{
+    "triggers": ["fleuve niger", "niger river", "le niger"],
+    "bambara": "Baji (Niger) ye baji belebeleba ye, a bɛ tɛmɛn Mali cɛmancɛ fɛ"
+},
+{
+    "triggers": ["la musique malienne", "malian music", "musique du mali"],
+    "bambara": "Mali ye fɔlikɛlaw jamana ye, i n'a fɔ Salif Keita ni Ali Farka Touré"
+},
+{
+    "triggers": ["les langues du mali", "languages of mali", "combien de langues"],
+    "bambara": "Kan caman bɛ Mali la: bamanankan, fulfulde, sɔnninkanko, dogokan, ni wɛrɛ caman"
+},
+{
+    "triggers": ["dogon", "pays dogon", "dogon country"],
+    "bambara": "Dogon jamana ye yɔrɔ kabakoma ye Mali kɔnɔ, a kulu ni sigicogo tɔgɔ bɔra duniya kɔnɔ"
+},
+{
+    "triggers": ["indépendance du mali", "mali independence"],
+    "bambara": "Mali ye jamana yɛrɛmahɔrɔnya sɔrɔ san 1960 la"
+},
+  {
+    "triggers": ["bonjour", "salut", "hello"],
+    "bambara": "I ni ce"
+  },
+  {
+    "triggers": ["comment vas-tu", "ça va", "how are you"],
+    "bambara": "I ka kene wa?"
+  },
+  {
+    "triggers": ["merci", "thank you", "thanks"],
+    "bambara": "I ni ce"
+  },
+  {
+    "triggers": ["au revoir", "goodbye", "bye"],
+    "bambara": "K'an ben"
+  },
+  {
+    "triggers": ["oui", "yes"],
+    "bambara": "Awo"
+  },
+  {
+    "triggers": ["non", "no"],
+    "bambara": "Ayi"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "name": "mande-ia-v2",
+  "version": "2.0.0",
+  "description": "Mande-IA — Bambara voice assistant",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

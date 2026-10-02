@@ -1,5 +1,108 @@
 [
   { "triggers": ["bonjour", "salut", "hello"], "bambara": "I ni ce" },
   { "triggers": ["merci", "thanks"], "bambara": "I ni ce" },
-  { "triggers": ["au revoir", "bye"], "bambara": "K'an ben" }
+  { "triggers": ["au revoir", "bye"], "bambara": "K'an ben" },
+  
+
+  {
+    "triggers": ["bonjour", "salut", "hello", "hi"],
+    "bambara": "I ni ce"
+  },
+  {
+    "triggers": ["comment vas-tu", "ça va", "how are you", "how are you doing"],
+    "bambara": "I ka kɛnɛ wa?"
+  },
+  
+  {
+    "triggers": ["au revoir", "goodbye", "bye", "bye bye"],
+    "bambara": "K'an bɛn"
+  },
+  {
+    "triggers": ["oui", "yes", "ouais"],
+    "bambara": "Awo"
+  },
+  {
+    "triggers": ["non", "no"],
+    "bambara": "Ayi"
+  },
+  {
+    "triggers": ["comment tu t'appelles", "quel est ton nom", "what's your name", "what is your name"],
+    "bambara": "e tɔgɔ ye di?"
+  },
+  {
+    "triggers": ["je m'appelle", "mon nom est", "my name is"],
+    "bambara": "Ne tɔgɔ ye"
+  },
+  {
+    "triggers": ["s'il te plaît", "s'il vous plaît", "please"],
+    "bambara": "Sabali"
+  },
+  {
+    "triggers": ["excuse-moi", "pardon", "sorry", "excuse me"],
+    "bambara": "Hakɛ to"
+  },
+  {
+    "triggers": ["où est", "where is", "where are"],
+    "bambara": "Min?"
+  },
+  {
+    "triggers": ["combien", "how much", "how many"],
+    "bambara": "dJoli?"
+  },
+  {
+    "triggers": ["je ne comprends pas", "I don't understand", "I do not understand"],
+    "bambara": "Ne ma a faamu"
+  },
+  {
+    "triggers": ["parle lentement", "speak slowly", "can you speak slowly"],
+    "bambara": "Kuma somma somma"
+  },
+  {
+    "triggers": ["aide-moi", "help me", "can you help me"],
+    "bambara": "Dɛmɛ n ye"
+  },
+  {
+    "triggers": ["je suis perdu", "I'm lost", "I am lost"],
+    "bambara": "Ne bɛna"
+  },
+  {
+    "triggers": ["où sont les toilettes", "where is the toilet", "where is the bathroom"],
+    "bambara": "Nyɛgɛn bɛ min?"
+  },
+  {
+    "triggers": ["j'ai faim", "I'm hungry", "I am hungry"],
+    "bambara": "Ne kɔngɔ bɛ"
+  },
+  {
+    "triggers": ["j'ai soif", "I'm thirsty", "I am thirsty"],
+    "bambara": "Ne ɔgɔ bɛ"
+  },
+  {
+    "triggers": ["c'est combien", "how much is it", "what's the price"],
+    "bambara": "A sara ye joli?"
+  },
+  {
+    "triggers": ["je veux", "I want", "I would like"],
+    "bambara": "Ne b'a fɛ"
+  },
+  {
+    "triggers": ["je ne veux pas", "I don't want", "I do not want"],
+    "bambara": "Ne t'a fɛ"
+  },
+  {
+    "triggers": ["d'accord", "ok", "okay", "alright"],
+    "bambara": "Ayiwa"
+  },
+  {
+    "triggers": ["à demain", "see you tomorrow"],
+    "bambara": "K'an bɛn sini"
+  },
+  {
+    "triggers": ["bonne nuit", "good night"],
+    "bambara": "Su hɛɛrɛ"
+  },
+  {
+    "triggers": ["bon travail", "good job", "well done"],
+    "bambara": "I ni baara"
+  }
 ]
