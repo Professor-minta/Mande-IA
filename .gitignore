@@ -7,3 +7,6 @@ npm-debug.log*
 # This was an accidental duplicate of server source beneath static icons.
 # Never publish application source from the public icon directory.
 public/icons/src/
+.env.save
+*.save
+.env
