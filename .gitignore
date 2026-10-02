@@ -10,3 +10,8 @@ public/icons/src/
 .env.save
 *.save
 .env
+.env
+.env.save
+.env.local
+*.log
+node_modules/
