@@ -1,5 +1,6 @@
-const CACHE = 'mande-ia-shell-v13';
-const SHELL = ['/', '/style.css', '/app.js', '/manifest.webmanifest', '/icons/mande-ia.svg', '/icons/icon-192.png'];
+const VERSION = '14';
+const CACHE = `mande-ia-shell-v${VERSION}`;
+const SHELL = ['/', `/style.css?v=${VERSION}`, `/app.js?v=${VERSION}`, '/manifest.webmanifest', '/icons/mande-ia.svg', '/icons/icon-192.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));

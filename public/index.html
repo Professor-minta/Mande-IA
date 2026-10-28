@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=14">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -82,6 +82,10 @@
       <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4.5h4M6.5 7l.9 11.6A1.5 1.5 0 0 0 8.9 20h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7M10 11v5M14 11v5"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4.5v11M7 11l5 5 5-5M5 19.5h14"/></symbol>
+      <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4.5 8h2.8l1.6-2.5h6.2L16.7 8h2.8A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-8A1.5 1.5 0 0 1 4.5 8z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+      <symbol id="i-file" viewBox="0 0 24 24"><path d="M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13.5 3.5v5h5M9 13h6M9 16.5h4"/></symbol>
+      <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M15 10.5V6a3 3 0 0 0-5.6-1.5M9 9v2.5a3 3 0 0 0 4.6 2.5M5.5 11a6.5 6.5 0 0 0 10.6 5M18.4 12.7c.1-.6.1-1.1.1-1.7M12 17.5V21M8.5 21h7M4 4l16 16"/></symbol>
+      <symbol id="i-phone-down" viewBox="0 0 24 24"><path d="M3.5 13.5c4.7-4.3 12.3-4.3 17 0l-1.9 2.6-3.4-1.2-.3-2.3a10 10 0 0 0-5.8 0l-.3 2.3-3.4 1.2z"/></symbol>
       <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M4 20l1.2-4A8 8 0 1 1 8.3 19z"/><path d="M9 8.5c0 3.4 3 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.5-2.5l.8-1-1-2z"/></symbol>
     </svg>
 
@@ -205,16 +209,30 @@
 
         <div class="dock" id="dock">
           <p class="status" id="status" role="status"></p>
-          <form class="composer" id="composer" autocomplete="off">
-            <button class="lang-chip" id="lang-chip" type="button" aria-label="Changer la langue des réponses">Auto</button>
-            <textarea id="prompt" rows="1" placeholder="Écrivez votre message…" aria-label="Votre message" enterkeyhint="send"></textarea>
-            <div class="recording" id="recording" hidden>
-              <span class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-              <span class="recording-time" id="recording-time">0:01</span>
+          <div class="attachment" id="attachment" hidden>
+            <span class="attachment-thumb" id="attachment-thumb"></span>
+            <span class="attachment-text"><strong id="attachment-name"></strong><small id="attachment-meta"></small></span>
+            <button class="icon-button is-small" id="attachment-remove" type="button" aria-label="Retirer le fichier"><svg><use href="#i-close"/></svg></button>
+          </div>
+          <form class="input-row" id="composer" autocomplete="off">
+            <div class="composer">
+              <button class="bar-button" id="attach-button" type="button" aria-label="Ajouter une photo ou un PDF" title="Ajouter une photo ou un PDF"><svg><use href="#i-plus"/></svg></button>
+              <textarea id="prompt" rows="1" placeholder="Écrivez ici…" aria-label="Votre message" enterkeyhint="send"></textarea>
+              <div class="recording" id="recording" hidden>
+                <span class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                <span class="recording-time" id="recording-time">0:01</span>
+              </div>
+              <button class="bar-button" id="dictate-button" type="button" aria-label="Dicter votre message" title="Dicter votre message"><svg><use href="#i-mic"/></svg></button>
+              <button class="bar-button" id="camera-button" type="button" aria-label="Prendre une photo" title="Prendre une photo"><svg><use href="#i-camera"/></svg></button>
             </div>
-            <span class="composer-divider" aria-hidden="true"></span>
-            <button class="primary-action" id="primary-action" type="submit" aria-label="Parler à Mande-IA"><svg><use href="#i-mic"/></svg></button>
+            <button class="round-action" id="round-action" type="submit" data-state="live" aria-label="Appeler Mande-IA en direct" title="Appeler Mande-IA en direct">
+              <span class="live-icon" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+              <svg class="icon-send"><use href="#i-send"/></svg>
+              <svg class="icon-stop"><use href="#i-stop"/></svg>
+            </button>
           </form>
+          <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+          <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
           <div class="gate" id="upgrade-gate" hidden>
             <p><strong>Vos 5 questions gratuites d'aujourd'hui sont utilisées.</strong> Revenez demain, ou passez à Pro pour continuer sans limite.</p>
             <a class="pill-button is-gold" id="upgrade-link" target="_blank" rel="noopener">Passer à Pro</a>
@@ -223,6 +241,26 @@
         </div>
       </div>
     </div>
+
+    <section class="call" id="call" hidden aria-labelledby="call-title" role="dialog" aria-modal="true">
+      <header class="call-head">
+        <h2 id="call-title">Mande-IA</h2>
+        <p class="call-timer" id="call-timer">0:00</p>
+      </header>
+      <div class="call-center">
+        <div class="orb call-orb" aria-hidden="true">
+          <span class="orb-ring"></span>
+          <span class="orb-bars"><i style="--h:.34"></i><i style="--h:.56"></i><i style="--h:.78"></i><i style="--h:1"></i><i style="--h:.78"></i><i style="--h:.56"></i><i style="--h:.34"></i></span>
+        </div>
+        <p class="call-status" id="call-status" role="status">Connexion…</p>
+        <p class="call-note" id="call-note"></p>
+        <a class="pill-button is-gold" id="call-upgrade" target="_blank" rel="noopener" hidden>Passer à Pro</a>
+      </div>
+      <div class="call-controls">
+        <button class="call-button" id="call-mute" type="button" aria-label="Couper le micro" aria-pressed="false"><svg><use href="#i-mic"/></svg><span>Micro</span></button>
+        <button class="call-button is-hangup" id="call-hangup" type="button" aria-label="Raccrocher"><svg><use href="#i-phone-down"/></svg><span>Raccrocher</span></button>
+      </div>
+    </section>
 
     <dialog class="sheet" id="auth-dialog" aria-labelledby="auth-title">
       <button class="icon-button sheet-close" id="close-auth" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
@@ -249,6 +287,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js"></script>
+    <script src="/app.js?v=14"></script>
   </body>
 </html>
