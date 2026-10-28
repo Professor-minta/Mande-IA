@@ -1,72 +1,59 @@
 # Mande-IA
 
-**Mande-IA** is an early-stage, Bambara-first AI assistant from **Minta Services**, created by Issa Minta in Mali. It is being built to make useful digital assistance more accessible through Bambara text, carefully tested voice features, and community-reviewed language resources.
+**Assistant IA centré sur le Bambara – Mali**
 
-Live demo: [ia.mintaservices.com](https://ia.mintaservices.com)  
-Organisation: [Minta Services](https://www.mintaservices.com)
+Mande-IA est un assistant d’intelligence artificielle conçu pour les locuteurs bambaras.  
+Il permet de discuter en **Bambara, Français et Anglais**, avec synthèse vocale, appels vocaux en streaming, génération d’images et intégration WhatsApp.
 
-## What works today
+Développé par **Professor Minta** / **Minta Services** à Bamako et Ségou, Mali.
 
-- Text conversations with a Bambara or French response setting.
-- Guest mode, accounts, saved conversations, and a daily free-use limit.
-- Djelia text-to-speech for supported responses.
-- A microphone input in beta. Bambara speech-to-text depends on an external provider and must be tested before use in a live presentation.
-- A starter Bambara - French - English phrase collection in [`public/bambara-demo.js`](public/bambara-demo.js).
+**Démo en ligne** → [ia.mintaservices.com](https://ia.mintaservices.com)
 
-## Why this project
+---
 
-Many people in Mali and across West Africa are more comfortable learning, asking questions, and expressing ideas in local languages. Mande-IA is an experiment in building language technology with communities, not only for communities.
+## Contacts officiels
 
-The next goal is a reviewed Bambara language resource, built with speakers, teachers, linguists, students, and developers. The project does **not** claim that its current AI responses are linguistically perfect.
+- **Email** : [Academy@mintaservices.com](mailto:Academy@mintaservices.com)  
+- **WhatsApp Mande-IA** : [+223 92 27 58 84](https://wa.me/22392275884)  
+- **Téléphone principal** : [+223 77 295 259](https://wa.me/22377295259)  
+- **Site web** : [mintaservices.com](https://mintaservices.com)  
+- **Plateforme IA** : [ia.mintaservices.com](https://ia.mintaservices.com)  
+- **Collecte de données / Clés API** : [data.mintaservices.com](https://data.mintaservices.com)  
+- **GitHub** : [github.com/Professor-minta](https://github.com/Professor-minta)
 
-## Run locally
+---
 
-Requirements: Node.js 20 or newer and npm.
+## Fonctionnalités actuelles
+
+- Conversations textuelles en Bambara, Français et Anglais
+- Mode invité + comptes + conversations sauvegardées
+- Limite d’utilisation gratuite quotidienne
+- Synthèse vocale (Text-to-Speech)
+- **Appels vocaux en streaming** (Voice Stream)
+- **Génération d’images**
+- Entrée micro (bêta)
+- Intégration WhatsApp
+- Collection de phrases de démarrage Bambara – Français – Anglais
+
+---
+
+## Pourquoi ce projet
+
+Beaucoup de personnes au Mali et en Afrique de l’Ouest préfèrent apprendre, poser des questions et s’exprimer dans les langues locales.  
+Mande-IA est un effort ouvert pour construire une technologie linguistique utile **avec** la communauté, et non seulement pour elle.
+
+Les réponses actuelles de l’IA ne prétendent **pas** être linguistiquement parfaites.  
+La prochaine priorité reste une ressource Bambara soigneusement revue avec des locuteurs natifs, des enseignants, des étudiants et des développeurs.
+
+---
+
+## Démarrage rapide (en local)
+
+Prérequis : Node.js 20+ et npm
 
 ```bash
-git clone https://github.com/Professor-minta/mande-ia.git
-cd mande-ia
+git clone https://github.com/Professor-minta/Mande-IA.git
+cd Mande-IA
 cp .env.example .env
 npm install
 npm start
-```
-
-Open `http://localhost:3001`.
-
-## Configuration
-
-Copy `.env.example` to `.env` and add your own values. Never commit `.env`, access tokens, application secrets, databases, or user conversations.
-
-The app can run without optional provider keys, but AI and voice features need their respective providers configured.
-
-## Bambara phrase collection
-
-`public/bambara-demo.js` currently contains starter phrases with three fields:
-
-```js
-{ category: 'Salutations', bm: 'Aw ni ce!', fr: 'Bonjour !', en: 'Hello!' }
-```
-
-This is a learning and demonstration collection, not an authoritative linguistic dataset. Contributions from Bambara speakers and language specialists are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Roadmap
-
-1. Review and expand the Bambara phrase collection with native speakers and linguists.
-2. Evaluate response quality using transparent Bambara test sets.
-3. Improve speech-to-text reliability and make its limitations clear in the user interface.
-4. Explore an offline, local deployment using Ollama for community locations with limited connectivity.
-5. Build a documented Bambara language API only after data consent, quality review, infrastructure, and sustainable governance are in place.
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Do not submit private conversations, API keys, or copyrighted language material without permission.
-
-## Contact
-
-- Issa Minta / Professor Minta
-- Minta Services, Mali
-- Website: [mintaservices.com](https://www.mintaservices.com)
-
-## License
-
-Code is available under the [MIT License](LICENSE). The Bambara phrase collection is offered for collaborative review; contributors must only submit material they have the right to share.
