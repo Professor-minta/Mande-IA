@@ -26,6 +26,8 @@ const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-3.6-flash';
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini';
 const LIVE_SECONDS = { free: 180, pro: 900 };
+const OLLAMA_URL = process.env.OLLAMA_API_URL || process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || '';
 const TTS_MODEL = process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
 const TTS_VOICE = process.env.OPENAI_TTS_VOICE || 'marin';
 const voiceJobs = new Map();
@@ -135,6 +137,25 @@ async function* streamGemini({ messages, preference, file, signal }) {
     for (const part of event.candidates?.[0]?.content?.parts || []) if (part.text && !part.thought) yield part.text;
   }
 }
+async function* streamOllama({ messages, preference, signal }) {
+  if (!OLLAMA_MODEL) throw httpError('Modèle local non configuré.', 503);
+  let response;
+  try { response = await fetch(`${OLLAMA_URL}/api/chat`, { method: 'POST', signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ model: OLLAMA_MODEL, stream: true, messages: [{ role: 'system', content: systemPrompt(preference) }, ...messages] }) }); }
+  catch (error) { if (error.name === 'AbortError') throw error; throw httpError('Le modèle local est injoignable. (code ollama-offline)'); }
+  if (!response.ok) throw httpError(`Le modèle local ne répond pas. (code ollama-${response.status})`);
+  const decoder = new TextDecoder(); let buffer = '';
+  for await (const chunk of response.body) {
+    buffer += decoder.decode(chunk, { stream: true });
+    let index;
+    while ((index = buffer.indexOf('\n')) !== -1) {
+      const line = buffer.slice(0, index).trim(); buffer = buffer.slice(index + 1);
+      if (!line) continue;
+      let data; try { data = JSON.parse(line); } catch { continue; }
+      if (data.error) throw httpError(`Le modèle local a échoué. (code ollama-error)`);
+      if (data.message?.content) yield data.message.content;
+    }
+  }
+}
 function parseMessages(raw) {
   let list = raw; if (typeof list === 'string') { try { list = JSON.parse(list); } catch { return null; } }
   if (!Array.isArray(list)) return null;
@@ -183,14 +204,17 @@ app.post('/api/ai/stream', aiLimit, upload.single('file'), async (req, res, next
     send({ type: 'start', usage, plan: user?.plan || 'free' });
     let reply = '';
     try {
-      const sources = file && process.env.GEMINI_API_KEY ? [streamGemini, streamClaude] : [streamClaude];
+      const sources = file ? (process.env.GEMINI_API_KEY ? [streamGemini, streamClaude] : [streamClaude]) : (OLLAMA_MODEL ? [streamClaude, streamOllama] : [streamClaude]);
+      let firstError = null;
       for (const [index, source] of sources.entries()) {
         try {
           for await (const text of source({ messages, preference, file, signal: controller.signal })) { reply += text; send({ type: 'delta', text }); }
           break;
         } catch (error) {
-          if (reply || controller.signal.aborted || index === sources.length - 1) throw error;
-          console.error('Gemini indisponible, Claude prend le relais :', error.message);
+          firstError = firstError || error;
+          if (reply || controller.signal.aborted) throw error;
+          if (index === sources.length - 1) throw firstError;
+          console.error(`${source.name} indisponible, relais vers ${sources[index + 1].name} :`, error.message);
         }
       }
       if (!reply.trim()) throw httpError('Mande-IA n’a pas pu répondre. Reformulez votre question.');
@@ -225,8 +249,8 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
 // --- OLLAMA LOCAL ROUTE (BACK) ---
 app.post('/api/ollama-chat', async (req, res) => {
     const userMessage = req.body.message;
-    const ollamaBase = process.env.OLLAMA_API_URL || 'http://127.0.0.1:11434';
-    const ollamaModel = process.env.OLLAMA_MODEL || 'qwen2';
+    const ollamaBase = OLLAMA_URL;
+    const ollamaModel = OLLAMA_MODEL || 'qwen2';
     try {
         const response = await fetch(`${ollamaBase}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: ollamaModel, messages: [{ role: 'user', content: userMessage }], stream: false }) });
         const data = await response.json();
@@ -315,7 +339,7 @@ app.post('/api/whatsapp/webhook', (req, res) => {
   }).catch((error) => console.error('WhatsApp error:', error.message));
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', multiAgent: true, chatManager: true, ollama: true, stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
 app.get('/robots.txt', (req, res) => { res.type('text/plain'); res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')); });
 app.use(express.static(PUBLIC_DIR));
