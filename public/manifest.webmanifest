@@ -1,17 +1,29 @@
 {
   "name": "Mande-IA",
   "short_name": "Mande-IA",
-  "description": "Assistant vocal Bambara pour le Mali.",
+  "description": "Assistant IA trilingue : bambara, français et anglais.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0f16",
-  "theme_color": "#0b0f16",
+  "background_color": "#061229",
+  "theme_color": "#061229",
   "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icons/mande-ia.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
