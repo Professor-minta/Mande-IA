@@ -12,7 +12,7 @@ const store = {
 
 const state = {
   user: null, usage: null, conversationId: null, messages: [], conversations: [],
-  djelia: false, canStream: false, filesEnabled: false, liveEnabled: false,
+  djelia: false, voiceEnabled: false, canStream: false, filesEnabled: false, liveEnabled: false,
   installEvent: null, busy: false, streamController: null, attachment: null,
   recorder: null, chunks: [], recordingStartedAt: 0, recordingTimer: null, transcribing: false,
   speechCache: new Map(), activeAudio: null, activeSpeechButton: null, speechLoading: false,
@@ -174,7 +174,7 @@ function addActions(item, content) {
   if (!body || $('.msg-actions', body)) return;
   const actions = document.createElement('div'); actions.className = 'msg-actions';
   const buttons = [actionButton('copy', 'Copier', (button) => copyText(content, button)), actionButton('share', 'Partager', (button) => shareText(content, button))];
-  if (state.djelia) buttons.unshift(actionButton('speaker', 'Écouter', (button) => say(content, button)));
+  if (state.voiceEnabled) buttons.unshift(actionButton('speaker', 'Écouter', (button) => say(content, button)));
   actions.append(...buttons);
   body.append(actions);
 }
@@ -289,8 +289,8 @@ function applyPreferences() {
   $('#theme-toggle').checked = preferences.theme === 'dark';
   $('#language-select').value = preferences.language;
   $('#voice-toggle').checked = preferences.voice;
-  $('#voice-toggle').disabled = !state.djelia;
-  $('#voice-description').textContent = state.djelia ? 'Voix Moussa, par Djelia' : 'La voix sera bientôt disponible';
+  $('#voice-toggle').disabled = !state.voiceEnabled;
+  $('#voice-description').textContent = state.voiceEnabled ? 'Bambara avec Djelia, français et anglais avec une voix naturelle' : 'La voix sera bientôt disponible';
 }
 function applyCapabilities() {
   $('#attach-button').hidden = !state.filesEnabled;
@@ -310,6 +310,7 @@ function showView(name) {
 async function checkHealth() {
   const data = await api('/api/health');
   state.djelia = Boolean(data.djelia);
+  state.voiceEnabled = data.voice === undefined ? state.djelia : Boolean(data.voice);
   state.canStream = data.stream === true;
   state.filesEnabled = state.canStream && data.files !== false;
   state.liveEnabled = data.live === true;
@@ -594,7 +595,7 @@ async function send(prefill) {
     renderAssistant(item, reply, false);
     addActions(item, reply);
     if (failure) setStatus('La réponse a été coupée. Vous pouvez reposer la question.', { timeout: 6000 });
-    else if (preferences.voice && state.djelia) say(reply);
+    else if (preferences.voice && state.voiceEnabled) say(reply);
   } else {
     item.remove();
     if (failure) {
@@ -739,29 +740,43 @@ function stopSpeech() {
   state.activeAudio = null; state.activeSpeechButton = null;
   return true;
 }
+async function playAudio(player, url) {
+  try { await player.play(); }
+  catch (error) {
+    if (error.name === 'NotAllowedError') throw error;
+    const response = await fetch(url, { credentials: 'same-origin' });
+    if (!response.ok) { let data = {}; try { data = await response.json(); } catch {} throw apiError(data, response.status); }
+    player.src = URL.createObjectURL(await response.blob());
+    await player.play();
+  }
+}
 async function say(content, button) {
-  if (!state.djelia) { setStatus("La lecture à voix haute n'est pas encore activée.", { timeout: 4000 }); return; }
+  if (!state.voiceEnabled) { setStatus("La lecture à voix haute n'est pas encore activée.", { timeout: 4000 }); return; }
   if (state.speechLoading) return;
   if (state.activeAudio) { const same = state.activeSpeechButton === button; stopSpeech(); if (same) return; }
   state.speechLoading = true;
   if (button) { button.disabled = true; setButtonLabel(button, 'speaker', 'Chargement…'); }
+  const text = plainText(content);
   try {
-    const text = plainText(content);
-    let audio = state.speechCache.get(text);
-    if (!audio) {
-      const data = await postJSON('/api/voice/speak', { text });
-      audio = `data:audio/mp3;base64,${data.audio}`;
-      state.speechCache.set(text, audio);
+    let url = state.speechCache.get(text);
+    if (!url) {
+      const data = await postJSON('/api/voice/prepare', { text, language: preferences.language });
+      url = data.url;
+      state.speechCache.set(text, url);
     }
-    const player = new Audio(audio);
+    const player = new Audio();
+    player.preload = 'auto';
+    player.src = url;
     state.activeAudio = player; state.activeSpeechButton = button;
     player.onended = () => { if (state.activeAudio === player) stopSpeech(); };
-    await player.play();
+    await playAudio(player, url);
+    if (state.activeAudio !== player) { player.pause(); return; }
     if (button) { setButtonLabel(button, 'stop', 'Arrêter'); button.classList.add('is-active'); }
-  } catch {
+  } catch (error) {
+    state.speechCache.delete(text);
     state.activeAudio = null; state.activeSpeechButton = null;
     setButtonLabel(button, 'speaker', 'Écouter');
-    setStatus('La lecture à voix haute est momentanément indisponible.', { timeout: 5000 });
+    setStatus(error.name === 'NotAllowedError' ? 'Touchez Écouter pour lancer la lecture.' : error.message && error.status ? error.message : 'La lecture à voix haute est momentanément indisponible.', { timeout: 6000 });
   } finally {
     state.speechLoading = false;
     if (button) button.disabled = false;

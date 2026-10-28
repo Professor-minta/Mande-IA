@@ -9,6 +9,7 @@ const multer = require('multer');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const fs = require('fs');
+const { Readable } = require('stream');
 const path = require('path');
 const { handleChat } = require('./chats/chatManager');
 
@@ -17,7 +18,7 @@ const PORT = Number(process.env.PORT || 3001);
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
 const PUBLIC_DIR = path.join(ROOT, 'public');
-const DJELIA_BASE_URL = 'https://api.djelia.cloud/openai/v1';
+const DJELIA_BASE_URL = process.env.DJELIA_BASE_URL || 'https://api.djelia.cloud/openai/v1';
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
 const GEMINI_BASE_URL = process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com';
 const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.openai.com';
@@ -25,6 +26,9 @@ const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-3.6-flash';
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini';
 const LIVE_SECONDS = { free: 180, pro: 900 };
+const TTS_MODEL = process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
+const TTS_VOICE = process.env.OPENAI_TTS_VOICE || 'marin';
+const voiceJobs = new Map();
 const ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -47,6 +51,7 @@ app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (req.ori
 app.use(express.urlencoded({ extended: false }));
 app.use(session({ store: new (SQLiteStoreFactory(session))({ db: 'sessions.db', dir: DATA_DIR }), secret: process.env.SESSION_SECRET || 'change-this-before-launch', proxy: true, resave: false, saveUninitialized: false, cookie: { httpOnly: true, secure: 'auto', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 } }));
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false }));
+const voiceLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
 const aiLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 25, standardHeaders: true, legacyHeaders: false });
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -111,7 +116,7 @@ async function* streamClaude({ messages, preference, file, signal }) {
     const last = payload[payload.length - 1]; last.content = [block, { type: 'text', text: last.content }];
   }
   const response = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, { method: 'POST', signal, headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 1500, system: systemPrompt(preference), messages: payload, stream: true }) });
-  if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('Claude stream:', response.status, data?.error?.message); throw httpError('Mande-IA est momentanément indisponible. Réessayez dans un instant.'); }
+  if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('Claude stream:', response.status, data?.error?.message); throw httpError(`Mande-IA est momentanément indisponible. Réessayez dans un instant. (code claude-${response.status})`); }
   for await (const event of sseEvents(response.body)) {
     if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') yield event.delta.text;
     else if (event.type === 'error') { console.error('Claude stream error:', event.error?.message); throw httpError('La réponse a été interrompue. Réessayez.'); }
@@ -122,7 +127,7 @@ async function* streamGemini({ messages, preference, file, signal }) {
   contents[contents.length - 1].parts.unshift({ inlineData: { mimeType: file.mimetype, data: file.buffer.toString('base64') } });
   const url = `${GEMINI_BASE_URL}/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:streamGenerateContent?alt=sse`;
   const response = await fetch(url, { method: 'POST', signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify({ systemInstruction: { parts: [{ text: systemPrompt(preference) }] }, contents, generationConfig: { maxOutputTokens: 2048 } }) });
-  if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('Gemini stream:', response.status, data?.error?.message); throw httpError('L’analyse du fichier est momentanément indisponible. Réessayez dans un instant.'); }
+  if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('Gemini stream:', response.status, data?.error?.message); throw httpError(`L’analyse du fichier est momentanément indisponible. Réessayez dans un instant. (code gemini-${response.status})`); }
   for await (const event of sseEvents(response.body)) {
     if (event.error) { console.error('Gemini stream error:', event.error.message); throw httpError('L’analyse du fichier a été interrompue. Réessayez.'); }
     for (const part of event.candidates?.[0]?.content?.parts || []) if (part.text && !part.thought) yield part.text;
@@ -176,8 +181,16 @@ app.post('/api/ai/stream', aiLimit, upload.single('file'), async (req, res, next
     send({ type: 'start', usage, plan: user?.plan || 'free' });
     let reply = '';
     try {
-      const source = file && process.env.GEMINI_API_KEY ? streamGemini : streamClaude;
-      for await (const text of source({ messages, preference, file, signal: controller.signal })) { reply += text; send({ type: 'delta', text }); }
+      const sources = file && process.env.GEMINI_API_KEY ? [streamGemini, streamClaude] : [streamClaude];
+      for (const [index, source] of sources.entries()) {
+        try {
+          for await (const text of source({ messages, preference, file, signal: controller.signal })) { reply += text; send({ type: 'delta', text }); }
+          break;
+        } catch (error) {
+          if (reply || controller.signal.aborted || index === sources.length - 1) throw error;
+          console.error('Gemini indisponible, Claude prend le relais :', error.message);
+        }
+      }
       if (!reply.trim()) throw httpError('Mande-IA n’a pas pu répondre. Reformulez votre question.');
       saveExchange(conversation, userContent, reply);
       send({ type: 'done', usage, plan: user?.plan || 'free' });
@@ -200,7 +213,7 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
     const response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.value) { refundQuestion(req, user); console.error('Realtime session:', response.status, data?.error?.message); return res.status(502).json({ error: 'L’appel en direct est momentanément indisponible. Réessayez dans un instant.', usage: usageFor(req, user) }); }
+    if (!response.ok || !data.value) { refundQuestion(req, user); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
     req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: liveInstructions(preference), maxSeconds: user?.plan === 'pro' ? LIVE_SECONDS.pro : LIVE_SECONDS.free, usage }));
   } catch (error) { next(error); }
 });
@@ -222,6 +235,63 @@ app.post('/api/voice/transcribe', upload.single('audio'), async (req, res, next)
 });
 app.post('/api/voice/speak', async (req, res, next) => { try { const text = String(req.body?.text || '').trim(); if (!text) return res.status(400).json({ error: 'Texte manquant.' }); if (!process.env.DJELIA_API_KEY) return res.status(503).json({ error: 'Clé Djelía non configurée.' }); const response = await fetch(`${DJELIA_BASE_URL}/audio/speech`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.DJELIA_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify({ model: 'jifili-1', input: text.slice(0, 3000), voice: 'moussa', response_format: 'mp3' }) }); if (!response.ok) return res.status(502).json({ error: 'Djelía ne peut pas lire.' }); res.json({ audio: Buffer.from(await response.arrayBuffer()).toString('base64') }); } catch (error) { next(error); } });
 
+function looksBambara(text) {
+  if (/[ɛɔɲŋƐƆƝŊ]/.test(text)) return true;
+  const words = text.toLowerCase().match(/[a-zàâçéèêëîïôûùüÿœ']+/g) || [];
+  const bm = new Set(['ni', 'ye', 'ka', 'ko', 'be', 'te', 'ma', 'ani', 'aw', 'ce', 'baara', 'ke', 'kan', 'don', 'min', 'walima', 'nka', 'sisan', 'mogo', 'bamanankan', 'kalan', 'ne', 'olu', 'nin', 'tun', 'bena', 'kun', 'fana', 'dama', 'barika', 'hakili']);
+  const other = new Set(['le', 'la', 'les', 'de', 'des', 'et', 'est', 'un', 'une', 'pour', 'vous', 'je', 'que', 'qui', 'dans', 'pas', 'avec', 'sur', 'au', 'du', 'ce', 'ça', 'mais', 'tu', 'the', 'and', 'you', 'is', 'to', 'of', 'in', 'it', 'for', 'are', 'with', 'what', 'your']);
+  let bambara = 0; let others = 0;
+  for (const word of words) { if (bm.has(word)) bambara += 1; if (other.has(word)) others += 1; }
+  return bambara >= 2 && bambara > others * 1.5;
+}
+function voiceEngine(text, language) {
+  const hasOpenAI = Boolean(process.env.OPENAI_API_KEY); const hasDjelia = Boolean(process.env.DJELIA_API_KEY);
+  const bambara = language === 'bm' || (language !== 'fr' && language !== 'en' && looksBambara(text));
+  if (bambara && hasDjelia) return 'djelia';
+  if (hasOpenAI) return 'openai';
+  return hasDjelia ? 'djelia' : null;
+}
+async function djeliaSpeech(text) {
+  const response = await fetch(`${DJELIA_BASE_URL}/audio/speech`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.DJELIA_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify({ model: 'jifili-1', input: text.slice(0, 3000), voice: 'moussa', response_format: 'mp3' }) });
+  if (!response.ok) { console.error('Djelia speech:', response.status); throw httpError(`Voix bambara indisponible (code djelia-${response.status}).`); }
+  return Buffer.from(await response.arrayBuffer());
+}
+app.post('/api/voice/prepare', voiceLimit, (req, res) => {
+  const text = String(req.body?.text || '').trim().slice(0, 3000);
+  if (!text) return res.status(400).json({ error: 'Texte manquant.' });
+  const engine = voiceEngine(text, req.body?.language);
+  if (!engine) return res.status(503).json({ error: 'La lecture à voix haute n’est pas encore activée.' });
+  const jobId = crypto.createHash('sha256').update(`${engine}|${TTS_MODEL}|${TTS_VOICE}|${text}`).digest('hex').slice(0, 32);
+  const cutoff = Date.now() - 20 * 60 * 1000;
+  for (const [key, job] of voiceJobs) if (job.created < cutoff) voiceJobs.delete(key);
+  while (voiceJobs.size >= 60) voiceJobs.delete(voiceJobs.keys().next().value);
+  if (!voiceJobs.has(jobId)) voiceJobs.set(jobId, { text, engine, created: Date.now(), audio: null });
+  res.json({ url: `/api/voice/stream/${jobId}`, engine });
+});
+app.get('/api/voice/stream/:id', async (req, res) => {
+  const job = voiceJobs.get(req.params.id);
+  if (!job) return res.status(404).json({ error: 'Audio expiré. Appuyez à nouveau sur Écouter.' });
+  res.set({ 'content-type': 'audio/mpeg', 'cache-control': 'private, max-age=600', 'x-accel-buffering': 'no' });
+  if (job.audio) return res.end(job.audio);
+  try {
+    if (job.engine === 'djelia') { job.audio = await djeliaSpeech(job.text); return res.end(job.audio); }
+    const controller = new AbortController();
+    res.on('close', () => { if (!res.writableFinished) controller.abort(); });
+    const response = await fetch(`${OPENAI_BASE_URL}/v1/audio/speech`, { method: 'POST', signal: controller.signal, headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json' }, body: JSON.stringify({ model: TTS_MODEL, voice: TTS_VOICE, input: job.text, response_format: 'mp3', instructions: 'Voix chaleureuse et naturelle, rythme posé, comme un professeur bienveillant. Prononce correctement les noms maliens.' }) });
+    if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('OpenAI speech:', response.status, data?.error?.message); if (process.env.DJELIA_API_KEY) { job.engine = 'djelia'; job.audio = await djeliaSpeech(job.text); return res.end(job.audio); } return res.status(502).json({ error: `Voix indisponible (code openai-${response.status}).` }); }
+    const chunks = [];
+    const stream = Readable.fromWeb(response.body);
+    stream.on('data', (chunk) => { chunks.push(chunk); res.write(chunk); });
+    stream.on('end', () => { job.audio = Buffer.concat(chunks); res.end(); });
+    stream.on('error', () => { if (!res.headersSent) res.status(502); res.end(); });
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    console.error('Voice stream:', error.message);
+    if (!res.headersSent) return res.status(502).json({ error: error.message });
+    res.end();
+  }
+});
+
 function validMetaSignature(req) { if (!process.env.META_APP_SECRET) return true; const received = req.get('x-hub-signature-256') || ''; const expected = `sha256=${crypto.createHmac('sha256', process.env.META_APP_SECRET).update(req.rawBody || Buffer.from('')).digest('hex')}`; return received.length === expected.length && crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected)); }
 async function sendWhatsAppText(to, body) { const token = process.env.WHATSAPP_ACCESS_TOKEN; const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID; if (!token || !phoneNumberId) return; const graphVersion = process.env.META_GRAPH_API_VERSION || 'v23.0'; const response = await fetch(`https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { preview_url: false, body } }) }); if (!response.ok) console.error('WhatsApp échoué:', response.status); }
 
@@ -241,7 +311,7 @@ app.post('/api/whatsapp/webhook', (req, res) => {
   }).catch((error) => console.error('WhatsApp error:', error.message));
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', multiAgent: true, chatManager: true, ollama: true, stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY) }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', multiAgent: true, chatManager: true, ollama: true, stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
 app.get('/robots.txt', (req, res) => { res.type('text/plain'); res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')); });
 app.use(express.static(PUBLIC_DIR));
