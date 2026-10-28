@@ -1,16 +1,19 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="google" content="notranslate">
-    <meta name="theme-color" content="#113c37">
+    <meta name="theme-color" content="#061229">
+    <title>Mande-IA — votre voix, notre intelligence</title>
+    <meta name="description" content="Mande-IA est un assistant d'intelligence artificielle pour écrire et parler en bambara, en français et en anglais.">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/icons/mande-ia.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icons/mande-ia.svg">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
     <link rel="stylesheet" href="/style.css">
-    <title>Mande-IA</title>
-    <meta name="description" content="Mande-IA est un assistant d'intelligence artificielle pour écrire et parler en bambara.">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -20,12 +23,12 @@
             "@id": "https://ia.mintaservices.com/#app",
             "name": "Mande-IA",
             "url": "https://ia.mintaservices.com/",
-            "description": "Assistant d'intelligence artificielle pour écrire et parler en bambara.",
+            "description": "Assistant d'intelligence artificielle pour écrire et parler en bambara, en français et en anglais.",
             "applicationCategory": "EducationalApplication",
             "applicationSubCategory": "Assistant IA en bambara",
             "operatingSystem": "Web",
             "isAccessibleForFree": true,
-            "inLanguage": ["bm", "fr"],
+            "inLanguage": ["bm", "fr", "en"],
             "author": {
               "@type": "Person",
               "@id": "https://www.mintaservices.com/#person",
@@ -44,74 +47,208 @@
       }
     </script>
   </head>
-  <body class="notranslate" translate="no">
-    <aside id="sidebar">
-      <div class="brand"><img class="mark" src="/icons/mande-ia.svg" alt=""><span>Mande-IA</span></div>
-      <button id="new-chat" class="new-chat">＋ Nouvelle discussion</button>
-      <div id="conversation-list" aria-label="Conversations"></div>
-      <button id="login-button" class="outline">Se connecter</button>
-    </aside>
-    <main>
-      <header><div><strong>Mande-IA</strong><small id="status">Écrivez dans votre langue — micro bêta</small></div><div class="header-actions"><button id="mobile-new" class="icon-button mobile-tool" aria-label="Nouvelle discussion" title="Nouvelle discussion">＋</button><button id="mobile-history" class="icon-button mobile-tool" aria-label="Historique" title="Historique">☰</button><button id="settings-button" class="icon-button" aria-label="Réglages" title="Réglages">⚙️</button><button id="mobile-login" class="outline">Compte</button></div></header>
-      <section id="welcome" class="welcome">
-        <div class="orb">🎙️</div>
-        <h1>I ni ce!</h1>
-        <img class="welcome-logo" src="/icons/mande-ia.svg" alt="Logo Mande-IA">
-        <p>Parlez ou écrivez à Mande‑IA en Bambara, français ou anglais.</p>
-        <p class="muted">Vous pouvez essayer sans compte. Créez un compte pour sauvegarder vos conversations.</p>
-      </section>
-      <section id="messages" aria-live="polite"></section>
-      <section class="composer">
-        <button id="mic" class="mic" aria-label="Parler (bêta)" title="Microphone bêta : écrivez si la transcription ne fonctionne pas">🎙️</button>
-        <textarea id="prompt" rows="1" placeholder="Écrivez en Bambara, français ou anglais…"></textarea>
-        <button id="send" class="send">Envoyer</button>
-      </section>
-      <section id="upgrade-gate" class="upgrade-gate" hidden>
-        <strong>Limite gratuite atteinte</strong>
-        <span>Revenez demain ou passez à Pro pour continuer.</span>
-        <a id="upgrade-link" target="_blank" rel="noopener">Passer à Pro sur WhatsApp</a>
-      </section>
-      <p id="usage" class="usage"></p>
-    </main>
-    <dialog id="auth-dialog">
-      <button id="close-dialog" class="close" aria-label="Fermer">×</button>
-      <h2>Gardez vos conversations</h2>
-      <p id="account-state">Créez un compte gratuit ou connectez-vous.</p>
-      <label>E-mail <input id="email" type="email" autocomplete="email"></label>
-      <label>Mot de passe <input id="password" type="password" minlength="8" autocomplete="current-password"></label>
-      <p id="auth-error" class="error"></p>
-      <button id="register" class="send full">Créer mon compte</button>
-      <button id="login" class="outline full">Se connecter</button>
-      <button id="logout" class="link hidden">Se déconnecter</button>
+  <body class="notranslate" translate="no" data-view="home" data-mode="idle">
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-chats" viewBox="0 0 24 24"><path d="M15.5 13.5h2.8L21 16V7.5A2.5 2.5 0 0 0 18.5 5h-6A2.5 2.5 0 0 0 10 7.5"/><path d="M3 11.5A2.5 2.5 0 0 1 5.5 9h6a2.5 2.5 0 0 1 2.5 2.5v3a2.5 2.5 0 0 1-2.5 2.5H6.7L3 19.5z"/></symbol>
+      <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H9l-5 3.5z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></symbol>
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M8.3 14.2A6 6 0 1 1 15.7 14.2c-.7.6-1.2 1.5-1.2 2.4v.9h-5v-.9c0-.9-.5-1.8-1.2-2.4z"/></symbol>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 19.5v-5M10 19.5v-8M15 19.5v-6M20 19.5V9"/><path d="m4.5 10 5-4.5 4 3.5 6-5"/><path d="M16 4h3.5v3.5"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4.5h5.5V10M19.5 4.5 11 13"/><path d="M18 14v4a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 5 18V8a1.5 1.5 0 0 1 1.5-1.5h4"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2.5" fill="currentColor"/></symbol>
+      <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18.3 6.5a8 8 0 0 1 0 11"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24"><circle cx="17.5" cy="5.5" r="2.5"/><circle cx="6.5" cy="12" r="2.5"/><circle cx="17.5" cy="18.5" r="2.5"/><path d="m8.7 10.8 6.6-4M8.7 13.2l6.6 4"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2.5"/><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 12.5h17"/></symbol>
+      <symbol id="i-school" viewBox="0 0 24 24"><path d="m2.5 9.5 9.5-5 9.5 5-9.5 5z"/><path d="M6.5 11.5v4.5c1.5 1.5 3.5 2.3 5.5 2.3s4-.8 5.5-2.3v-4.5M21.5 9.5v5"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.5c-2-1.5-4.5-2-8-2v13c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2v-13c-3.5 0-6 .5-8 2zM12 6.5v13"/></symbol>
+      <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 8V4.5M9 13h.01M15 13h.01M9.5 16h5M2.5 12.5v2M21.5 12.5v2"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 0 0-13 0c0 5.4 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></symbol>
+      <symbol id="i-handshake" viewBox="0 0 24 24"><path d="m3 11 3.5-3.5 4 1.5 2.5-2 4 .5L21 11"/><path d="m6 13 4.5 4.5a1.5 1.5 0 0 0 2.1 0l4.9-4.9M10 11.5l2-1.5 3.5 3.5"/></symbol>
+      <symbol id="i-academy" viewBox="0 0 24 24"><path d="M4 20.5h16M5.5 20.5v-9M18.5 20.5v-9M9.5 20.5v-6h5v6M3 11.5 12 5l9 6.5"/></symbol>
+      <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.5"/><path d="M6 20.5v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3M10 13.5l2 3 2-3"/></symbol>
+      <symbol id="i-wave" viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4.5v15M16 7v10M20 10v4"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4.5h4M6.5 7l.9 11.6A1.5 1.5 0 0 0 8.9 20h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7M10 11v5M14 11v5"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4.5v11M7 11l5 5 5-5M5 19.5h14"/></symbol>
+      <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M4 20l1.2-4A8 8 0 1 1 8.3 19z"/><path d="M9 8.5c0 3.4 3 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.5-2.5l.8-1-1-2z"/></symbol>
+    </svg>
+
+    <div class="app">
+      <nav class="tabbar" aria-label="Navigation principale">
+        <a class="rail-brand" href="/" aria-label="Mande-IA, accueil">
+          <img src="/icons/mande-ia.svg" alt="" width="36" height="36">
+          <span>Mande-IA</span>
+        </a>
+        <button class="tab" data-target="home" aria-current="page"><svg><use href="#i-home"/></svg><span>Accueil</span></button>
+        <button class="tab" data-target="conversations"><svg><use href="#i-chats"/></svg><span>Conversations</span></button>
+        <button class="tab" data-target="discover"><svg><use href="#i-compass"/></svg><span>Découvrir</span></button>
+        <button class="tab" data-target="settings"><svg><use href="#i-gear"/></svg><span>Paramètres</span></button>
+        <button class="rail-account account-button" type="button"><svg><use href="#i-user"/></svg><span class="account-label">Se connecter</span></button>
+      </nav>
+
+      <div class="stage">
+        <div class="decor" aria-hidden="true">
+          <span class="motif motif-left"></span>
+          <span class="motif motif-right"></span>
+          <svg class="bands bands-left" viewBox="0 0 160 160"><path d="M0 52a108 108 0 0 1 108 108" /><path d="M0 72a88 88 0 0 1 88 88" /><path d="M0 92a68 68 0 0 1 68 68" /></svg>
+          <svg class="bands bands-right" viewBox="0 0 160 160"><path d="M160 52A108 108 0 0 0 52 160" /><path d="M160 72a88 88 0 0 0-88 88" /><path d="M160 92a68 68 0 0 0-68 68" /></svg>
+        </div>
+
+        <header class="topbar">
+          <button class="icon-button only-mobile" id="open-history" aria-label="Voir mes conversations"><svg><use href="#i-menu"/></svg></button>
+          <a class="brand" href="/" aria-label="Mande-IA, accueil">
+            <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="brand-text"><strong>Mande-IA</strong><small>Votre voix, notre intelligence</small></span>
+          </a>
+          <div class="topbar-actions">
+            <button class="icon-button" id="new-chat" aria-label="Nouvelle discussion" hidden><svg><use href="#i-plus"/></svg></button>
+            <button class="icon-button account-button only-mobile" aria-label="Mon compte"><svg><use href="#i-user"/></svg></button>
+          </div>
+        </header>
+
+        <main class="view" id="view-home" data-view-name="home">
+          <section class="hero" id="welcome">
+            <div class="orb" aria-hidden="true">
+              <span class="orb-ring"></span>
+              <span class="orb-bars"><i style="--h:.34"></i><i style="--h:.56"></i><i style="--h:.78"></i><i style="--h:1"></i><i style="--h:.78"></i><i style="--h:.56"></i><i style="--h:.34"></i></span>
+            </div>
+            <h1 class="greeting">I ni ce&nbsp;!</h1>
+            <p class="lede">Je suis Mande-IA, votre assistant intelligent. Posez-moi vos questions en bambara, français ou anglais.</p>
+            <div class="suggestions">
+              <button class="suggestion" data-prompt="Parle-moi de la culture malienne : les traditions, la musique et les grandes figures de l'histoire."><span class="suggestion-icon"><svg><use href="#i-chat"/></svg></span><span>Parle-moi de la culture malienne</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="suggestion" data-prompt="Donne-moi des conseils simples et concrets pour mieux réussir mes études."><span class="suggestion-icon"><svg><use href="#i-bulb"/></svg></span><span>Donne-moi des conseils pour mes études</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="suggestion" data-prompt="Quelles sont les opportunités pour les jeunes au Mali, dans le numérique, l'agriculture et le commerce ?"><span class="suggestion-icon"><svg><use href="#i-chart"/></svg></span><span>Quelles sont les opportunités au Mali&nbsp;?</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+            </div>
+          </section>
+          <section class="messages" id="messages" aria-live="polite" aria-label="Discussion"></section>
+        </main>
+
+        <section class="view" id="view-conversations" data-view-name="conversations" hidden>
+          <div class="page">
+            <div class="page-head">
+              <h2>Conversations</h2>
+              <button class="pill-button" id="history-new"><svg><use href="#i-plus"/></svg>Nouvelle discussion</button>
+            </div>
+            <div class="conversation-list" id="conversation-list"></div>
+            <div class="empty" id="history-empty" hidden>
+              <p id="history-empty-text">Connectez-vous pour retrouver vos discussions sur tous vos appareils.</p>
+              <button class="pill-button" id="history-empty-action">Se connecter</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-discover" data-view-name="discover" hidden>
+          <div class="page">
+            <div class="page-head"><h2>Découvrir</h2></div>
+            <p class="page-intro">Des idées pour commencer une discussion, et les autres projets de Minta Services.</p>
+            <h3 class="group-title">Demander à Mande-IA</h3>
+            <div class="list">
+              <button class="row" data-prompt="Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens."><span class="row-icon"><svg><use href="#i-briefcase"/></svg></span><span class="row-text">Conseil entrepreneurial</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" data-prompt="Explique-moi simplement comment fonctionne l'école au Mali, du fondamental jusqu'à l'université."><span class="row-icon"><svg><use href="#i-school"/></svg></span><span class="row-text">L'école malienne expliquée</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" data-prompt="Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple."><span class="row-icon"><svg><use href="#i-book"/></svg></span><span class="row-text">Leçon du jour en bambara</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" data-prompt="Comment créer ma propre IA locale avec Ollama, étape par étape, pour un débutant ?"><span class="row-icon"><svg><use href="#i-bot"/></svg></span><span class="row-text">Créer ta propre IA</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" data-prompt="Présente-moi le Mali : sa géographie, ses régions, ses langues et son histoire."><span class="row-icon"><svg><use href="#i-map"/></svg></span><span class="row-text">À propos du Mali</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+            </div>
+            <h3 class="group-title">Minta Services</h3>
+            <div class="list">
+              <a class="row" href="https://data.mintaservices.com" target="_blank" rel="noopener"><span class="row-icon is-gold"><svg><use href="#i-wave"/></svg></span><span class="row-text">Aider Mande-IA<small>Envoyez une phrase ou votre voix en bambara</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <a class="row" href="https://mintaservices.com/academy.html" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-academy"/></svg></span><span class="row-text">Rejoindre Minta Academy<small>Formation pratique de 10 jours : cloud, serveurs et IA</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <a class="row" href="https://mintaservices.com/entrepreneurship.html" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-handshake"/></svg></span><span class="row-text">Minta Services Entrepreneurship</span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <a class="row" href="https://github.com/Professor-minta/Mande-IA" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-code"/></svg></span><span class="row-text">Le code de Mande-IA sur GitHub</span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <a class="row" id="meet-link" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-person"/></svg></span><span class="row-text">Rencontrer Professor Issa Minta<small>Sur WhatsApp</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <button class="row" id="discover-about"><span class="row-icon"><svg><use href="#i-info"/></svg></span><span class="row-text">Qui est derrière Mande-IA&nbsp;?</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-settings" data-view-name="settings" hidden>
+          <div class="page">
+            <div class="page-head"><h2>Paramètres</h2></div>
+            <h3 class="group-title">Compte</h3>
+            <div class="list">
+              <div class="row is-static"><span class="row-icon"><svg><use href="#i-user"/></svg></span><span class="row-text"><span id="settings-account">Invité</span><small id="settings-plan">5 questions gratuites par jour</small></span><button class="pill-button is-small" id="settings-auth">Se connecter</button></div>
+              <button class="row is-gold-row" id="settings-upgrade"><span class="row-icon is-gold"><svg><use href="#i-wave"/></svg></span><span class="row-text">Passer à Pro<small>500&nbsp;FCFA par semaine ou 1&nbsp;500&nbsp;FCFA par mois</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+            </div>
+            <h3 class="group-title">Préférences</h3>
+            <div class="list">
+              <label class="row is-static"><span class="row-text">Thème sombre<small>Plus reposant le soir</small></span><input class="switch" id="theme-toggle" type="checkbox"></label>
+              <label class="row is-static"><span class="row-text">Langue des réponses<small>Automatique : Mande-IA répond dans la langue de votre message</small></span><select class="select" id="language-select"><option value="auto">Automatique</option><option value="bm">Bambara</option><option value="fr">Français</option><option value="en">English</option></select></label>
+              <label class="row is-static"><span class="row-text">Lire les réponses à voix haute<small id="voice-description">Voix Moussa, par Djelia</small></span><input class="switch" id="voice-toggle" type="checkbox"></label>
+            </div>
+            <h3 class="group-title">Application</h3>
+            <div class="list">
+              <button class="row" id="install-app" hidden><span class="row-icon"><svg><use href="#i-download"/></svg></span><span class="row-text">Installer Mande-IA<small>Sur l'écran d'accueil, sans Play Store</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" id="share-app"><span class="row-icon"><svg><use href="#i-share"/></svg></span><span class="row-text">Partager l'application</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <a class="row" id="support-link" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-whatsapp"/></svg></span><span class="row-text">Contacter le support<small>Sur WhatsApp</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <a class="row" id="feedback-link" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-chat"/></svg></span><span class="row-text">Donner votre avis</span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <button class="row" id="about-app"><span class="row-icon"><svg><use href="#i-info"/></svg></span><span class="row-text">À propos de Mande-IA</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+            </div>
+            <h3 class="group-title">Discussion en cours</h3>
+            <div class="list">
+              <button class="row is-danger" id="delete-conversation"><span class="row-icon"><svg><use href="#i-trash"/></svg></span><span class="row-text">Effacer cette discussion<small>L'effacement est définitif</small></span></button>
+            </div>
+            <p class="fineprint">Mande-IA est développé et hébergé au Mali par Minta Services.</p>
+          </div>
+        </section>
+
+        <div class="dock" id="dock">
+          <p class="status" id="status" role="status"></p>
+          <form class="composer" id="composer" autocomplete="off">
+            <button class="lang-chip" id="lang-chip" type="button" aria-label="Changer la langue des réponses">Auto</button>
+            <textarea id="prompt" rows="1" placeholder="Écrivez votre message…" aria-label="Votre message" enterkeyhint="send"></textarea>
+            <div class="recording" id="recording" hidden>
+              <span class="mini-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="recording-time" id="recording-time">0:01</span>
+            </div>
+            <span class="composer-divider" aria-hidden="true"></span>
+            <button class="primary-action" id="primary-action" type="submit" aria-label="Parler à Mande-IA"><svg><use href="#i-mic"/></svg></button>
+          </form>
+          <div class="gate" id="upgrade-gate" hidden>
+            <p><strong>Vos 5 questions gratuites d'aujourd'hui sont utilisées.</strong> Revenez demain, ou passez à Pro pour continuer sans limite.</p>
+            <a class="pill-button is-gold" id="upgrade-link" target="_blank" rel="noopener">Passer à Pro</a>
+          </div>
+          <p class="usage" id="usage"></p>
+        </div>
+      </div>
+    </div>
+
+    <dialog class="sheet" id="auth-dialog" aria-labelledby="auth-title">
+      <button class="icon-button sheet-close" id="close-auth" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
+      <h2 id="auth-title">Gardez vos conversations</h2>
+      <p class="sheet-intro" id="account-state">Créez un compte gratuit ou connectez-vous. Vous pouvez aussi continuer sans compte.</p>
+      <form class="auth-form" id="auth-form">
+        <label>Adresse e-mail<input id="email" type="email" autocomplete="email" inputmode="email" required></label>
+        <label>Mot de passe<input id="password" type="password" minlength="8" autocomplete="current-password" required><small>8 caractères minimum</small></label>
+        <p class="form-error" id="auth-error" role="alert"></p>
+        <button class="pill-button is-wide" id="login" type="submit">Se connecter</button>
+        <button class="pill-button is-wide is-ghost" id="register" type="button">Créer mon compte</button>
+      </form>
+      <button class="pill-button is-wide is-ghost" id="logout" type="button" hidden>Se déconnecter</button>
     </dialog>
-    <dialog id="settings-dialog">
-      <button id="close-settings" class="close" aria-label="Fermer">×</button>
-      <h2>Réglages</h2>
-      <p class="settings-intro">Personnalisez Mande‑IA sur cet appareil.</p>
-      <label class="setting-row"><span><strong>Thème sombre</strong><small>Confort visuel le soir</small></span><input id="theme-toggle" type="checkbox"></label>
-      <label class="setting-row"><span><strong>Langue des réponses</strong><small>Automatique répond dans la langue de votre message</small></span><select id="language-select"><option value="auto">Automatique</option><option value="bm">Bambara</option><option value="fr">Français</option><option value="en">English</option></select></label>
-      <label class="setting-row"><span><strong>Lire les réponses</strong><small id="voice-description">Disponible après configuration de Djelía</small></span><input id="voice-toggle" type="checkbox"></label>
-      <button id="install-app" class="outline full hidden">Installer Mande‑IA</button>
-      <button id="share-app" class="outline full">Partager l’application</button>
-      <a class="setting-link" id="support-link" target="_blank" rel="noopener">💬 Contacter le support WhatsApp</a>
-      <a class="setting-link" id="feedback-link" target="_blank" rel="noopener">📝 Envoyer un avis</a>
-      <button id="about-app" class="outline full">À propos de Mande‑IA</button>
-      <button id="delete-conversation" class="danger full">Effacer cette discussion</button>
-      <p class="settings-note">Les discussions sont protégées par votre compte. L’effacement est définitif.</p>
+
+    <dialog class="sheet" id="about-dialog" aria-labelledby="about-title">
+      <button class="icon-button sheet-close" id="close-about" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
+      <h2 id="about-title">À propos de Mande-IA</h2>
+      <div class="segmented" role="group" aria-label="Langue du texte">
+        <button type="button" data-about="bm">Bamanankan</button>
+        <button type="button" data-about="fr">Français</button>
+        <button type="button" data-about="en">English</button>
+      </div>
+      <article class="about-content" id="about-content"></article>
     </dialog>
-    <dialog id="history-dialog">
-      <button id="close-history" class="close" aria-label="Fermer">×</button>
-      <h2>Discussions</h2>
-      <button id="history-new" class="new-chat full">＋ Nouvelle discussion</button>
-      <div id="mobile-conversation-list" class="dialog-conversations"></div>
-      <p id="history-empty" class="settings-note">Connectez-vous pour sauvegarder et retrouver vos discussions.</p>
-    </dialog>
-    <dialog id="about-dialog">
-      <button id="close-about" class="close" aria-label="Fermer">×</button>
-      <h2 id="about-title">À propos de Mande‑IA</h2>
-      <select id="about-language" class="about-language"><option value="bm">Bambara</option><option value="fr">Français</option><option value="en">English</option></select>
-      <article id="about-content" class="about-content"></article>
-    </dialog>
+
     <script src="/app.js"></script>
   </body>
 </html>
