@@ -29,6 +29,8 @@ const LIVE_SECONDS = { free: 180, pro: 900 };
 const TTS_MODEL = process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
 const TTS_VOICE = process.env.OPENAI_TTS_VOICE || 'marin';
 const voiceJobs = new Map();
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.SESSION_SECRET) console.warn('SESSION_SECRET manquant dans .env : secret temporaire utilisé, les utilisateurs seront déconnectés à chaque redémarrage.');
 const ATTACHMENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -49,7 +51,7 @@ app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (req.originalUrl === '/api/whatsapp/webhook') req.rawBody = buffer; }}));
 app.use(express.urlencoded({ extended: false }));
-app.use(session({ store: new (SQLiteStoreFactory(session))({ db: 'sessions.db', dir: DATA_DIR }), secret: process.env.SESSION_SECRET || 'change-this-before-launch', proxy: true, resave: false, saveUninitialized: false, cookie: { httpOnly: true, secure: 'auto', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 } }));
+app.use(session({ store: new (SQLiteStoreFactory(session))({ db: 'sessions.db', dir: DATA_DIR }), secret: SESSION_SECRET, proxy: true, resave: false, saveUninitialized: false, cookie: { httpOnly: true, secure: 'auto', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 } }));
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 const voiceLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
 const aiLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 25, standardHeaders: true, legacyHeaders: false });
@@ -211,7 +213,9 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: 'Limite atteinte.', usage: usageFor(req, user) });
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
-    const response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) });
+    let response;
+    try { response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) }); }
+    catch (error) { refundQuestion(req, user); console.error('Realtime session:', error.message); return res.status(504).json({ error: 'OpenAI ne répond pas. Réessayez dans un instant. (code openai-timeout)', usage: usageFor(req, user) }); }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.value) { refundQuestion(req, user); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
     req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: liveInstructions(preference), maxSeconds: user?.plan === 'pro' ? LIVE_SECONDS.pro : LIVE_SECONDS.free, usage }));
@@ -293,7 +297,7 @@ app.get('/api/voice/stream/:id', async (req, res) => {
 });
 
 function validMetaSignature(req) { if (!process.env.META_APP_SECRET) return true; const received = req.get('x-hub-signature-256') || ''; const expected = `sha256=${crypto.createHmac('sha256', process.env.META_APP_SECRET).update(req.rawBody || Buffer.from('')).digest('hex')}`; return received.length === expected.length && crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected)); }
-async function sendWhatsAppText(to, body) { const token = process.env.WHATSAPP_ACCESS_TOKEN; const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID; if (!token || !phoneNumberId) return; const graphVersion = process.env.META_GRAPH_API_VERSION || 'v23.0'; const response = await fetch(`https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { preview_url: false, body } }) }); if (!response.ok) console.error('WhatsApp échoué:', response.status); }
+async function sendWhatsAppText(to, body) { const token = process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN; const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID; if (!token || !phoneNumberId) return; const graphVersion = process.env.META_GRAPH_API_VERSION || 'v23.0'; const response = await fetch(`https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { preview_url: false, body } }) }); if (!response.ok) console.error('WhatsApp échoué:', response.status); }
 
 app.get('/api/whatsapp/webhook', (req, res) => { const mode = req.query['hub.mode']; const token = req.query['hub.verify_token']; const challenge = req.query['hub.challenge']; if (mode === 'subscribe' && token && token === process.env.WHATSAPP_VERIFY_TOKEN) return res.status(200).send(String(challenge || '')); return res.sendStatus(403); });
 app.post('/api/whatsapp/webhook', (req, res) => {

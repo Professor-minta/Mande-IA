@@ -894,8 +894,10 @@ async function startCall() {
     };
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
-    const answer = await fetch(session.callsUrl, { method: 'POST', body: offer.sdp, headers: { Authorization: `Bearer ${session.clientSecret}`, 'Content-Type': 'application/sdp' } });
-    if (!answer.ok) throw new Error('L’appel n’a pas pu démarrer. Réessayez dans un instant.');
+    let answer;
+    try { answer = await fetch(session.callsUrl, { method: 'POST', body: offer.sdp, signal: AbortSignal.timeout(20000), headers: { Authorization: `Bearer ${session.clientSecret}`, 'Content-Type': 'application/sdp' } }); }
+    catch { throw new Error('La connexion à Mande-IA prend trop de temps. Vérifiez votre réseau, puis rappelez.'); }
+    if (!answer.ok) throw new Error(`L’appel n’a pas pu démarrer. Réessayez dans un instant. (code realtime-${answer.status})`);
     await pc.setRemoteDescription({ type: 'answer', sdp: await answer.text() });
     if (state.call !== call) return;
     call.startedAt = Date.now();
@@ -908,6 +910,7 @@ async function startCall() {
     tickClock();
     call.timer = setInterval(tickClock, 500);
     runCallMeter(call);
+    setTimeout(() => { if (state.call === call && !call.aiMeter && pc.connectionState !== 'connected') endCall('La voix de Mande-IA n’arrive pas. Vérifiez votre réseau, puis rappelez.'); }, 25000);
     if ('vibrate' in navigator) navigator.vibrate(40);
   } catch (error) {
     if (state.call !== call) return;
