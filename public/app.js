@@ -960,6 +960,47 @@ function renderAbout(lang) {
   $('#about-content').replaceChildren(...copy.paragraphs.map((p) => Object.assign(document.createElement('p'), { textContent: p })));
   $$('.segmented button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.about === lang)));
 }
+const NEWS_KEY = 'mande-news-seen';
+let news = null;
+function formatDay(iso) {
+  const date = new Date(`${iso}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? iso : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+function renderNews() {
+  const list = $('#news-list');
+  list.replaceChildren(...news.entries.map((entry) => {
+    const article = Object.assign(document.createElement('article'), { className: 'news-entry' });
+    const time = Object.assign(document.createElement('time'), { dateTime: entry.date, textContent: formatDay(entry.date) });
+    const items = document.createElement('ul');
+    items.append(...(entry.points || []).map((point) => Object.assign(document.createElement('li'), { textContent: point })));
+    article.append(Object.assign(document.createElement('h3'), { textContent: entry.titre }), time, items);
+    return article;
+  }));
+}
+function hideNewsBanner() {
+  $('#news-banner').hidden = true;
+  if (news) store.set(NEWS_KEY, news.version);
+}
+function openNews() {
+  if (!news) return;
+  renderNews();
+  hideNewsBanner();
+  $('#news-dialog').showModal();
+}
+async function loadNews() {
+  const response = await fetch('/nouveautes.json', { cache: 'no-store' });
+  if (!response.ok) return;
+  news = await response.json();
+  if (!news?.version || !Array.isArray(news.entries) || !news.entries.length) { news = null; return; }
+  const latest = news.entries[0];
+  $('#discover-news-date').textContent = `${latest.titre} – ${formatDay(latest.date)}`;
+  if (store.get(NEWS_KEY, '') !== news.version) {
+    $('#news-banner-title').textContent = `Nouveau : ${latest.titre}`;
+    $('#news-banner-summary').textContent = latest.points?.[0] || '';
+    $('#news-banner').hidden = false;
+  }
+}
+
 function openAbout() { renderAbout(preferences.language === 'bm' ? 'bm' : preferences.language === 'en' ? 'en' : 'fr'); $('#about-dialog').showModal(); }
 
 $('#composer').addEventListener('submit', (event) => {
@@ -1012,6 +1053,10 @@ $('#feedback-link').href = waLink('Bonjour, voici mon avis sur Mande-IA : ');
 $('#meet-link').href = waLink('Bonjour Professor Minta, je souhaite échanger avec vous au sujet de Mande-IA.');
 $('#about-app').onclick = openAbout;
 $('#discover-about').onclick = openAbout;
+$('#discover-news').onclick = openNews;
+$('#news-banner-open').onclick = openNews;
+$('#news-banner-close').onclick = hideNewsBanner;
+$('#close-news').onclick = () => $('#news-dialog').close();
 $('#close-about').onclick = () => $('#about-dialog').close();
 $$('.segmented button').forEach((b) => { b.onclick = () => renderAbout(b.dataset.about); });
 $('#delete-conversation').onclick = () => deleteConversation().catch((error) => setStatus(error.message, { timeout: 5000 }));
@@ -1030,5 +1075,6 @@ applyPreferences();
 applyCapabilities();
 renderMessages();
 checkHealth().catch(() => {});
+loadNews().catch(() => {});
 checkAuth().catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});

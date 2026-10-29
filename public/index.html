@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=16">
+    <link rel="stylesheet" href="/style.css?v=17">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -86,6 +86,7 @@
       <symbol id="i-file" viewBox="0 0 24 24"><path d="M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13.5 3.5v5h5M9 13h6M9 16.5h4"/></symbol>
       <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M15 10.5V6a3 3 0 0 0-5.6-1.5M9 9v2.5a3 3 0 0 0 4.6 2.5M5.5 11a6.5 6.5 0 0 0 10.6 5M18.4 12.7c.1-.6.1-1.1.1-1.7M12 17.5V21M8.5 21h7M4 4l16 16"/></symbol>
       <symbol id="i-phone-down" viewBox="0 0 24 24"><path d="M3.5 13.5c4.7-4.3 12.3-4.3 17 0l-1.9 2.6-3.4-1.2-.3-2.3a10 10 0 0 0-5.8 0l-.3 2.3-3.4 1.2z"/></symbol>
+      <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/></symbol>
       <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M4 20l1.2-4A8 8 0 1 1 8.3 19z"/><path d="M9 8.5c0 3.4 3 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.5-2.5l.8-1-1-2z"/></symbol>
     </svg>
 
@@ -157,6 +158,9 @@
           <div class="page">
             <div class="page-head"><h2>Découvrir</h2></div>
             <p class="page-intro">Des idées pour commencer une discussion, et les autres projets de Minta Services.</p>
+            <div class="list">
+              <button class="row" id="discover-news"><span class="row-icon is-gold"><svg><use href="#i-sparkle"/></svg></span><span class="row-text">Nouveautés<small id="discover-news-date">Ce qui a changé dans Mande-IA</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+            </div>
             <h3 class="group-title">Demander à Mande-IA</h3>
             <div class="list">
               <button class="row" data-prompt="Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens."><span class="row-icon"><svg><use href="#i-briefcase"/></svg></span><span class="row-text">Conseil entrepreneurial</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
@@ -208,6 +212,11 @@
         </section>
 
         <div class="dock" id="dock">
+          <div class="news-banner" id="news-banner" hidden>
+            <span class="news-banner-icon" aria-hidden="true"><svg><use href="#i-sparkle"/></svg></span>
+            <button class="news-banner-text" id="news-banner-open" type="button"><strong id="news-banner-title">Nouveau dans Mande-IA</strong><span id="news-banner-summary"></span></button>
+            <button class="icon-button is-small" id="news-banner-close" type="button" aria-label="Masquer cette annonce"><svg><use href="#i-close"/></svg></button>
+          </div>
           <p class="status" id="status" role="status"></p>
           <div class="attachment" id="attachment" hidden>
             <span class="attachment-thumb" id="attachment-thumb"></span>
@@ -276,6 +285,12 @@
       <button class="pill-button is-wide is-ghost" id="logout" type="button" hidden>Se déconnecter</button>
     </dialog>
 
+    <dialog class="sheet" id="news-dialog" aria-labelledby="news-title">
+      <button class="icon-button sheet-close" id="close-news" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
+      <h2 id="news-title">Nouveautés</h2>
+      <div class="news-list" id="news-list"></div>
+    </dialog>
+
     <dialog class="sheet" id="about-dialog" aria-labelledby="about-title">
       <button class="icon-button sheet-close" id="close-about" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
       <h2 id="about-title">À propos de Mande-IA</h2>
@@ -287,6 +302,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=16"></script>
+    <script src="/app.js?v=17"></script>
   </body>
 </html>

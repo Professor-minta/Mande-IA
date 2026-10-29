@@ -1,4 +1,4 @@
-const VERSION = '16';
+const VERSION = '17';
 const CACHE = `mande-ia-shell-v${VERSION}`;
 const SHELL = ['/', `/style.css?v=${VERSION}`, `/app.js?v=${VERSION}`, '/manifest.webmanifest', '/icons/mande-ia.svg', '/icons/icon-192.png'];
 
@@ -13,7 +13,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.startsWith('/api/') || url.pathname === '/nouveautes.json') return;
 
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).then((response) => {
