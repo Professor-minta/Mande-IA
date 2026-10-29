@@ -15,5 +15,17 @@ const tests = [
       console.log(name.padEnd(7), r.ok ? 'OK, clé acceptée' : `REFUSÉE (${r.status} ${why})`);
     } catch (e) { console.log(name.padEnd(7), 'injoignable :', e.message); }
   }
+  const waToken = env.WHATSAPP_ACCESS_TOKEN || env.WHATSAPP_ROOT_TOKEN;
+  if (waToken && env.WHATSAPP_PHONE_NUMBER_ID) {
+    try {
+      const r = await fetch(`https://graph.facebook.com/${env.META_GRAPH_API_VERSION || 'v26.0'}/${env.WHATSAPP_PHONE_NUMBER_ID}?fields=display_phone_number,verified_name,name_status`, { headers: { Authorization: `Bearer ${waToken}` } });
+      const d = await r.json().catch(() => ({}));
+      console.log('WhatsApp', r.ok ? `OK, ${d.display_phone_number} (${d.verified_name}, nom : ${d.name_status})` : `REFUSÉE (${r.status} ${d.error?.code || ''} ${d.error?.message || ''})`);
+    } catch (e) { console.log('WhatsApp injoignable :', e.message); }
+    console.log('WhatsApp mode', env.WHATSAPP_TEST_MODE === 'false' ? (env.META_APP_SECRET ? 'public' : 'public mais META_APP_SECRET MANQUANT') : `test (répond seulement à ${env.WHATSAPP_TEST_RECIPIENT || 'personne : ajoutez WHATSAPP_TEST_RECIPIENT'})`);
+    console.log('Vérif. webhook', env.WHATSAPP_VERIFY_TOKEN ? 'OK' : 'MANQUANT : ajoutez WHATSAPP_VERIFY_TOKEN');
+  } else {
+    console.log('WhatsApp pas encore configuré');
+  }
   console.log('SESSION_SECRET', env.SESSION_SECRET && env.SESSION_SECRET.length >= 32 ? 'OK' : 'MANQUANT : ajoutez-le (voir le guide PM2)');
 })();

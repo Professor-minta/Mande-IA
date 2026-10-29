@@ -320,26 +320,59 @@ app.get('/api/voice/stream/:id', async (req, res) => {
   }
 });
 
-function validMetaSignature(req) { if (!process.env.META_APP_SECRET) return true; const received = req.get('x-hub-signature-256') || ''; const expected = `sha256=${crypto.createHmac('sha256', process.env.META_APP_SECRET).update(req.rawBody || Buffer.from('')).digest('hex')}`; return received.length === expected.length && crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected)); }
-async function sendWhatsAppText(to, body) { const token = process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN; const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID; if (!token || !phoneNumberId) return; const graphVersion = process.env.META_GRAPH_API_VERSION || 'v23.0'; const response = await fetch(`https://graph.facebook.com/${graphVersion}/${phoneNumberId}/messages`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', to, type: 'text', text: { preview_url: false, body } }) }); if (!response.ok) console.error('WhatsApp échoué:', response.status); }
+const GRAPH_BASE_URL = process.env.META_GRAPH_BASE_URL || 'https://graph.facebook.com';
+const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION || 'v26.0';
+const WHATSAPP_TEST_MODE = process.env.WHATSAPP_TEST_MODE !== 'false';
+const WHATSAPP_NOT_TEXT = 'Pour l’instant, Mande-IA répond aux messages écrits sur WhatsApp. Pour envoyer une photo, un PDF ou parler à voix haute, ouvrez https://ia.mintaservices.com';
+if (!WHATSAPP_TEST_MODE && !process.env.META_APP_SECRET) console.warn('WhatsApp : META_APP_SECRET manquant, les messages WhatsApp seront refusés tant qu’il n’est pas dans .env.');
+function validMetaSignature(req) {
+  if (!process.env.META_APP_SECRET) return WHATSAPP_TEST_MODE;
+  const received = req.get('x-hub-signature-256') || '';
+  const expected = `sha256=${crypto.createHmac('sha256', process.env.META_APP_SECRET).update(req.rawBody || Buffer.from('')).digest('hex')}`;
+  return received.length === expected.length && crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected));
+}
+function whatsappFormat(text) {
+  return String(text)
+    .replace(/\*\*(.+?)\*\*/g, '*$1*')
+    .replace(/__(.+?)__/g, '*$1*')
+    .replace(/^\s*#{1,6}\s+(.+)$/gm, '*$1*')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '$1 ($2)')
+    .trim();
+}
+async function sendWhatsAppText(to, body) {
+  const token = process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN;
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  if (!token || !phoneNumberId) { console.error('WhatsApp : WHATSAPP_ACCESS_TOKEN ou WHATSAPP_PHONE_NUMBER_ID manquant.'); return false; }
+  const response = await fetch(`${GRAPH_BASE_URL}/${GRAPH_VERSION}/${phoneNumberId}/messages`, { method: 'POST', signal: AbortSignal.timeout(20000), headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', recipient_type: 'individual', to, type: 'text', text: { preview_url: false, body: whatsappFormat(body).slice(0, 4000) } }) });
+  if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('WhatsApp envoi échoué :', response.status, data?.error?.code || '', data?.error?.message || ''); return false; }
+  return true;
+}
 
-app.get('/api/whatsapp/webhook', (req, res) => { const mode = req.query['hub.mode']; const token = req.query['hub.verify_token']; const challenge = req.query['hub.challenge']; if (mode === 'subscribe' && token && token === process.env.WHATSAPP_VERIFY_TOKEN) return res.status(200).send(String(challenge || '')); return res.sendStatus(403); });
+app.get('/api/whatsapp/webhook', (req, res) => { const mode = req.query['hub.mode']; const token = req.query['hub.verify_token']; const challenge = req.query['hub.challenge']; if (mode === 'subscribe' && token && process.env.WHATSAPP_VERIFY_TOKEN && token === process.env.WHATSAPP_VERIFY_TOKEN) return res.status(200).send(String(challenge || '')); return res.sendStatus(403); });
 app.post('/api/whatsapp/webhook', (req, res) => {
-  if (!validMetaSignature(req)) return res.sendStatus(403); res.sendStatus(200);
+  if (!validMetaSignature(req)) return res.sendStatus(403);
+  res.sendStatus(200);
   Promise.resolve().then(async () => {
     const changes = (req.body?.entry || []).flatMap((e) => e.changes || []);
-    for (const change of changes) { for (const message of change.value?.messages || []) {
-        const from = String(message.from || ''); const messageId = String(message.id || ''); if (!messageId || message.type !== 'text' || !message.text?.body) continue;
-        if (process.env.WHATSAPP_TEST_MODE !== 'false' && from !== String(process.env.WHATSAPP_TEST_RECIPIENT || '')) continue;
+    for (const change of changes) {
+      for (const message of change.value?.messages || []) {
+        const from = String(message.from || ''); const messageId = String(message.id || '');
+        if (!messageId || !from) continue;
+        if (WHATSAPP_TEST_MODE && from !== String(process.env.WHATSAPP_TEST_RECIPIENT || '')) { console.log(`WhatsApp (mode test) : message de ${from} ignoré.`); continue; }
         try { db.prepare('INSERT INTO whatsapp_inbound (message_id, created_at) VALUES (?, ?)').run(messageId, now()); } catch (e) { if (String(e.message).includes('UNIQUE constraint failed')) continue; throw e; }
-        const incomingText = String(message.text.body).trim(); console.log(`WhatsApp Multi-Agent [${from}]: ${incomingText}`);
-        let replyText; try { const result = await handleChat(from, incomingText); replyText = result.reply; } catch (error) { console.error('chatManager failed:', error.message); try { replyText = await askClaude([{ role: 'user', content: incomingText.slice(0, 4000) }], 'auto', 220); } catch (e) { replyText = 'Mande-IA est indisponible pour le moment.'; } }
-        await sendWhatsAppText(from, replyText.slice(0, 3500));
-    } }
-  }).catch((error) => console.error('WhatsApp error:', error.message));
+        if (message.type !== 'text' || !message.text?.body) { await sendWhatsAppText(from, WHATSAPP_NOT_TEXT); continue; }
+        const incomingText = String(message.text.body).trim().slice(0, 4000);
+        console.log(`WhatsApp [${from.slice(0, -4).replace(/\d/g, '•')}${from.slice(-4)}] : message reçu`);
+        let replyText;
+        try { replyText = (await handleChat(from, incomingText)).reply; }
+        catch (error) { console.error('chatManager :', error.message); replyText = 'Mande-IA est momentanément indisponible. Réessayez dans quelques minutes.'; }
+        await sendWhatsAppText(from, replyText);
+      }
+    }
+  }).catch((error) => console.error('WhatsApp :', error.message));
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
 app.get('/robots.txt', (req, res) => { res.type('text/plain'); res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')); });
 app.use(express.static(PUBLIC_DIR));
