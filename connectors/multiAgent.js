@@ -32,6 +32,32 @@ async function askClaude(input, lang = 'auto') {
   return (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim();
 }
 
+async function* streamClaude(input, lang = 'auto', signal) {
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY manquant');
+  const messages = Array.isArray(input) ? input : [{ role: 'user', content: String(input) }];
+  const res = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, {
+    method: 'POST',
+    signal: signal || AbortSignal.timeout(90000),
+    headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 900, stream: true, system: whatsappSystemPrompt(lang), messages })
+  });
+  if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data?.error?.message || `Claude ${res.status}`); }
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for await (const chunk of res.body) {
+    buffer += decoder.decode(chunk, { stream: true }).replace(/\r\n/g, '\n');
+    let index;
+    while ((index = buffer.indexOf('\n\n')) !== -1) {
+      const block = buffer.slice(0, index); buffer = buffer.slice(index + 2);
+      const data = block.split('\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n');
+      if (!data) continue;
+      let event; try { event = JSON.parse(data); } catch { continue; }
+      if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') yield event.delta.text;
+      else if (event.type === 'error') throw new Error(event.error?.message || 'Claude stream error');
+    }
+  }
+}
+
 async function askOllama(input, lang = 'auto') {
   const model = process.env.OLLAMA_MODEL;
   if (!model) throw new Error('OLLAMA_MODEL non configuré');
@@ -52,4 +78,4 @@ async function askMeta(input, lang = 'auto') {
   return askClaude(input, lang);
 }
 
-module.exports = { askClaude, askOllama, askMeta, whatsappSystemPrompt };
+module.exports = { askClaude, streamClaude, askOllama, askMeta, whatsappSystemPrompt };

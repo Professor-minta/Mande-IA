@@ -121,13 +121,27 @@ Commandes utiles : `pm2 status`, `pm2 logs mande-ia --lines 50`.
 
 ---
 
+## WhatsApp
+
+Le connecteur répond sur WhatsApp avec un menu de 10 sujets, l'indicateur « en train d'écrire » et des réponses envoyées paragraphe par paragraphe.
+
+```bash
+node scripts/whatsapp.js diagnostic       # vérifie le jeton, le numéro, l'abonnement et le webhook
+node scripts/whatsapp.js configurer       # abonne l'app, met à jour le profil, la photo et les suggestions
+node scripts/whatsapp.js enregistrer PIN  # active le numéro sur Cloud API (PIN à 6 chiffres)
+node scripts/whatsapp.js test             # simule un message « menu » depuis WHATSAPP_TEST_RECIPIENT
+```
+
+---
+
 ## Structure du projet
 
 ```
 server.js               Serveur Express : discussion, fichiers, voix, appel, WhatsApp
 ecosystem.config.js     Configuration PM2
 verifier-cles.js        Vérifie les clés API sans les afficher
-chats/, connectors/     Logique multi-agents utilisée par WhatsApp
+scripts/                whatsapp.js (diagnostic et configuration), nettoyer-serveur.sh
+chats/, connectors/     Connecteur WhatsApp (connectors/whatsapp.js) et logique multi-agents
 public/                 Application web (PWA)
   index.html, app.js, style.css
   nouveautes.json       Nouveautés affichées aux utilisateurs
