@@ -10,6 +10,13 @@ const MAX_TEXT = 4000;
 const MIN_PARAGRAPH_SEND = 350;
 const MAX_PARTIAL_SENDS = 3;
 const GITHUB_REPO = 'Professor-minta/Mande-IA';
+const WEBHOOK_PATHS = ['/whatsapp/webhook', '/api/whatsapp/webhook', '/webhook/whatsapp', '/api/webhook', '/webhook'];
+
+function isWebhookPath(url) {
+  return WEBHOOK_PATHS.includes(String(url).split('?')[0].replace(/(.)\/+$/, '$1'));
+}
+function digits(value) { return String(value || '').replace(/\D/g, ''); }
+function testNumbers() { return String(process.env.WHATSAPP_TEST_RECIPIENT || '').split(',').map(digits).filter(Boolean); }
 
 const TEXT = {
   notText: 'Pour l’instant, Mande-IA répond aux messages écrits sur WhatsApp. Pour envoyer une photo, un PDF ou parler à voix haute, ouvrez https://ia.mintaservices.com',
@@ -65,9 +72,9 @@ function whatsappFormat(text) {
 }
 function maskNumber(number) { return `${number.slice(0, -4).replace(/\d/g, '•')}${number.slice(-4)}`; }
 
-async function graphPost(path, body) {
+async function graphPost(phoneId, path, body) {
   const token = process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+  const phoneNumberId = phoneId || process.env.WHATSAPP_PHONE_NUMBER_ID;
   if (!token || !phoneNumberId) { console.error('WhatsApp : WHATSAPP_ACCESS_TOKEN ou WHATSAPP_PHONE_NUMBER_ID manquant.'); return false; }
   try {
     const response = await fetch(`${GRAPH_BASE_URL}/${GRAPH_VERSION}/${phoneNumberId}/${path}`, { method: 'POST', signal: AbortSignal.timeout(20000), headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', ...body }) });
@@ -78,7 +85,7 @@ async function graphPost(path, body) {
   return false;
 }
 
-async function sendText(to, text) {
+async function sendText(phoneId, to, text) {
   let rest = whatsappFormat(text);
   let sent = true;
   while (rest) {
@@ -88,17 +95,17 @@ async function sendText(to, text) {
       part = part.slice(0, cut > MAX_TEXT / 2 ? cut : MAX_TEXT);
     }
     rest = rest.slice(part.length).trim();
-    sent = (await graphPost('messages', { recipient_type: 'individual', to, type: 'text', text: { preview_url: false, body: part.trim() } })) && sent;
+    sent = (await graphPost(phoneId, 'messages', { recipient_type: 'individual', to, type: 'text', text: { preview_url: false, body: part.trim() } })) && sent;
   }
   return sent;
 }
 
-function showTyping(messageId) {
-  return graphPost('messages', { status: 'read', message_id: messageId, typing_indicator: { type: 'text' } });
+function showTyping(phoneId, messageId) {
+  return graphPost(phoneId, 'messages', { status: 'read', message_id: messageId, typing_indicator: { type: 'text' } });
 }
 
-function sendMenu(to) {
-  return graphPost('messages', {
+function sendMenu(phoneId, to) {
+  return graphPost(phoneId, 'messages', {
     recipient_type: 'individual',
     to,
     type: 'interactive',
@@ -134,11 +141,12 @@ async function githubReply() {
 }
 
 function setupWhatsApp(app, { db, day, now }) {
-  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
+  const envPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
   if (!TEST_MODE && !process.env.META_APP_SECRET) console.warn('WhatsApp : META_APP_SECRET manquant, les messages WhatsApp seront refusés tant qu’il n’est pas dans .env.');
-  if (phoneId && phoneId === process.env.META_APP_ID) console.warn('WhatsApp : WHATSAPP_PHONE_NUMBER_ID contient l’App ID. Mettez l’identifiant du numéro (WhatsApp → API Setup → Phone number ID), sinon aucune réponse ne part.');
-  if (TEST_MODE) console.log(process.env.WHATSAPP_TEST_RECIPIENT ? `WhatsApp : mode test, réponses seulement au ${maskNumber(String(process.env.WHATSAPP_TEST_RECIPIENT))}.` : 'WhatsApp : mode test sans WHATSAPP_TEST_RECIPIENT, Mande-IA ne répondra à personne.');
+  if (envPhoneId && envPhoneId === process.env.META_APP_ID) console.warn('WhatsApp : WHATSAPP_PHONE_NUMBER_ID contient l’App ID. Les réponses partent quand même du numéro qui reçoit le message, mais « configurer » a besoin du vrai Phone number ID.');
+  if (TEST_MODE) console.log(testNumbers().length ? `WhatsApp : mode test, réponses seulement au ${testNumbers().map(maskNumber).join(', ')}.` : 'WhatsApp : mode test sans WHATSAPP_TEST_RECIPIENT, Mande-IA ne répondra à personne.');
   else console.log('WhatsApp : mode public.');
+  console.log(`WhatsApp : webhook sur ${WEBHOOK_PATHS.slice(0, 2).join(' et ')}.`);
 
   function validSignature(req) {
     if (!process.env.META_APP_SECRET) return TEST_MODE;
@@ -148,7 +156,7 @@ function setupWhatsApp(app, { db, day, now }) {
   }
 
   function takeQuota(from) {
-    if (!DAILY_LIMIT || from === String(process.env.WHATSAPP_TEST_RECIPIENT || '')) return 'ok';
+    if (!DAILY_LIMIT || testNumbers().includes(from)) return 'ok';
     const identity = `wa:${from}`;
     const used = db.prepare('SELECT count FROM daily_usage WHERE identity = ? AND day = ?').get(identity, day())?.count || 0;
     if (used > DAILY_LIMIT) return 'silent';
@@ -159,10 +167,10 @@ function setupWhatsApp(app, { db, day, now }) {
     db.prepare('UPDATE daily_usage SET count = MAX(0, count - 1) WHERE identity = ? AND day = ?').run(`wa:${from}`, day());
   }
 
-  async function answer(from, question, messageId) {
+  async function answer(phoneId, from, question, messageId) {
     const quota = takeQuota(from);
     if (quota === 'silent') return;
-    if (quota === 'limit') { await sendText(from, TEXT.limit); return; }
+    if (quota === 'limit') { await sendText(phoneId, from, TEXT.limit); return; }
     let pending = '';
     let partials = 0;
     const flushParagraphs = async () => {
@@ -173,61 +181,63 @@ function setupWhatsApp(app, { db, day, now }) {
       if ((part.match(/```/g) || []).length % 2) return;
       pending = pending.slice(cut + 2);
       partials += 1;
-      await sendText(from, part);
-      showTyping(messageId);
+      await sendText(phoneId, from, part);
+      showTyping(phoneId, messageId);
     };
     const reply = await streamChat(from, question, async (text) => { pending += text; await flushParagraphs(); });
-    if (!reply) { refundQuota(from); await sendText(from, TEXT.unavailable); return; }
-    if (pending.trim()) await sendText(from, pending);
+    if (!reply) { refundQuota(from); await sendText(phoneId, from, TEXT.unavailable); return; }
+    if (pending.trim()) await sendText(phoneId, from, pending);
   }
 
-  async function handleMessage(message) {
+  async function handleMessage(message, phoneId) {
     const from = String(message.from || '');
     const messageId = String(message.id || '');
     if (!messageId || !from) return;
-    if (TEST_MODE && from !== String(process.env.WHATSAPP_TEST_RECIPIENT || '')) { console.log(`WhatsApp (mode test) : message de ${maskNumber(from)} ignoré. Ajoutez ce numéro dans WHATSAPP_TEST_RECIPIENT ou passez WHATSAPP_TEST_MODE=false.`); return; }
+    if (TEST_MODE && !testNumbers().includes(from)) { console.log(`WhatsApp (mode test) : message de ${maskNumber(from)} ignoré. Ajoutez ce numéro dans WHATSAPP_TEST_RECIPIENT ou passez WHATSAPP_TEST_MODE=false.`); return; }
     try { db.prepare('INSERT INTO whatsapp_inbound (message_id, created_at) VALUES (?, ?)').run(messageId, now()); }
     catch (error) { if (String(error.message).includes('UNIQUE constraint failed')) return; throw error; }
     console.log(`WhatsApp [${maskNumber(from)}] : ${message.type} reçu`);
 
-    if (message.type === 'request_welcome') { await sendMenu(from); return; }
-    await showTyping(messageId);
+    if (message.type === 'request_welcome') { await sendMenu(phoneId, from); return; }
+    await showTyping(phoneId, messageId);
 
     if (message.type === 'interactive') {
       const choice = message.interactive?.list_reply || message.interactive?.button_reply;
       const row = ROWS[choice?.id];
-      if (!row) { await sendText(from, TEXT.unknownChoice); return; }
-      if (row.prompt) { await answer(from, row.prompt, messageId); return; }
-      await sendText(from, row.id === 'github' ? await githubReply() : STATIC_REPLIES[row.id]);
+      if (!row) { await sendText(phoneId, from, TEXT.unknownChoice); return; }
+      if (row.prompt) { await answer(phoneId, from, row.prompt, messageId); return; }
+      await sendText(phoneId, from, row.id === 'github' ? await githubReply() : STATIC_REPLIES[row.id]);
       return;
     }
-    if (message.type !== 'text' || !message.text?.body) { await sendText(from, TEXT.notText); return; }
+    if (message.type !== 'text' || !message.text?.body) { await sendText(phoneId, from, TEXT.notText); return; }
     const text = String(message.text.body).trim().slice(0, 4000);
-    if (isMenuRequest(text)) { await sendMenu(from); return; }
-    await answer(from, text, messageId);
+    if (isMenuRequest(text)) { await sendMenu(phoneId, from); return; }
+    await answer(phoneId, from, text, messageId);
   }
 
   const queues = new Map();
-  function enqueue(message) {
+  function enqueue(message, phoneId) {
     const key = String(message.from || '');
     const previous = queues.get(key) || Promise.resolve();
-    const next = previous.then(() => handleMessage(message)).catch((error) => console.error('WhatsApp :', error.message));
+    const next = previous.then(() => handleMessage(message, phoneId)).catch((error) => console.error('WhatsApp :', error.message));
     queues.set(key, next);
     next.finally(() => { if (queues.get(key) === next) queues.delete(key); });
   }
 
-  app.get('/api/whatsapp/webhook', (req, res) => {
+  app.get(WEBHOOK_PATHS, (req, res) => {
     const mode = req.query['hub.mode']; const token = req.query['hub.verify_token']; const challenge = req.query['hub.challenge'];
     if (mode === 'subscribe' && token && process.env.WHATSAPP_VERIFY_TOKEN && token === process.env.WHATSAPP_VERIFY_TOKEN) return res.status(200).send(String(challenge || ''));
     return res.sendStatus(403);
   });
 
-  app.post('/api/whatsapp/webhook', (req, res) => {
+  app.post(WEBHOOK_PATHS, (req, res) => {
     if (!validSignature(req)) { console.warn('WhatsApp : signature refusée. Vérifiez META_APP_SECRET.'); return res.sendStatus(403); }
     res.sendStatus(200);
-    const messages = (req.body?.entry || []).flatMap((entry) => entry.changes || []).flatMap((change) => change.value?.messages || []);
-    for (const message of messages) enqueue(message);
+    for (const change of (req.body?.entry || []).flatMap((entry) => entry.changes || [])) {
+      const phoneId = change.value?.metadata?.phone_number_id;
+      for (const message of change.value?.messages || []) enqueue(message, phoneId);
+    }
   });
 }
 
-module.exports = { setupWhatsApp, MENU, isMenuRequest, whatsappFormat };
+module.exports = { setupWhatsApp, MENU, WEBHOOK_PATHS, isWebhookPath, isMenuRequest, whatsappFormat };

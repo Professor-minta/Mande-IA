@@ -17,7 +17,7 @@ const rateLimit = require('express-rate-limit');
 const fs = require('fs');
 const { Readable } = require('stream');
 const path = require('path');
-const { setupWhatsApp } = require('./connectors/whatsapp');
+const { setupWhatsApp, isWebhookPath } = require('./connectors/whatsapp');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
@@ -64,10 +64,10 @@ setInterval(purgeOldRecords, 24 * 60 * 60 * 1000).unref();
 
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (req.originalUrl.startsWith('/api/whatsapp/webhook')) req.rawBody = buffer; }}));
+app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (isWebhookPath(req.originalUrl)) req.rawBody = buffer; }}));
 app.use(express.urlencoded({ extended: false }));
 app.use(session({ store: new (SQLiteStoreFactory(session))({ db: 'sessions.db', dir: DATA_DIR }), secret: SESSION_SECRET, proxy: true, resave: false, saveUninitialized: false, cookie: { httpOnly: true, secure: 'auto', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 } }));
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false, skip: (req) => req.path.startsWith('/whatsapp/webhook') }));
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false, skip: (req) => isWebhookPath(req.originalUrl) }));
 const voiceLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
 const aiLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 25, standardHeaders: true, legacyHeaders: false });
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });

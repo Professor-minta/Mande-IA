@@ -126,7 +126,9 @@ Puis **Restart** dans aaPanel. En cas de problème, regardez l'onglet **Project 
 
 ## WhatsApp
 
-Le connecteur répond sur WhatsApp avec un menu de 10 sujets, l'indicateur « en train d'écrire » et des réponses envoyées paragraphe par paragraphe.
+Le connecteur répond sur WhatsApp avec un menu de 10 sujets, l'indicateur « en train d'écrire » et des réponses envoyées paragraphe par paragraphe. Il répond toujours depuis le numéro qui a reçu le message.
+
+Callback URL chez Meta : `https://ia.mintaservices.com/whatsapp/webhook` (`/api/whatsapp/webhook` marche aussi).
 
 ```bash
 node scripts/whatsapp.js diagnostic       # vérifie le jeton, le numéro, l'abonnement et le webhook

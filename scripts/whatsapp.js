@@ -3,12 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 require('dotenv').config({ quiet: true, path: path.join(__dirname, '..', '.env') });
+const { isWebhookPath } = require('../connectors/whatsapp');
 
 const env = process.env;
 const GRAPH = `${env.META_GRAPH_BASE_URL || 'https://graph.facebook.com'}/${env.META_GRAPH_API_VERSION || 'v26.0'}`;
 const TOKEN = env.WHATSAPP_ACCESS_TOKEN || env.WHATSAPP_ROOT_TOKEN || '';
 const PHONE_ID = env.WHATSAPP_PHONE_NUMBER_ID || '';
-const WEBHOOK_URL = env.WHATSAPP_WEBHOOK_URL || 'https://ia.mintaservices.com/api/whatsapp/webhook';
+const WEBHOOK_URL = env.WHATSAPP_WEBHOOK_URL || 'https://ia.mintaservices.com/whatsapp/webhook';
+const TEST_NUMBERS = String(env.WHATSAPP_TEST_RECIPIENT || '').split(',').map((n) => n.replace(/\D/g, '')).filter(Boolean);
 const PROFILE_PICTURE = path.join(__dirname, '..', 'public', 'icons', 'whatsapp-profil.png');
 
 const PROFILE = {
@@ -47,6 +49,10 @@ async function graph(method, url, { body, auth = `Bearer ${TOKEN}`, headers = {}
 }
 
 const digits = (value) => String(value || '').replace(/\D/g, '');
+function goodCallback(url) {
+  if (env.WHATSAPP_WEBHOOK_URL) return url === env.WHATSAPP_WEBHOOK_URL;
+  try { const u = new URL(url); return u.protocol === 'https:' && u.hostname === new URL(WEBHOOK_URL).hostname && isWebhookPath(u.pathname); } catch { return false; }
+}
 const frenchDate = (seconds) => new Date(seconds * 1000).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Africa/Bamako' });
 
 async function tokenInfo() {
@@ -68,9 +74,9 @@ async function diagnostic() {
   env.META_APP_SECRET ? ok('Clé secrète app', 'présente') : bad('Clé secrète app', 'META_APP_SECRET manquant (App settings → Basic → App secret)');
   env.WHATSAPP_VERIFY_TOKEN ? ok('Jeton webhook', 'présent') : bad('Jeton webhook', 'WHATSAPP_VERIFY_TOKEN manquant');
   env.META_APP_ID ? ok('App ID', env.META_APP_ID) : note('App ID', 'META_APP_ID manquant : la section 5 ne pourra pas vérifier le webhook');
-  if (env.WHATSAPP_TEST_RECIPIENT && !/^\d{8,15}$/.test(env.WHATSAPP_TEST_RECIPIENT)) bad('Numéro de test', 'format attendu : 223 puis le numéro, sans + ni espaces (ex. 22377295259)');
+  for (const n of TEST_NUMBERS) if (n.length < 11 || n.length > 15) bad('Numéro de test', `${n} : mettez l’indicatif, ex. 22377295259`);
   if (env.WHATSAPP_TEST_MODE === 'false') ok('Mode', 'public : Mande-IA répond à tout le monde');
-  else if (env.WHATSAPP_TEST_RECIPIENT) note('Mode', `test : répond seulement au ${env.WHATSAPP_TEST_RECIPIENT}`);
+  else if (TEST_NUMBERS.length) note('Mode', `test : répond seulement au ${TEST_NUMBERS.join(', ')}`);
   else bad('Mode', 'test, mais WHATSAPP_TEST_RECIPIENT est vide : Mande-IA ne répond à personne');
   if (!TOKEN) return finish();
 
@@ -97,8 +103,8 @@ async function diagnostic() {
     const list = await graph('GET', `/${id}/phone_numbers?fields=id,display_phone_number,verified_name`);
     for (const n of list.data?.data || []) { numbers.push(n); note(n.display_phone_number, `Phone number ID = ${n.id} (${n.verified_name || 'sans nom'})`); }
   }
-  if (env.WHATSAPP_TEST_RECIPIENT && numbers.some((n) => digits(n.display_phone_number) === digits(env.WHATSAPP_TEST_RECIPIENT))) bad('Numéro de test', 'WHATSAPP_TEST_RECIPIENT est le numéro de Mande-IA lui-même : mettez le numéro du téléphone qui écrit à Mande-IA');
-  if (numbers.length && PHONE_ID && !numbers.some((n) => n.id === PHONE_ID)) bad('Phone number ID', `${PHONE_ID} n’est aucun de ces numéros. Copiez ${numbers.length === 1 ? numbers[0].id : 'le Phone number ID de votre numéro ci-dessus'} dans WHATSAPP_PHONE_NUMBER_ID`);
+  if (numbers.some((n) => TEST_NUMBERS.includes(digits(n.display_phone_number)))) bad('Numéro de test', 'WHATSAPP_TEST_RECIPIENT contient un numéro de Mande-IA : mettez le numéro du téléphone qui écrit à Mande-IA');
+  if (numbers.length && PHONE_ID && !numbers.some((n) => n.id === PHONE_ID)) bad('Phone number ID', `${PHONE_ID} n’est aucun de ces numéros. Copiez ${numbers.length === 1 ? numbers[0].id : 'le Phone number ID du numéro de Mande-IA ci-dessus'} dans WHATSAPP_PHONE_NUMBER_ID (sert au profil ; les réponses partent toujours du numéro qui reçoit le message)`);
 
   if (PHONE_ID) {
     console.log('\n4. Numéro utilisé par Mande-IA');
@@ -115,13 +121,15 @@ async function diagnostic() {
   }
 
   console.log('\n5. Webhook chez Meta');
+  let callbackUrl = WEBHOOK_URL;
   if (env.META_APP_ID && env.META_APP_SECRET) {
     const subs = await graph('GET', `/${env.META_APP_ID}/subscriptions`, { auth: `OAuth ${env.META_APP_ID}|${env.META_APP_SECRET}` });
     const wa = (subs.data?.data || []).find((s) => s.object === 'whatsapp_business_account');
     if (!subs.ok) bad('Configuration', `lecture impossible ${why(subs)} : vérifiez META_APP_ID et META_APP_SECRET`);
     else if (!wa) bad('Configuration', 'aucun webhook WhatsApp : WhatsApp → Configuration → Callback URL');
     else {
-      wa.callback_url === WEBHOOK_URL ? ok('Callback URL', wa.callback_url) : bad('Callback URL', `${wa.callback_url} (attendu : ${WEBHOOK_URL})`);
+      if (goodCallback(wa.callback_url)) { callbackUrl = wa.callback_url; ok('Callback URL', wa.callback_url); }
+      else bad('Callback URL', `${wa.callback_url} (attendu : ${WEBHOOK_URL})`);
       const fields = (wa.fields || []).map((f) => f.name || f);
       fields.includes('messages') ? ok('Champ messages', 'abonné') : bad('Champ messages', 'non abonné : Webhook fields → messages → Subscribe');
       wa.active === false ? bad('Webhook', 'inactif') : ok('Webhook', 'actif');
@@ -131,8 +139,8 @@ async function diagnostic() {
   console.log('\n6. Serveur joignable depuis Internet');
   if (env.WHATSAPP_VERIFY_TOKEN) {
     const challenge = String(Date.now());
-    const res = await graph('GET', `${WEBHOOK_URL}?hub.mode=subscribe&hub.verify_token=${encodeURIComponent(env.WHATSAPP_VERIFY_TOKEN)}&hub.challenge=${challenge}`, { auth: '' });
-    res.ok && String(res.data?.raw ?? res.data) === challenge ? ok('Webhook public', `${WEBHOOK_URL} répond correctement`) : bad('Webhook public', `réponse inattendue ${why(res)} : vérifiez que Mande-IA tourne dans aaPanel (Node.js Project)`);
+    const res = await graph('GET', `${callbackUrl}?hub.mode=subscribe&hub.verify_token=${encodeURIComponent(env.WHATSAPP_VERIFY_TOKEN)}&hub.challenge=${challenge}`, { auth: '' });
+    res.ok && String(res.data?.raw ?? res.data) === challenge ? ok('Webhook public', `${callbackUrl} répond correctement`) : bad('Webhook public', `réponse inattendue ${why(res)} : vérifiez que Mande-IA tourne dans aaPanel (Node.js Project)`);
   }
   finish();
 }
@@ -173,11 +181,11 @@ async function enregistrer(pin) {
 }
 
 async function test() {
-  const to = env.WHATSAPP_TEST_RECIPIENT;
+  const to = TEST_NUMBERS[0];
   if (!to || !env.META_APP_SECRET) { console.log('Remplissez WHATSAPP_TEST_RECIPIENT et META_APP_SECRET dans .env.'); process.exitCode = 1; return; }
-  const body = JSON.stringify({ object: 'whatsapp_business_account', entry: [{ changes: [{ field: 'messages', value: { messages: [{ from: to, id: `wamid.test.${Date.now()}`, type: 'text', text: { body: 'menu' } }] } }] }] });
+  const body = JSON.stringify({ object: 'whatsapp_business_account', entry: [{ changes: [{ field: 'messages', value: { metadata: { phone_number_id: PHONE_ID }, messages: [{ from: to, id: `wamid.test.${Date.now()}`, type: 'text', text: { body: 'menu' } }] } }] }] });
   const signature = crypto.createHmac('sha256', env.META_APP_SECRET).update(body).digest('hex');
-  const res = await graph('POST', `http://127.0.0.1:${env.PORT || 3001}/api/whatsapp/webhook`, { body: Buffer.from(body), auth: '', headers: { 'content-type': 'application/json', 'x-hub-signature-256': `sha256=${signature}` } });
+  const res = await graph('POST', `http://127.0.0.1:${env.PORT || 3001}/whatsapp/webhook`, { body: Buffer.from(body), auth: '', headers: { 'content-type': 'application/json', 'x-hub-signature-256': `sha256=${signature}` } });
   if (res.ok) ok('Message simulé', `accepté. Regardez le WhatsApp du ${to} : le menu doit arriver.`);
   else bad('Message simulé', `refusé ${why(res)}`);
   note('Attention', 'WhatsApp n’accepte la réponse que si ce numéro a écrit à Mande-IA dans les dernières 24 heures.');
