@@ -1,18 +1,41 @@
-const { askClaude, askOllama, askMeta } = require('../connectors/multiAgent');
-const chatHistory = {};
+const { askClaude, askOllama } = require('../connectors/multiAgent');
+
+const MAX_TURNS = 8;
+const MAX_USERS = 500;
+const chatHistory = new Map();
+
+function detectLanguage(message) {
+  if (/[ɛɔɲŋ]/i.test(message) || /\b(i ni ce|aw ni ce|i ka kɛnɛ|i ka kene|n bɛ|n be)\b/i.test(message)) return 'bm';
+  return 'auto';
+}
+
+function historyFor(userId) {
+  if (!chatHistory.has(userId)) {
+    if (chatHistory.size >= MAX_USERS) chatHistory.delete(chatHistory.keys().next().value);
+    chatHistory.set(userId, []);
+  }
+  return chatHistory.get(userId);
+}
+
 async function handleChat(userId, message) {
-  let lang = 'auto';
-  try {
-    if (message.match(/[ɛɔɲ]/i) || message.toLowerCase().includes('i ni ce')) lang = 'bm';
-  } catch {}
-  if (!chatHistory[userId]) chatHistory[userId] = [];
-  chatHistory[userId].push({ role: 'user', text: message, lang, at: new Date().toISOString() });
+  const lang = detectLanguage(message);
+  const history = historyFor(userId);
+  const messages = [...history, { role: 'user', content: message }];
   let reply = '';
   try {
-    if (process.env.OLLAMA_API_URL) { try { reply = await askOllama(message); } catch { reply = ''; } }
-    if (!reply) reply = await askClaude(message, lang);
-  } catch (e) { reply = "Mande-IA est indisponible, réessayez."; }
-  chatHistory[userId].push({ role: 'assistant', text: reply, at: new Date().toISOString() });
-  return { reply, lang, history: chatHistory[userId] };
+    reply = await askClaude(messages, lang);
+  } catch (error) {
+    console.error('WhatsApp Claude:', error.message);
+    if (process.env.OLLAMA_MODEL) {
+      try { reply = await askOllama(messages, lang); } catch (e) { console.error('WhatsApp Ollama:', e.message); }
+    }
+  }
+  if (!reply) reply = 'Mande-IA est momentanément indisponible. Réessayez dans quelques minutes.';
+  else {
+    history.push({ role: 'user', content: message }, { role: 'assistant', content: reply });
+    while (history.length > MAX_TURNS * 2) history.shift();
+  }
+  return { reply, lang, history };
 }
+
 module.exports = { handleChat, chatHistory };
