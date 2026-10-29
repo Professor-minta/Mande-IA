@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=17">
+    <link rel="stylesheet" href="/style.css?v=18">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -201,6 +201,7 @@
               <button class="row" id="share-app"><span class="row-icon"><svg><use href="#i-share"/></svg></span><span class="row-text">Partager l'application</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <a class="row" id="support-link" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-whatsapp"/></svg></span><span class="row-text">Contacter le support<small>Sur WhatsApp</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
               <a class="row" id="feedback-link" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-chat"/></svg></span><span class="row-text">Donner votre avis</span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <a class="row" href="/confidentialite" target="_blank" rel="noopener"><span class="row-icon"><svg><use href="#i-info"/></svg></span><span class="row-text">Confidentialité et conditions<small>Vos données et vos droits</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
               <button class="row" id="about-app"><span class="row-icon"><svg><use href="#i-info"/></svg></span><span class="row-text">À propos de Mande-IA</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
             </div>
             <h3 class="group-title">Discussion en cours</h3>
@@ -281,8 +282,18 @@
         <p class="form-error" id="auth-error" role="alert"></p>
         <button class="pill-button is-wide" id="login" type="submit">Se connecter</button>
         <button class="pill-button is-wide is-ghost" id="register" type="button">Créer mon compte</button>
+        <p class="legal-note">En créant un compte, vous acceptez les <a href="/conditions" target="_blank" rel="noopener">conditions d'utilisation</a> et la <a href="/confidentialite" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
       </form>
       <button class="pill-button is-wide is-ghost" id="logout" type="button" hidden>Se déconnecter</button>
+      <div class="delete-zone" id="delete-zone" hidden>
+        <button class="text-danger" id="delete-account-open" type="button">Supprimer mon compte</button>
+        <form class="auth-form" id="delete-form" hidden>
+          <p class="sheet-intro">Votre compte et toutes vos discussions seront effacés définitivement. Entrez votre mot de passe pour confirmer.</p>
+          <label>Mot de passe<input id="delete-password" type="password" autocomplete="current-password" required></label>
+          <p class="form-error" id="delete-error" role="alert"></p>
+          <button class="pill-button is-wide is-danger" type="submit">Supprimer définitivement</button>
+        </form>
+      </div>
     </dialog>
 
     <dialog class="sheet" id="news-dialog" aria-labelledby="news-title">
@@ -302,6 +313,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=17"></script>
+    <script src="/app.js?v=18"></script>
   </body>
 </html>

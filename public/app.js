@@ -333,6 +333,11 @@ function openAuth() {
   $('#account-state').textContent = signedIn ? `Connecté avec ${state.user.email}.` : 'Créez un compte gratuit ou connectez-vous. Vous pouvez aussi continuer sans compte.';
   $('#auth-form').hidden = signedIn;
   $('#logout').hidden = !signedIn;
+  $('#delete-zone').hidden = !signedIn;
+  $('#delete-form').hidden = true;
+  $('#delete-account-open').hidden = false;
+  $('#delete-password').value = '';
+  $('#delete-error').textContent = '';
   $('#auth-dialog').showModal();
 }
 async function submitAuth(action) {
@@ -355,6 +360,20 @@ async function logout() {
   renderMessages();
   await checkAuth();
   renderConversations();
+}
+
+async function deleteAccount() {
+  const password = $('#delete-password').value;
+  if (!password) { $('#delete-error').textContent = 'Entrez votre mot de passe.'; return; }
+  try {
+    await postJSON('/api/auth', { action: 'delete', password });
+    $('#auth-dialog').close();
+    state.user = null; state.conversationId = null; state.messages = []; state.conversations = [];
+    renderMessages();
+    await checkAuth();
+    renderConversations();
+    setStatus('Votre compte et vos discussions ont été supprimés.', { timeout: 6000 });
+  } catch (error) { $('#delete-error').textContent = error.message; }
 }
 
 function relativeDay(iso) {
@@ -1041,6 +1060,8 @@ $('#close-auth').onclick = () => $('#auth-dialog').close();
 $('#auth-form').addEventListener('submit', (event) => { event.preventDefault(); submitAuth('login'); });
 $('#register').onclick = () => submitAuth('register');
 $('#logout').onclick = () => logout().catch((error) => setStatus(error.message, { timeout: 5000 }));
+$('#delete-account-open').onclick = () => { $('#delete-account-open').hidden = true; $('#delete-form').hidden = false; $('#delete-password').focus(); };
+$('#delete-form').addEventListener('submit', (event) => { event.preventDefault(); deleteAccount(); });
 $('#settings-auth').onclick = openAuth;
 $('#settings-upgrade').onclick = openUpgrade;
 $('#upgrade-link').href = waLink(UPGRADE_MESSAGE);

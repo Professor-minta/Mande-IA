@@ -1,4 +1,4 @@
-const { askClaude, askOllama } = require('../connectors/multiAgent');
+const { askClaude, streamClaude, askOllama } = require('../connectors/multiAgent');
 
 const MAX_TURNS = 8;
 const MAX_USERS = 500;
@@ -38,4 +38,25 @@ async function handleChat(userId, message) {
   return { reply, lang, history };
 }
 
-module.exports = { handleChat, chatHistory };
+async function streamChat(userId, message, onText) {
+  const lang = detectLanguage(message);
+  const history = historyFor(userId);
+  const messages = [...history, { role: 'user', content: message }];
+  let reply = '';
+  try {
+    for await (const text of streamClaude(messages, lang)) { reply += text; await onText(text); }
+  } catch (error) {
+    console.error('WhatsApp Claude:', error.message);
+    if (!reply && process.env.OLLAMA_MODEL) {
+      try { const local = await askOllama(messages, lang); if (local) { reply = local; await onText(local); } }
+      catch (e) { console.error('WhatsApp Ollama:', e.message); }
+    }
+  }
+  if (reply) {
+    history.push({ role: 'user', content: message }, { role: 'assistant', content: reply });
+    while (history.length > MAX_TURNS * 2) history.shift();
+  }
+  return reply;
+}
+
+module.exports = { handleChat, streamChat, chatHistory };

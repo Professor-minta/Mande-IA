@@ -1,6 +1,14 @@
 {
-  "version": "2026-10-29",
+  "version": "2026-10-29-2",
   "entries": [
+    {
+      "date": "2026-10-29",
+      "titre": "Vos données",
+      "points": [
+        "Supprimez votre compte et toutes vos discussions depuis Mon compte.",
+        "La politique de confidentialité et les conditions d'utilisation sont dans Paramètres."
+      ]
+    },
     {
       "date": "2026-10-29",
       "titre": "Mande-IA v3",

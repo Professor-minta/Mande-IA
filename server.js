@@ -3,7 +3,13 @@ const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
 const SQLiteStoreFactory = require('connect-sqlite3');
-const Database = require('better-sqlite3');
+let Database;
+try { Database = require('better-sqlite3'); }
+catch (error) {
+  if (error.code !== 'ERR_DLOPEN_FAILED') throw error;
+  console.error(`better-sqlite3 a été installé avec une autre version de Node que ${process.version}. Dans le dossier du projet, avec cette version de Node, lancez « rm -rf node_modules && npm install --omit=dev », puis redémarrez Mande-IA.`);
+  process.exit(1);
+}
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const helmet = require('helmet');
@@ -11,7 +17,7 @@ const rateLimit = require('express-rate-limit');
 const fs = require('fs');
 const { Readable } = require('stream');
 const path = require('path');
-const { handleChat } = require('./chats/chatManager');
+const { setupWhatsApp, isWebhookPath } = require('./connectors/whatsapp');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
@@ -49,12 +55,19 @@ function usageFor(req, user) { if (user?.plan === 'pro') return { used: 0, remai
 function refundQuestion(req, user) { if (user?.plan === 'pro') return; db.prepare('UPDATE daily_usage SET count = MAX(0, count - 1) WHERE identity = ? AND day = ?').run(usageIdentity(req), day()); }
 function consumeQuestion(req, user) { if (user?.plan === 'pro') return usageFor(req, user); const usage = usageFor(req, user); if (usage.used >= 5) return null; db.prepare(`INSERT INTO daily_usage(identity, day, count) VALUES (?, ?, 1) ON CONFLICT(identity, day) DO UPDATE SET count = count + 1`).run(usageIdentity(req), day()); return usageFor(req, user); }
 
+function purgeOldRecords() {
+  db.prepare("DELETE FROM daily_usage WHERE day < date('now', '-30 day')").run();
+  db.prepare("DELETE FROM whatsapp_inbound WHERE created_at < strftime('%Y-%m-%dT%H:%M:%S', 'now', '-30 day')").run();
+}
+purgeOldRecords();
+setInterval(purgeOldRecords, 24 * 60 * 60 * 1000).unref();
+
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
-app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (req.originalUrl === '/api/whatsapp/webhook') req.rawBody = buffer; }}));
+app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (isWebhookPath(req.originalUrl)) req.rawBody = buffer; }}));
 app.use(express.urlencoded({ extended: false }));
 app.use(session({ store: new (SQLiteStoreFactory(session))({ db: 'sessions.db', dir: DATA_DIR }), secret: SESSION_SECRET, proxy: true, resave: false, saveUninitialized: false, cookie: { httpOnly: true, secure: 'auto', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 } }));
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false }));
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false, skip: (req) => isWebhookPath(req.originalUrl) }));
 const voiceLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
 const aiLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 25, standardHeaders: true, legacyHeaders: false });
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -66,6 +79,14 @@ app.post('/api/auth', async (req, res, next) => {
   try {
     const action = req.body?.action; if (action === 'guest') return res.json(sessionInfo(req)); if (action === 'check') return saveSessionInfo(req, res, next); if (action === 'logout') return req.session.destroy(() => res.json({ success: true }));
     const email = String(req.body?.email || '').trim().toLowerCase(); const password = String(req.body?.password || '');
+    if (action === 'delete') {
+      const account = req.session.userId ? db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId) : null;
+      if (!account) return res.status(401).json({ error: 'Connectez-vous pour supprimer votre compte.' });
+      if (!(await bcrypt.compare(password, account.password_hash))) return res.status(401).json({ error: 'Mot de passe incorrect.' });
+      db.transaction(() => { db.prepare('DELETE FROM daily_usage WHERE identity = ?').run(`user:${account.id}`); db.prepare('DELETE FROM users WHERE id = ?').run(account.id); })();
+      console.log('Compte supprimé à la demande de l’utilisateur.');
+      return req.session.destroy(() => res.json({ success: true }));
+    }
     if (action === 'register') { if (!emailIsValid(email)) return res.status(400).json({ error: 'Adresse e-mail invalide.' }); if (password.length < 8) return res.status(400).json({ error: 'Le mot de passe doit avoir au moins 8 caractères.' }); if (db.prepare('SELECT 1 FROM users WHERE email = ?').get(email)) return res.status(409).json({ error: 'Cette adresse e-mail existe déjà.' }); const userId = id(); db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, email, await bcrypt.hash(password, 12), now()); req.session.userId = userId; return saveSessionInfo(req, res, next); }
     if (action === 'login') { const account = db.prepare('SELECT * FROM users WHERE email = ?').get(email); if (!account || !(await bcrypt.compare(password, account.password_hash))) return res.status(401).json({ error: 'E-mail ou mot de passe incorrect.' }); req.session.userId = account.id; return saveSessionInfo(req, res, next); }
     return res.status(400).json({ error: 'Action inconnue.' });
@@ -320,62 +341,17 @@ app.get('/api/voice/stream/:id', async (req, res) => {
   }
 });
 
-const GRAPH_BASE_URL = process.env.META_GRAPH_BASE_URL || 'https://graph.facebook.com';
-const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION || 'v26.0';
-const WHATSAPP_TEST_MODE = process.env.WHATSAPP_TEST_MODE !== 'false';
-const WHATSAPP_NOT_TEXT = 'Pour l’instant, Mande-IA répond aux messages écrits sur WhatsApp. Pour envoyer une photo, un PDF ou parler à voix haute, ouvrez https://ia.mintaservices.com';
-if (!WHATSAPP_TEST_MODE && !process.env.META_APP_SECRET) console.warn('WhatsApp : META_APP_SECRET manquant, les messages WhatsApp seront refusés tant qu’il n’est pas dans .env.');
-function validMetaSignature(req) {
-  if (!process.env.META_APP_SECRET) return WHATSAPP_TEST_MODE;
-  const received = req.get('x-hub-signature-256') || '';
-  const expected = `sha256=${crypto.createHmac('sha256', process.env.META_APP_SECRET).update(req.rawBody || Buffer.from('')).digest('hex')}`;
-  return received.length === expected.length && crypto.timingSafeEqual(Buffer.from(received), Buffer.from(expected));
-}
-function whatsappFormat(text) {
-  return String(text)
-    .replace(/\*\*(.+?)\*\*/g, '*$1*')
-    .replace(/__(.+?)__/g, '*$1*')
-    .replace(/^\s*#{1,6}\s+(.+)$/gm, '*$1*')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '$1 ($2)')
-    .trim();
-}
-async function sendWhatsAppText(to, body) {
-  const token = process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  if (!token || !phoneNumberId) { console.error('WhatsApp : WHATSAPP_ACCESS_TOKEN ou WHATSAPP_PHONE_NUMBER_ID manquant.'); return false; }
-  const response = await fetch(`${GRAPH_BASE_URL}/${GRAPH_VERSION}/${phoneNumberId}/messages`, { method: 'POST', signal: AbortSignal.timeout(20000), headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ messaging_product: 'whatsapp', recipient_type: 'individual', to, type: 'text', text: { preview_url: false, body: whatsappFormat(body).slice(0, 4000) } }) });
-  if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('WhatsApp envoi échoué :', response.status, data?.error?.code || '', data?.error?.message || ''); return false; }
-  return true;
-}
-
-app.get('/api/whatsapp/webhook', (req, res) => { const mode = req.query['hub.mode']; const token = req.query['hub.verify_token']; const challenge = req.query['hub.challenge']; if (mode === 'subscribe' && token && process.env.WHATSAPP_VERIFY_TOKEN && token === process.env.WHATSAPP_VERIFY_TOKEN) return res.status(200).send(String(challenge || '')); return res.sendStatus(403); });
-app.post('/api/whatsapp/webhook', (req, res) => {
-  if (!validMetaSignature(req)) return res.sendStatus(403);
-  res.sendStatus(200);
-  Promise.resolve().then(async () => {
-    const changes = (req.body?.entry || []).flatMap((e) => e.changes || []);
-    for (const change of changes) {
-      for (const message of change.value?.messages || []) {
-        const from = String(message.from || ''); const messageId = String(message.id || '');
-        if (!messageId || !from) continue;
-        if (WHATSAPP_TEST_MODE && from !== String(process.env.WHATSAPP_TEST_RECIPIENT || '')) { console.log(`WhatsApp (mode test) : message de ${from} ignoré.`); continue; }
-        try { db.prepare('INSERT INTO whatsapp_inbound (message_id, created_at) VALUES (?, ?)').run(messageId, now()); } catch (e) { if (String(e.message).includes('UNIQUE constraint failed')) continue; throw e; }
-        if (message.type !== 'text' || !message.text?.body) { await sendWhatsAppText(from, WHATSAPP_NOT_TEXT); continue; }
-        const incomingText = String(message.text.body).trim().slice(0, 4000);
-        console.log(`WhatsApp [${from.slice(0, -4).replace(/\d/g, '•')}${from.slice(-4)}] : message reçu`);
-        let replyText;
-        try { replyText = (await handleChat(from, incomingText)).reply; }
-        catch (error) { console.error('chatManager :', error.message); replyText = 'Mande-IA est momentanément indisponible. Réessayez dans quelques minutes.'; }
-        await sendWhatsAppText(from, replyText);
-      }
-    }
-  }).catch((error) => console.error('WhatsApp :', error.message));
-});
+setupWhatsApp(app, { db, day, now });
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
 app.get('/robots.txt', (req, res) => { res.type('text/plain'); res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')); });
-app.use(express.static(PUBLIC_DIR));
+app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
 app.get(/.*/, (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 app.use((error, req, res, next) => { if (error instanceof multer.MulterError) return res.status(413).json({ error: error.code === 'LIMIT_FILE_SIZE' ? 'Ce fichier dépasse 10 Mo. Choisissez un fichier plus léger.' : 'Fichier refusé.' }); console.error(error); if (res.headersSent) return res.end(); res.status(500).json({ error: 'Erreur interne.' }); });
-app.listen(PORT, () => console.log(`Mande-IA v2 Multi-Agent + Ollama écoute sur le port ${PORT}`));
+process.on('unhandledRejection', (error) => console.error('Erreur non gérée :', error?.stack || error));
+app.listen(PORT, (error) => {
+  if (!error) return console.log(`Mande-IA écoute sur le port ${PORT} (Node ${process.version})`);
+  console.error(error.code === 'EADDRINUSE' ? `Le port ${PORT} est déjà utilisé : Mande-IA tourne déjà ailleurs (aaPanel ou PM2). Gardez un seul gestionnaire et arrêtez l’autre.` : `Serveur : ${error.message}`);
+  process.exit(1);
+});
