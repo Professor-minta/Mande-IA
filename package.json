@@ -1,14 +1,15 @@
 {
   "name": "mande-ia-v2",
-  "version": "2.0.0",
-  "description": "Mande-IA — assistant vocal Bambara",
+  "version": "3.0.0",
+  "description": "Mande-IA — assistant IA trilingue : bambara, français et anglais",
   "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check-keys": "node verifier-cles.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
