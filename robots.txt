@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://ia.mintaservices.com/sitemap.xml

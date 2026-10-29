@@ -25,6 +25,10 @@ Please avoid presenting one regional wording as the only correct wording. Add a 
 2. Test the JavaScript syntax with `node --check public/bambara-demo.js`.
 3. Describe the source of the phrase: personal knowledge, language teacher review, or another source that you have permission to use.
 
+## Changes that users can see
+
+When a change is visible in the app, add a short entry at the top of `public/nouveautes.json` in the same commit, and update its `version` value. Write it in plain French for users, not for developers. The app shows it once as a banner, then keeps it in Découvrir → Nouveautés.
+
 ## Respect and consent
 
 Do not submit sensitive personal information, harmful content, or copyrighted text without permission. Mande-IA aims to work with language communities and welcomes corrections made in a respectful way.
