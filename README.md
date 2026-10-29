@@ -98,26 +98,29 @@ Le fichier `.env` ne doit **jamais** être envoyé sur GitHub. Voir [SECURITY.md
 
 ---
 
-## Mise en production (aaPanel + PM2)
+## Mise en production (aaPanel)
 
-Première installation sur le serveur :
+Mande-IA tourne comme **Node.js Project** dans aaPanel (Website → Node.js Project). Réglages du projet :
 
-```bash
-cd /www/wwwroot/mande-ia-v2
-npm install --omit=dev
-npm install -g pm2
-pm2 start ecosystem.config.js
-pm2 startup systemd
-pm2 save
-```
+| Champ | Valeur |
+|---|---|
+| Path | `/www/wwwroot/mande-ia-v2` |
+| Run opt | `start` (lance `node server.js`) |
+| Port | `3001` |
+| User | `www` |
+| Node version | celle qui a installé `node_modules` |
+
+Un seul gestionnaire à la fois : si Mande-IA tourne dans aaPanel, il ne doit pas tourner aussi avec PM2. Sinon le port 3001 est déjà pris et l'un des deux s'arrête. `ecosystem.config.js` sert seulement si vous choisissez PM2 à la place d'aaPanel.
+
+Après un changement de version de Node, réinstallez les modules : supprimez `node_modules`, puis onglet **Module** du projet → installation en un clic.
 
 Mettre à jour après un changement sur GitHub :
 
 ```bash
-cd /www/wwwroot/mande-ia-v2 && git pull --ff-only origin main && chown -R www:www . && pm2 reload mande-ia
+cd /www/wwwroot/mande-ia-v2 && git pull --ff-only origin main && chown -R www:www .
 ```
 
-Commandes utiles : `pm2 status`, `pm2 logs mande-ia --lines 50`.
+Puis **Restart** dans aaPanel. En cas de problème, regardez l'onglet **Project log**.
 
 ---
 
@@ -138,7 +141,7 @@ node scripts/whatsapp.js test             # simule un message « menu » depuis 
 
 ```
 server.js               Serveur Express : discussion, fichiers, voix, appel, WhatsApp
-ecosystem.config.js     Configuration PM2
+ecosystem.config.js     Configuration PM2 (seulement si PM2 remplace aaPanel)
 verifier-cles.js        Vérifie les clés API sans les afficher
 scripts/                whatsapp.js (diagnostic et configuration), nettoyer-serveur.sh
 chats/, connectors/     Connecteur WhatsApp (connectors/whatsapp.js) et logique multi-agents

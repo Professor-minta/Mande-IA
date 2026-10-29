@@ -134,7 +134,11 @@ async function githubReply() {
 }
 
 function setupWhatsApp(app, { db, day, now }) {
+  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
   if (!TEST_MODE && !process.env.META_APP_SECRET) console.warn('WhatsApp : META_APP_SECRET manquant, les messages WhatsApp seront refusés tant qu’il n’est pas dans .env.');
+  if (phoneId && phoneId === process.env.META_APP_ID) console.warn('WhatsApp : WHATSAPP_PHONE_NUMBER_ID contient l’App ID. Mettez l’identifiant du numéro (WhatsApp → API Setup → Phone number ID), sinon aucune réponse ne part.');
+  if (TEST_MODE) console.log(process.env.WHATSAPP_TEST_RECIPIENT ? `WhatsApp : mode test, réponses seulement au ${maskNumber(String(process.env.WHATSAPP_TEST_RECIPIENT))}.` : 'WhatsApp : mode test sans WHATSAPP_TEST_RECIPIENT, Mande-IA ne répondra à personne.');
+  else console.log('WhatsApp : mode public.');
 
   function validSignature(req) {
     if (!process.env.META_APP_SECRET) return TEST_MODE;

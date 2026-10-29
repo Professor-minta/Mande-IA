@@ -3,7 +3,13 @@ const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
 const SQLiteStoreFactory = require('connect-sqlite3');
-const Database = require('better-sqlite3');
+let Database;
+try { Database = require('better-sqlite3'); }
+catch (error) {
+  if (error.code !== 'ERR_DLOPEN_FAILED') throw error;
+  console.error(`better-sqlite3 a été installé avec une autre version de Node que ${process.version}. Dans le dossier du projet, avec cette version de Node, lancez « rm -rf node_modules && npm install --omit=dev », puis redémarrez Mande-IA.`);
+  process.exit(1);
+}
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const helmet = require('helmet');
@@ -343,4 +349,9 @@ app.get('/robots.txt', (req, res) => { res.type('text/plain'); res.sendFile(path
 app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
 app.get(/.*/, (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 app.use((error, req, res, next) => { if (error instanceof multer.MulterError) return res.status(413).json({ error: error.code === 'LIMIT_FILE_SIZE' ? 'Ce fichier dépasse 10 Mo. Choisissez un fichier plus léger.' : 'Fichier refusé.' }); console.error(error); if (res.headersSent) return res.end(); res.status(500).json({ error: 'Erreur interne.' }); });
-app.listen(PORT, () => console.log(`Mande-IA v2 Multi-Agent + Ollama écoute sur le port ${PORT}`));
+process.on('unhandledRejection', (error) => console.error('Erreur non gérée :', error?.stack || error));
+app.listen(PORT, (error) => {
+  if (!error) return console.log(`Mande-IA écoute sur le port ${PORT} (Node ${process.version})`);
+  console.error(error.code === 'EADDRINUSE' ? `Le port ${PORT} est déjà utilisé : Mande-IA tourne déjà ailleurs (aaPanel ou PM2). Gardez un seul gestionnaire et arrêtez l’autre.` : `Serveur : ${error.message}`);
+  process.exit(1);
+});

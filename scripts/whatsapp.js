@@ -46,50 +46,79 @@ async function graph(method, url, { body, auth = `Bearer ${TOKEN}`, headers = {}
   } catch (error) { return { ok: false, status: 0, data: { error: { message: error.message } } }; }
 }
 
-async function wabaIds() {
+const digits = (value) => String(value || '').replace(/\D/g, '');
+const frenchDate = (seconds) => new Date(seconds * 1000).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Africa/Bamako' });
+
+async function tokenInfo() {
   const res = await graph('GET', `/debug_token?input_token=${encodeURIComponent(TOKEN)}`);
-  const scopes = res.data?.data?.granular_scopes || [];
+  return res.ok ? res.data?.data || {} : { failure: res };
+}
+
+function wabaIds(info) {
+  const scopes = info.granular_scopes || [];
   return [...new Set(scopes.filter((s) => s.scope === 'whatsapp_business_management').flatMap((s) => s.target_ids || []))];
 }
 
 async function diagnostic() {
   console.log('\n1. Fichier .env');
   TOKEN ? ok('Jeton', 'présent') : bad('Jeton', 'WHATSAPP_ACCESS_TOKEN manquant');
-  PHONE_ID ? ok('Phone number ID', 'présent') : bad('Phone number ID', 'WHATSAPP_PHONE_NUMBER_ID manquant');
+  if (!PHONE_ID) bad('Phone number ID', 'WHATSAPP_PHONE_NUMBER_ID manquant');
+  else if (PHONE_ID === env.META_APP_ID) bad('Phone number ID', 'contient l’App ID de l’application, pas l’identifiant du numéro (voir section 3)');
+  else ok('Phone number ID', 'présent');
   env.META_APP_SECRET ? ok('Clé secrète app', 'présente') : bad('Clé secrète app', 'META_APP_SECRET manquant (App settings → Basic → App secret)');
   env.WHATSAPP_VERIFY_TOKEN ? ok('Jeton webhook', 'présent') : bad('Jeton webhook', 'WHATSAPP_VERIFY_TOKEN manquant');
+  env.META_APP_ID ? ok('App ID', env.META_APP_ID) : note('App ID', 'META_APP_ID manquant : la section 5 ne pourra pas vérifier le webhook');
+  if (env.WHATSAPP_TEST_RECIPIENT && !/^\d{8,15}$/.test(env.WHATSAPP_TEST_RECIPIENT)) bad('Numéro de test', 'format attendu : 223 puis le numéro, sans + ni espaces (ex. 22377295259)');
   if (env.WHATSAPP_TEST_MODE === 'false') ok('Mode', 'public : Mande-IA répond à tout le monde');
   else if (env.WHATSAPP_TEST_RECIPIENT) note('Mode', `test : répond seulement au ${env.WHATSAPP_TEST_RECIPIENT}`);
   else bad('Mode', 'test, mais WHATSAPP_TEST_RECIPIENT est vide : Mande-IA ne répond à personne');
-  if (!TOKEN || !PHONE_ID) return;
+  if (!TOKEN) return finish();
 
-  console.log('\n2. Numéro WhatsApp');
-  const phone = await graph('GET', `/${PHONE_ID}?fields=display_phone_number,verified_name,name_status,code_verification_status,quality_rating,platform_type,status`);
-  if (!phone.ok) bad('Numéro', `refusé ${why(phone)}`);
-  else {
-    const p = phone.data;
-    ok('Numéro', `${p.display_phone_number} (nom affiché : ${p.verified_name})`);
-    p.platform_type === 'CLOUD_API' ? ok('Plateforme', 'Cloud API') : bad('Plateforme', `${p.platform_type || 'inconnue'} : lancez « node scripts/whatsapp.js enregistrer PIN »`);
-    p.status && p.status !== 'CONNECTED' ? bad('Statut', p.status) : ok('Statut', p.status || 'non indiqué');
-    p.name_status === 'APPROVED' || p.name_status === 'AVAILABLE_WITHOUT_REVIEW' ? ok('Nom affiché', p.name_status) : note('Nom affiché', `${p.name_status || 'inconnu'} (en attente ou refusé par Meta)`);
-    note('Qualité', p.quality_rating || 'inconnue');
-  }
+  console.log('\n2. Jeton d’accès');
+  const info = await tokenInfo();
+  if (info.failure) { bad('Jeton', `refusé ${why(info.failure)} : créez un jeton permanent (Business Settings → System users → Generate token)`); return finish(); }
+  if (info.is_valid === false) { bad('Jeton', 'expiré ou révoqué : créez un jeton permanent (Business Settings → System users → Generate token)'); return finish(); }
+  ok('Jeton', info.type === 'SYSTEM_USER' ? 'valide, utilisateur système' : `valide (type ${info.type || 'inconnu'})`);
+  if (!info.expires_at) ok('Expiration', 'jamais');
+  else if (info.expires_at * 1000 - Date.now() < 48 * 3600 * 1000) bad('Expiration', `jeton temporaire, expire le ${frenchDate(info.expires_at)} : créez un jeton permanent (utilisateur système, Never)`);
+  else note('Expiration', `le ${frenchDate(info.expires_at)}`);
+  const scopes = info.scopes || (info.granular_scopes || []).map((s) => s.scope);
+  for (const scope of ['whatsapp_business_messaging', 'whatsapp_business_management']) scopes.includes(scope) ? ok('Permission', scope) : bad('Permission', `${scope} manquante`);
 
-  console.log('\n3. Compte WhatsApp Business et abonnement de l’app');
-  const ids = await wabaIds();
-  if (!ids.length) bad('Compte WhatsApp', 'le jeton n’a pas accès au compte WhatsApp (Utilisateur système → Assign assets → WhatsApp accounts)');
+  console.log('\n3. Compte WhatsApp Business, numéros et abonnement de l’app');
+  const ids = wabaIds(info);
+  if (!ids.length) bad('Compte WhatsApp', 'le jeton n’a pas accès au compte WhatsApp (System users → Assign assets → WhatsApp accounts)');
+  const numbers = [];
   for (const id of ids) {
     const subs = await graph('GET', `/${id}/subscribed_apps`);
     if (!subs.ok) bad(`Compte ${id}`, `lecture impossible ${why(subs)}`);
     else if (!(subs.data.data || []).length) bad(`Compte ${id}`, 'aucune app abonnée : lancez « node scripts/whatsapp.js configurer »');
     else ok(`Compte ${id}`, `app abonnée : ${(subs.data.data || []).map((a) => a.whatsapp_business_api_data?.name || a.name || a.id).join(', ')}`);
+    const list = await graph('GET', `/${id}/phone_numbers?fields=id,display_phone_number,verified_name`);
+    for (const n of list.data?.data || []) { numbers.push(n); note(n.display_phone_number, `Phone number ID = ${n.id} (${n.verified_name || 'sans nom'})`); }
+  }
+  if (env.WHATSAPP_TEST_RECIPIENT && numbers.some((n) => digits(n.display_phone_number) === digits(env.WHATSAPP_TEST_RECIPIENT))) bad('Numéro de test', 'WHATSAPP_TEST_RECIPIENT est le numéro de Mande-IA lui-même : mettez le numéro du téléphone qui écrit à Mande-IA');
+  if (numbers.length && PHONE_ID && !numbers.some((n) => n.id === PHONE_ID)) bad('Phone number ID', `${PHONE_ID} n’est aucun de ces numéros. Copiez ${numbers.length === 1 ? numbers[0].id : 'le Phone number ID de votre numéro ci-dessus'} dans WHATSAPP_PHONE_NUMBER_ID`);
+
+  if (PHONE_ID) {
+    console.log('\n4. Numéro utilisé par Mande-IA');
+    const phone = await graph('GET', `/${PHONE_ID}?fields=display_phone_number,verified_name,name_status,code_verification_status,quality_rating,platform_type,status`);
+    if (!phone.ok) bad('Numéro', /node type \(Application\)/.test(phone.data?.error?.message || '') ? 'WHATSAPP_PHONE_NUMBER_ID est l’App ID, pas un numéro (voir section 3)' : `refusé ${why(phone)}`);
+    else {
+      const p = phone.data;
+      ok('Numéro', `${p.display_phone_number} (nom affiché : ${p.verified_name})`);
+      p.platform_type === 'CLOUD_API' ? ok('Plateforme', 'Cloud API') : bad('Plateforme', `${p.platform_type || 'inconnue'} : lancez « node scripts/whatsapp.js enregistrer PIN »`);
+      p.status && p.status !== 'CONNECTED' ? bad('Statut', p.status) : ok('Statut', p.status || 'non indiqué');
+      p.name_status === 'APPROVED' || p.name_status === 'AVAILABLE_WITHOUT_REVIEW' ? ok('Nom affiché', p.name_status) : note('Nom affiché', `${p.name_status || 'inconnu'} (en attente ou refusé par Meta)`);
+      note('Qualité', p.quality_rating || 'inconnue');
+    }
   }
 
-  console.log('\n4. Webhook chez Meta');
+  console.log('\n5. Webhook chez Meta');
   if (env.META_APP_ID && env.META_APP_SECRET) {
     const subs = await graph('GET', `/${env.META_APP_ID}/subscriptions`, { auth: `OAuth ${env.META_APP_ID}|${env.META_APP_SECRET}` });
     const wa = (subs.data?.data || []).find((s) => s.object === 'whatsapp_business_account');
-    if (!subs.ok) bad('Configuration', `lecture impossible ${why(subs)}`);
+    if (!subs.ok) bad('Configuration', `lecture impossible ${why(subs)} : vérifiez META_APP_ID et META_APP_SECRET`);
     else if (!wa) bad('Configuration', 'aucun webhook WhatsApp : WhatsApp → Configuration → Callback URL');
     else {
       wa.callback_url === WEBHOOK_URL ? ok('Callback URL', wa.callback_url) : bad('Callback URL', `${wa.callback_url} (attendu : ${WEBHOOK_URL})`);
@@ -99,14 +128,17 @@ async function diagnostic() {
     }
   } else note('Configuration', 'ajoutez META_APP_ID dans .env pour vérifier la Callback URL');
 
-  console.log('\n5. Serveur joignable depuis Internet');
+  console.log('\n6. Serveur joignable depuis Internet');
   if (env.WHATSAPP_VERIFY_TOKEN) {
     const challenge = String(Date.now());
     const res = await graph('GET', `${WEBHOOK_URL}?hub.mode=subscribe&hub.verify_token=${encodeURIComponent(env.WHATSAPP_VERIFY_TOKEN)}&hub.challenge=${challenge}`, { auth: '' });
-    res.ok && String(res.data?.raw ?? res.data) === challenge ? ok('Webhook public', `${WEBHOOK_URL} répond correctement`) : bad('Webhook public', `réponse inattendue ${why(res)} : vérifiez Nginx et PM2`);
+    res.ok && String(res.data?.raw ?? res.data) === challenge ? ok('Webhook public', `${WEBHOOK_URL} répond correctement`) : bad('Webhook public', `réponse inattendue ${why(res)} : vérifiez que Mande-IA tourne dans aaPanel (Node.js Project)`);
   }
+  finish();
+}
 
-  console.log(problems ? `\n${problems} problème(s) à corriger.\n` : '\nTout est en ordre. Envoyez « menu » au numéro de Mande-IA.\n');
+function finish() {
+  console.log(problems ? `\n${problems} problème(s) à corriger.\n` : '\nTout est en ordre. Envoyez « Bonjour » au numéro de Mande-IA.\n');
 }
 
 async function uploadProfilePicture() {
@@ -122,7 +154,7 @@ async function uploadProfilePicture() {
 async function configurer() {
   if (!TOKEN || !PHONE_ID) { console.log('Remplissez d’abord WHATSAPP_ACCESS_TOKEN et WHATSAPP_PHONE_NUMBER_ID dans .env.'); process.exitCode = 1; return; }
   console.log('\nConfiguration de WhatsApp');
-  for (const id of await wabaIds()) {
+  for (const id of wabaIds(await tokenInfo())) {
     const res = await graph('POST', `/${id}/subscribed_apps`);
     res.ok ? ok(`Compte ${id}`, 'app abonnée aux messages') : bad(`Compte ${id}`, `abonnement refusé ${why(res)}`);
   }
