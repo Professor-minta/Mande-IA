@@ -49,6 +49,13 @@ function usageFor(req, user) { if (user?.plan === 'pro') return { used: 0, remai
 function refundQuestion(req, user) { if (user?.plan === 'pro') return; db.prepare('UPDATE daily_usage SET count = MAX(0, count - 1) WHERE identity = ? AND day = ?').run(usageIdentity(req), day()); }
 function consumeQuestion(req, user) { if (user?.plan === 'pro') return usageFor(req, user); const usage = usageFor(req, user); if (usage.used >= 5) return null; db.prepare(`INSERT INTO daily_usage(identity, day, count) VALUES (?, ?, 1) ON CONFLICT(identity, day) DO UPDATE SET count = count + 1`).run(usageIdentity(req), day()); return usageFor(req, user); }
 
+function purgeOldRecords() {
+  db.prepare("DELETE FROM daily_usage WHERE day < date('now', '-30 day')").run();
+  db.prepare("DELETE FROM whatsapp_inbound WHERE created_at < strftime('%Y-%m-%dT%H:%M:%S', 'now', '-30 day')").run();
+}
+purgeOldRecords();
+setInterval(purgeOldRecords, 24 * 60 * 60 * 1000).unref();
+
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (req.originalUrl === '/api/whatsapp/webhook') req.rawBody = buffer; }}));
@@ -66,6 +73,14 @@ app.post('/api/auth', async (req, res, next) => {
   try {
     const action = req.body?.action; if (action === 'guest') return res.json(sessionInfo(req)); if (action === 'check') return saveSessionInfo(req, res, next); if (action === 'logout') return req.session.destroy(() => res.json({ success: true }));
     const email = String(req.body?.email || '').trim().toLowerCase(); const password = String(req.body?.password || '');
+    if (action === 'delete') {
+      const account = req.session.userId ? db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId) : null;
+      if (!account) return res.status(401).json({ error: 'Connectez-vous pour supprimer votre compte.' });
+      if (!(await bcrypt.compare(password, account.password_hash))) return res.status(401).json({ error: 'Mot de passe incorrect.' });
+      db.transaction(() => { db.prepare('DELETE FROM daily_usage WHERE identity = ?').run(`user:${account.id}`); db.prepare('DELETE FROM users WHERE id = ?').run(account.id); })();
+      console.log('Compte supprimé à la demande de l’utilisateur.');
+      return req.session.destroy(() => res.json({ success: true }));
+    }
     if (action === 'register') { if (!emailIsValid(email)) return res.status(400).json({ error: 'Adresse e-mail invalide.' }); if (password.length < 8) return res.status(400).json({ error: 'Le mot de passe doit avoir au moins 8 caractères.' }); if (db.prepare('SELECT 1 FROM users WHERE email = ?').get(email)) return res.status(409).json({ error: 'Cette adresse e-mail existe déjà.' }); const userId = id(); db.prepare('INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, ?)').run(userId, email, await bcrypt.hash(password, 12), now()); req.session.userId = userId; return saveSessionInfo(req, res, next); }
     if (action === 'login') { const account = db.prepare('SELECT * FROM users WHERE email = ?').get(email); if (!account || !(await bcrypt.compare(password, account.password_hash))) return res.status(401).json({ error: 'E-mail ou mot de passe incorrect.' }); req.session.userId = account.id; return saveSessionInfo(req, res, next); }
     return res.status(400).json({ error: 'Action inconnue.' });
@@ -323,6 +338,17 @@ app.get('/api/voice/stream/:id', async (req, res) => {
 const GRAPH_BASE_URL = process.env.META_GRAPH_BASE_URL || 'https://graph.facebook.com';
 const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION || 'v26.0';
 const WHATSAPP_TEST_MODE = process.env.WHATSAPP_TEST_MODE !== 'false';
+const whatsappLimitSetting = Number.parseInt(process.env.WHATSAPP_DAILY_LIMIT ?? '5', 10);
+const WHATSAPP_DAILY_LIMIT = Number.isFinite(whatsappLimitSetting) && whatsappLimitSetting >= 0 ? whatsappLimitSetting : 5;
+const WHATSAPP_LIMIT_TEXT = `Vos ${WHATSAPP_DAILY_LIMIT} messages gratuits d’aujourd’hui sont utilisés. Revenez demain. Pour un accès illimité, passez à Pro en écrivant au +223 77 29 52 59.`;
+function whatsappQuota(from) {
+  if (!WHATSAPP_DAILY_LIMIT || from === String(process.env.WHATSAPP_TEST_RECIPIENT || '')) return 'ok';
+  const identity = `wa:${from}`;
+  const used = db.prepare('SELECT count FROM daily_usage WHERE identity = ? AND day = ?').get(identity, day())?.count || 0;
+  if (used > WHATSAPP_DAILY_LIMIT) return 'silent';
+  db.prepare('INSERT INTO daily_usage(identity, day, count) VALUES (?, ?, 1) ON CONFLICT(identity, day) DO UPDATE SET count = count + 1').run(identity, day());
+  return used >= WHATSAPP_DAILY_LIMIT ? 'limit' : 'ok';
+}
 const WHATSAPP_NOT_TEXT = 'Pour l’instant, Mande-IA répond aux messages écrits sur WhatsApp. Pour envoyer une photo, un PDF ou parler à voix haute, ouvrez https://ia.mintaservices.com';
 if (!WHATSAPP_TEST_MODE && !process.env.META_APP_SECRET) console.warn('WhatsApp : META_APP_SECRET manquant, les messages WhatsApp seront refusés tant qu’il n’est pas dans .env.');
 function validMetaSignature(req) {
@@ -361,6 +387,9 @@ app.post('/api/whatsapp/webhook', (req, res) => {
         if (WHATSAPP_TEST_MODE && from !== String(process.env.WHATSAPP_TEST_RECIPIENT || '')) { console.log(`WhatsApp (mode test) : message de ${from} ignoré.`); continue; }
         try { db.prepare('INSERT INTO whatsapp_inbound (message_id, created_at) VALUES (?, ?)').run(messageId, now()); } catch (e) { if (String(e.message).includes('UNIQUE constraint failed')) continue; throw e; }
         if (message.type !== 'text' || !message.text?.body) { await sendWhatsAppText(from, WHATSAPP_NOT_TEXT); continue; }
+        const quota = whatsappQuota(from);
+        if (quota === 'silent') continue;
+        if (quota === 'limit') { await sendWhatsAppText(from, WHATSAPP_LIMIT_TEXT); continue; }
         const incomingText = String(message.text.body).trim().slice(0, 4000);
         console.log(`WhatsApp [${from.slice(0, -4).replace(/\d/g, '•')}${from.slice(-4)}] : message reçu`);
         let replyText;
@@ -375,7 +404,7 @@ app.post('/api/whatsapp/webhook', (req, res) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
 app.get('/robots.txt', (req, res) => { res.type('text/plain'); res.sendFile(path.join(PUBLIC_DIR, 'robots.txt')); });
-app.use(express.static(PUBLIC_DIR));
+app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
 app.get(/.*/, (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 app.use((error, req, res, next) => { if (error instanceof multer.MulterError) return res.status(413).json({ error: error.code === 'LIMIT_FILE_SIZE' ? 'Ce fichier dépasse 10 Mo. Choisissez un fichier plus léger.' : 'Fichier refusé.' }); console.error(error); if (res.headersSent) return res.end(); res.status(500).json({ error: 'Erreur interne.' }); });
 app.listen(PORT, () => console.log(`Mande-IA v2 Multi-Agent + Ollama écoute sur le port ${PORT}`));
