@@ -1,6 +1,15 @@
 {
-  "version": "2026-10-30-2",
+  "version": "2026-10-30-3",
   "entries": [
+    {
+      "date": "2026-10-30",
+      "titre": "Installer Mande-IA",
+      "points": [
+        "Mande-IA vous propose de s'installer sur l'écran d'accueil, comme une application, sans Play Store.",
+        "Sur iPhone, la fenêtre explique comment l'ajouter depuis Safari.",
+        "Quand vous demandez un appel en bambara, Mande-IA vous répond en bambara."
+      ]
+    },
     {
       "date": "2026-10-30",
       "titre": "Appeler à la voix",

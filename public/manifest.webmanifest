@@ -1,11 +1,21 @@
 {
+  "id": "/",
   "name": "Mande-IA",
   "short_name": "Mande-IA",
-  "description": "Assistant IA trilingue : bambara, français et anglais.",
+  "description": "Assistant IA qui parle bambara, français et anglais : questions, photos, voix, appel en direct et appels vers vos contacts.",
+  "lang": "fr",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#061229",
   "theme_color": "#061229",
+  "categories": [
+    "education",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -24,6 +34,29 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/capture-accueil.webp",
+      "sizes": "824x1784",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Accueil de Mande-IA"
+    },
+    {
+      "src": "/icons/capture-discussion.webp",
+      "sizes": "824x1784",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Une réponse de Mande-IA"
+    },
+    {
+      "src": "/icons/capture-appel.webp",
+      "sizes": "824x1784",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Appeler un contact à la voix"
     }
   ],
   "shortcuts": [
@@ -53,5 +86,12 @@
         }
       ]
     }
-  ]
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://ia.mintaservices.com/manifest.webmanifest"
+    }
+  ],
+  "prefer_related_applications": false
 }
