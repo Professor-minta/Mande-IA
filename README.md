@@ -32,7 +32,7 @@ Par **Minta Services** — Bamako / Ségou, Mali 🇲🇱
 - **Écouter les réponses** : voix bambara avec Djelia, voix naturelle en français et en anglais
 - **Dictée** au micro
 - **Appel vocal en direct** (OpenAI Realtime, WebRTC) : 3 minutes en gratuit, 15 minutes en Pro
-- **Appeler un contact** : « Appelle Mamadou » ouvre le téléphone avec le bon numéro (contacts gardés sur l'appareil, import depuis le téléphone sur Android)
+- **Appeler un contact** : « Appelle Mamadou » ou « Mamadou wele », écrit ou dit au micro ou pendant l'appel en direct, ouvre le téléphone avec le bon numéro (contacts gardés sur l'appareil, import depuis le téléphone sur Android, raccourci « Appeler » sur l'icône)
 - Mode invité, comptes et conversations sauvegardées
 - Limite gratuite de 5 questions par jour
 - **Nouveautés** affichées dans l'application après chaque mise à jour

@@ -1,6 +1,15 @@
 {
-  "version": "2026-10-30-1",
+  "version": "2026-10-30-2",
   "entries": [
+    {
+      "date": "2026-10-30",
+      "titre": "Appeler à la voix",
+      "points": [
+        "Touchez le micro et dites « Appelle Mamadou » : pas besoin d'écrire. Mande-IA s'arrête tout seul quand vous avez fini de parler.",
+        "Pendant l'appel en direct avec Mande-IA, dites aussi « Appelle Mamadou » : un gros bouton vert apparaît, touchez-le pour appeler.",
+        "Sur Android, appuyez longtemps sur l'icône Mande-IA de l'écran d'accueil, puis touchez « Appeler » : Mande-IA s'ouvre prêt à écouter."
+      ]
+    },
     {
       "date": "2026-10-30",
       "titre": "Appeler vos contacts",

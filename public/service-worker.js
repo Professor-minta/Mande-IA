@@ -1,4 +1,4 @@
-const VERSION = '19';
+const VERSION = '20';
 const CACHE = `mande-ia-shell-v${VERSION}`;
 const SHELL = ['/', `/style.css?v=${VERSION}`, `/app.js?v=${VERSION}`, '/manifest.webmanifest', '/icons/mande-ia.svg', '/icons/icon-192.png'];
 

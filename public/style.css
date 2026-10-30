@@ -380,3 +380,15 @@ body:not([data-view="home"]) .dock { display: none; }
 .contact-list .row { gap: 10px; padding: 10px 12px; }
 .contact-list .row-text { min-width: 0; overflow-wrap: anywhere; }
 #contacts-import { margin-bottom: 4px; }
+.pill-button.is-call { background: #1fbf5b; color: #fff; }
+.pill-button.is-call:hover { background: #18a34d; }
+.pill-button.is-call svg { width: 20px; height: 20px; }
+.call-actions .pill-button.is-call { min-height: 52px; padding: 12px 22px; font-size: 17px; }
+.call-dial { display: grid; gap: 12px; width: min(100%, 340px); }
+.call-dial[hidden] { display: none; }
+.call-dial .pill-button { min-height: 60px; font-size: 19px; white-space: normal; }
+.call-dial .pill-button.is-call svg { width: 24px; height: 24px; }
+.call-dial .pill-button:not(.is-call) { background: #f2f6ff; color: #061229; }
+.bar-button.is-pulse { color: var(--cyan); animation: mic-pulse 1.2s ease-in-out infinite; }
+@keyframes mic-pulse { 50% { transform: scale(1.18); } }
+@media (prefers-reduced-motion: reduce) { .bar-button.is-pulse { animation: none; } }

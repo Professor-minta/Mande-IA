@@ -645,17 +645,34 @@ function stopReply() { state.streamController?.abort(); }
 
 const CONTACTS_KEY = 'mande-contacts';
 const canPickContacts = 'contacts' in navigator && 'ContactsManager' in window;
-const CALL_REQUEST = /^(?:(?:mande ?i[ae]|mandeia)\s+)?(?:(?:je veux|je voudrais|peux tu|tu peux|pouvez vous|vous pouvez|i want to|can you|please|stp|svp)\s+)?(?:appelle|appelles|appeler|appelez|telephone a|telephoner a|telephonez a|compose|composer|call|phone|ring|wele|weele)\s+(?:moi\s+|me\s+)?(.+)$/;
-const CALL_BAMBARA = /^(?:(?:n b a fe ka|a b a fe ka|i ka|aw ka)\s+)?(.+?)\s+(?:wele|weele)$/;
+const CALL_PREFIX = '(?:(?:mande ?i[ae]|mandeia)\\s+)?(?:(?:je veux|je voudrais|peux tu|tu peux|pouvez vous|vous pouvez|i want to|can you|please|stp|svp|n b a fe ka|a b a fe ka)\\s+)?';
+const CALL_STRONG = new RegExp(`^${CALL_PREFIX}(?:ap+el+(?:e|es|er|ez|i)|telephone a|telephoner a|telephonez a|(?:lance|lancer|lancez|passe|passer|passez|fais|faire|faites) (?:l |un )?appel(?: (?:a|pour|vers|avec))?|we+le)(?:\\s+(?:moi|me))?(?:\\s+(.+))?$`);
+const CALL_WEAK = new RegExp(`^${CALL_PREFIX}(?:appel(?: a)?|telephone|telephoner|compose|composer|call|phone|ring)\\s+(.+)$`);
+const CALL_BAMBARA = /^(?:(?:n b a fe ka|a b a fe ka|i ka|aw ka)\s+)?(.+?)\s+we+le$/;
 const CALL_TAIL = /\s+(?:s il te plait|s il vous plait|stp|svp|please|maintenant|now|tout de suite|pour moi|au telephone)$/;
 const NOT_A_NAME = /^(?:t on|t il|t elle|on|ca|cela|ceci|comment|quoi|qui|quel|quelle|pourquoi|en|un|une|des|du|de|what|how|who|it|this|that)(?:\s|$)/;
 const PRONOUNS = new Set(['le', 'la', 'les', 'lui', 'moi', 'toi', 'nous', 'vous', 'eux', 'elle', 'il', 'me', 'him', 'her', 'them', 'a']);
+const CALL_SPEECH = {
+  fr: {
+    ready: (name) => `Touchez le bouton vert pour appeler ${name}.`,
+    choose: (name) => `J'ai trouvé plusieurs ${name}. Touchez celui que vous voulez appeler.`,
+    missing: (name) => `Je ne trouve pas ${name} dans vos contacts Mande-IA. ${canPickContacts ? 'Touchez « Choisir dans mes contacts ».' : 'Entrez son numéro une seule fois.'}`,
+    who: 'Qui voulez-vous appeler ? Dites « Appelle », puis le nom.'
+  },
+  en: {
+    ready: (name) => `Tap the green button to call ${name}.`,
+    choose: (name) => `I found several contacts named ${name}. Tap the one you want to call.`,
+    missing: (name) => `I can't find ${name} in your Mande-IA contacts. ${canPickContacts ? 'Tap “Choisir dans mes contacts”.' : 'Enter the number once.'}`,
+    who: 'Who do you want to call? Say “Call”, then the name.'
+  }
+};
 
 function foldText(value) {
-  return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return String(value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/ɛ/g, 'e').replace(/ɔ/g, 'o').replace(/ɲ/g, 'ny').replace(/ŋ/g, 'ng')
     .replace(/[^a-z0-9+ ]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
+function nameKey(value) { return foldText(value).replace(/ou/g, 'u').replace(/dj/g, 'j').replace(/([a-z])\1+/g, '$1'); }
 function cleanNumber(value) {
   const raw = String(value || '').trim();
   const digits = raw.replace(/\D/g, '').replace(/^00/, '');
@@ -669,13 +686,17 @@ function formatNumber(tel) {
 }
 function mdSafe(text) { return String(text).replace(/[*_`[\]#]/g, ''); }
 function titleCase(text) { return text.replace(/(^|\s)\S/g, (c) => c.toUpperCase()); }
+function contactLabel(contact) { const number = formatNumber(contact.tel); return contact.name && contact.name !== number ? contact.name : number; }
 
-function parseCallIntent(text) {
+function parseCallIntent(text, { voice = false } = {}) {
   if (!text || text.length > 80) return null;
   const folded = foldText(text);
-  const match = folded.match(CALL_REQUEST) || folded.match(CALL_BAMBARA);
+  let weak = false;
+  let match = folded.match(CALL_STRONG) || folded.match(CALL_BAMBARA);
+  if (!match) { match = folded.match(CALL_WEAK); weak = Boolean(match); }
   if (!match) return null;
-  const target = match[1].replace(CALL_TAIL, '').trim();
+  const target = (match[1] || '').replace(CALL_TAIL, '').trim();
+  if (!target) return { type: 'TRIGGER_PHONE_CALL', name: '', number: '' };
   const withNumber = target.match(/^(.*?)\s*(?:\b(?:au|a|on|at|sur le)\s+)?(\+?\d[\d ]{4,}\d)$/);
   if (withNumber && cleanNumber(withNumber[2])) {
     const name = withNumber[1].trim();
@@ -683,6 +704,7 @@ function parseCallIntent(text) {
   }
   const name = target.replace(/^(?:mon|ma|mes|le|la|les|l|my|the|n)\s+/, '');
   if (!name || /\d/.test(name) || PRONOUNS.has(name) || NOT_A_NAME.test(target) || name.split(' ').length > 4) return null;
+  if (weak && !findContacts(name).length && (!voice || name.split(' ').length > 2)) return null;
   return { type: 'TRIGGER_PHONE_CALL', name: titleCase(name), number: '' };
 }
 
@@ -698,8 +720,8 @@ function addContact(name, tel, alias = '') {
   const label = (name || formatNumber(tel)).trim().slice(0, 60);
   let contact = contacts.find((c) => sameNumber(c.tel, tel));
   if (!contact) { contact = { name: label, tel, aliases: [] }; contacts.unshift(contact); }
-  const known = [contact.name, ...(contact.aliases || [])].map(foldText);
-  const spoken = foldText(alias);
+  const known = [contact.name, ...(contact.aliases || [])].map(nameKey);
+  const spoken = nameKey(alias);
   if (spoken && !known.some((n) => n === spoken || n.split(' ').includes(spoken))) contact.aliases = [...(contact.aliases || []), alias].slice(-5);
   saveContacts(contacts);
   renderContactList();
@@ -707,10 +729,10 @@ function addContact(name, tel, alias = '') {
 }
 function removeContact(tel) { saveContacts(loadContacts().filter((c) => c.tel !== tel)); renderContactList(); }
 function findContacts(name) {
-  const wanted = foldText(name);
+  const wanted = nameKey(name);
   if (!wanted) return [];
   const score = (contact) => {
-    const names = [contact.name, ...(contact.aliases || [])].map(foldText);
+    const names = [contact.name, ...(contact.aliases || [])].map(nameKey);
     if (names.includes(wanted)) return 3;
     if (names.some((n) => n.startsWith(`${wanted} `) || n.split(' ').includes(wanted))) return 2;
     return wanted.length >= 3 && names.some((n) => n.includes(wanted)) ? 1 : 0;
@@ -725,13 +747,26 @@ async function pickPhoneContacts(multiple) {
 }
 
 function telLink(contact, label, extraClass = '') {
-  const link = Object.assign(document.createElement('a'), { className: `pill-button is-small ${extraClass}`.trim(), href: `tel:${contact.tel}` });
+  const link = Object.assign(document.createElement('a'), { className: `pill-button is-call ${extraClass}`.trim(), href: `tel:${contact.tel}` });
   link.append(icon('phone'), document.createTextNode(label));
   return link;
 }
 function canDialNow() {
   const touch = matchMedia('(pointer: coarse)').matches;
   return touch && (navigator.userActivation ? navigator.userActivation.isActive : true);
+}
+async function speakHint(key, name = '') {
+  if (!state.voiceEnabled) return;
+  const lines = CALL_SPEECH[preferences.language === 'en' ? 'en' : 'fr'];
+  const text = typeof lines[key] === 'function' ? lines[key](name) : lines[key];
+  try {
+    stopSpeech();
+    const data = await postJSON('/api/voice/prepare', { text, language: preferences.language === 'en' ? 'en' : 'fr' });
+    const player = new Audio(data.url);
+    state.activeAudio = player; state.activeSpeechButton = null;
+    player.onended = () => { if (state.activeAudio === player) stopSpeech(); };
+    await player.play();
+  } catch {}
 }
 function callCardButton(label, handler, ghost = true) {
   const button = Object.assign(document.createElement('button'), { type: 'button', className: `pill-button is-small${ghost ? ' is-ghost' : ''}` });
@@ -747,16 +782,26 @@ function fillCallCard(card, markdown, ...controls) {
   $('.msg-body', card).append(actions);
   requestAnimationFrame(() => scrollToEnd());
 }
-function showCallReady(card, contact) {
-  const number = formatNumber(contact.tel);
-  const who = contact.name && contact.name !== number ? `**${mdSafe(contact.name)}** au ${number}` : `le ${number}`;
-  const link = telLink(contact, contact.name && contact.name !== number ? `Appeler ${contact.name}` : `Appeler le ${number}`);
-  const dialNow = canDialNow();
-  fillCallCard(card, `J'appelle ${who}.\n\n${dialNow ? 'Votre téléphone s\'ouvre' : 'Touchez le bouton'} : appuyez ensuite sur le bouton vert pour lancer l'appel.`, link);
-  if (dialNow) link.click();
+function pickButton(name, onPicked, ghost = false) {
+  return callCardButton('Choisir dans mes contacts', async () => {
+    try {
+      const [picked] = await pickPhoneContacts(false);
+      if (picked) onPicked(addContact(picked.name, picked.tel, name));
+    } catch { setStatus('Impossible d’ouvrir vos contacts. Entrez le numéro à la main.', { timeout: 5000 }); }
+  }, ghost);
 }
-function showCallChoices(card, contacts) {
-  fillCallCard(card, 'J\'ai trouvé plusieurs contacts. Lequel voulez-vous appeler ?', ...contacts.map((c) => telLink(c, `${c.name} · ${formatNumber(c.tel)}`, 'is-ghost')));
+function showCallReady(card, contact, { voice = false } = {}) {
+  const label = contactLabel(contact);
+  const who = label === contact.name ? `**${mdSafe(label)}** au ${formatNumber(contact.tel)}` : `le ${label}`;
+  const link = telLink(contact, label === contact.name ? `Appeler ${label}` : `Appeler le ${label}`);
+  const dialNow = canDialNow();
+  fillCallCard(card, `J'appelle ${who}.\n\n${dialNow ? 'Votre téléphone s\'ouvre' : 'Touchez le bouton vert'} : appuyez ensuite sur le bouton vert de votre téléphone pour lancer l'appel.`, link);
+  if (dialNow) link.click();
+  else if (voice) speakHint('ready', label);
+}
+function showCallChoices(card, contacts, { voice = false, name = '' } = {}) {
+  fillCallCard(card, 'J\'ai trouvé plusieurs contacts. Lequel voulez-vous appeler ?', ...contacts.map((c) => telLink(c, `${c.name} · ${formatNumber(c.tel)}`)));
+  if (voice) speakHint('choose', name);
 }
 function showCallForm(card, name, text) {
   const form = Object.assign(document.createElement('form'), { className: 'call-form' });
@@ -774,28 +819,85 @@ function showCallForm(card, name, text) {
   fillCallCard(card, `Entrez le numéro de **${mdSafe(name)}**. Il restera seulement sur ce téléphone.`, form, callCardButton('Annuler', () => showCallMissing(card, name, text)));
   telInput.focus({ preventScroll: true });
 }
-function showCallMissing(card, name, text) {
+function showCallMissing(card, name, text, { voice = false } = {}) {
   const controls = [];
-  if (canPickContacts) controls.push(callCardButton('Choisir dans mes contacts', async () => {
-    try {
-      const [picked] = await pickPhoneContacts(false);
-      if (picked) showCallReady(card, addContact(picked.name, picked.tel, name));
-    } catch { setStatus('Impossible d’ouvrir vos contacts. Entrez le numéro à la main.', { timeout: 5000 }); }
-  }, false));
+  if (canPickContacts) controls.push(pickButton(name, (contact) => showCallReady(card, contact)));
   controls.push(callCardButton('Entrer le numéro', () => showCallForm(card, name, text), canPickContacts));
   controls.push(callCardButton('Demander à Mande-IA', () => { card.remove(); send(text, { allowCall: false }); }));
   fillCallCard(card, `Je n'ai pas encore **${mdSafe(name)}** dans vos contacts Mande-IA.`, ...controls);
+  if (voice) speakHint('missing', name);
 }
-function startPhoneCall(intent, text) {
+function showCallWho(card, { voice = false } = {}) {
+  const recent = loadContacts().slice(0, 6).map((c) => telLink(c, contactLabel(c)));
+  const controls = canPickContacts ? [pickButton('', (contact) => showCallReady(card, contact), recent.length > 0), ...recent] : recent;
+  fillCallCard(card, `Qui voulez-vous appeler ? Dites ou écrivez « Appelle » suivi du nom, par exemple « Appelle Mamadou ».${controls.length ? '' : '\n\nAjoutez d\'abord vos contacts dans Paramètres, puis Mes contacts pour les appels.'}`, ...controls);
+  if (voice) speakHint('who');
+}
+function startPhoneCall(intent, text, { voice = false } = {}) {
   showView('home');
   stopSpeech();
   addMessage('user', text);
   const card = addMessage('assistant', '', { pending: true });
-  if (intent.number) return showCallReady(card, intent.name ? addContact(intent.name, intent.number) : { name: formatNumber(intent.number), tel: intent.number });
+  if (intent.number) return showCallReady(card, intent.name ? addContact(intent.name, intent.number) : { name: formatNumber(intent.number), tel: intent.number }, { voice });
+  if (!intent.name) return showCallWho(card, { voice });
   const matches = findContacts(intent.name);
-  if (matches.length === 1) return showCallReady(card, matches[0]);
-  if (matches.length > 1) return showCallChoices(card, matches);
-  return showCallMissing(card, intent.name, text);
+  if (matches.length === 1) return showCallReady(card, matches[0], { voice });
+  if (matches.length > 1) return showCallChoices(card, matches, { voice, name: intent.name });
+  return showCallMissing(card, intent.name, text, { voice });
+}
+
+const CALL_TOOL = {
+  type: 'function',
+  name: 'appeler_contact',
+  description: 'Ouvre le téléphone de l’utilisateur pour appeler une personne de ses contacts ou un numéro. À utiliser dès que l’utilisateur demande d’appeler, de téléphoner ou de joindre quelqu’un, en bambara (« Mamadou wele »), en français ou en anglais.',
+  parameters: { type: 'object', properties: { nom: { type: 'string', description: 'Nom de la personne à appeler, tel que l’utilisateur l’a dit, ou numéro de téléphone.' } }, required: ['nom'] }
+};
+function showLiveDial(controls) {
+  const box = $('#call-dial');
+  box.replaceChildren(...controls);
+  box.hidden = !controls.length;
+}
+function liveDialLink(contact) {
+  const link = telLink(contact, `Appeler ${contactLabel(contact)}`, 'is-big');
+  link.addEventListener('click', () => endCall());
+  return link;
+}
+function answerLiveTool(call, callId, result) {
+  if (state.call !== call || call.channel?.readyState !== 'open') return;
+  call.channel.send(JSON.stringify({ type: 'conversation.item.create', item: { type: 'function_call_output', call_id: callId, output: JSON.stringify(result) } }));
+  call.channel.send(JSON.stringify({ type: 'response.create' }));
+}
+function handleLiveTool(call, item) {
+  call.toolCalls = call.toolCalls || new Set();
+  if (item.name !== CALL_TOOL.name || call.toolCalls.has(item.call_id)) return;
+  call.toolCalls.add(item.call_id);
+  let args = {};
+  try { args = JSON.parse(item.arguments || '{}'); } catch {}
+  const asked = String(args.nom || args.name || '').trim().slice(0, 60);
+  const intent = parseCallIntent(`appelle ${asked}`, { voice: true }) || { name: titleCase(foldText(asked)), number: '' };
+  const ready = (contact) => {
+    showLiveDial([liveDialLink(contact)]);
+    return { statut: 'pret', contact: contactLabel(contact), consigne: `Dis en une phrase courte que l’utilisateur doit toucher le gros bouton vert à l’écran pour appeler ${contactLabel(contact)}. Ne dis pas le numéro.` };
+  };
+  let result;
+  if (intent.number) result = ready(intent.name ? addContact(intent.name, intent.number) : { name: formatNumber(intent.number), tel: intent.number });
+  else if (!intent.name) {
+    showLiveDial(loadContacts().slice(0, 4).map(liveDialLink));
+    result = { statut: 'nom_manquant', consigne: 'Demande à l’utilisateur, en une phrase courte, qui il veut appeler.' };
+  } else {
+    const matches = findContacts(intent.name);
+    if (matches.length === 1) result = ready(matches[0]);
+    else if (matches.length > 1) {
+      showLiveDial(matches.map(liveDialLink));
+      result = { statut: 'plusieurs', contacts: matches.map(contactLabel), consigne: 'Dis en une phrase courte qu’il y a plusieurs personnes avec ce nom et qu’il doit toucher le bon bouton vert à l’écran.' };
+    } else {
+      showLiveDial(canPickContacts ? [pickButton(intent.name, (contact) => showLiveDial([liveDialLink(contact)]))] : []);
+      result = canPickContacts
+        ? { statut: 'introuvable', consigne: `Dis en une phrase courte que tu ne trouves pas ${intent.name} dans ses contacts Mande-IA et qu’il peut toucher le bouton « Choisir dans mes contacts » à l’écran.` }
+        : { statut: 'introuvable', consigne: `Dis en une phrase courte que ${intent.name} n’est pas encore enregistré, et qu’il doit raccrocher puis l’ajouter dans Paramètres, Mes contacts pour les appels.` };
+    }
+  }
+  answerLiveTool(call, item.call_id, result);
 }
 
 function renderContactList() {
@@ -910,11 +1012,14 @@ async function startRecording() {
   state.recorder.start();
   setMode('listening');
   setRecordingUI(true);
-  setStatus("J'écoute… Touchez le bouton rouge pour finir.");
+  setStatus("J'écoute… Parlez : je m'arrête quand vous avez fini.");
+  let heardAt = 0;
   const tickTimer = () => {
     const elapsed = Date.now() - state.recordingStartedAt;
+    if (meter && levelOf(meter) > 0.15) heardAt = Date.now();
     $('#recording-time').textContent = `${formatClock(Math.max(1, Math.ceil(elapsed / 1000)))} / 0:10`;
-    if (elapsed >= MAX_RECORDING_MS && state.recorder?.state === 'recording') state.recorder.stop();
+    const silent = heardAt && Date.now() - heardAt > 1800;
+    if ((elapsed >= MAX_RECORDING_MS || silent) && state.recorder?.state === 'recording') state.recorder.stop();
   };
   tickTimer();
   state.recordingTimer = setInterval(tickTimer, 250);
@@ -940,6 +1045,8 @@ async function finishRecording(stream) {
     const transcript = data.text?.trim();
     if (!transcript) throw new Error('Aucun mot reconnu. Parlez plus près du microphone et réessayez.');
     const input = $('#prompt');
+    const callIntent = !input.value.trim() && !state.attachment && parseCallIntent(transcript, { voice: true });
+    if (callIntent) { setStatus(''); startPhoneCall(callIntent, transcript, { voice: true }); return; }
     input.value = input.value.trim() ? `${input.value.trim()} ${transcript}` : transcript;
     autoresize();
     setStatus('Vérifiez le texte, puis appuyez sur la flèche pour envoyer.', { timeout: 6000 });
@@ -1022,6 +1129,7 @@ function openCallScreen() {
   const screen = $('#call');
   screen.hidden = false;
   $('#call-timer').textContent = '0:00';
+  showLiveDial([]);
   $('#call-mute').setAttribute('aria-pressed', 'false');
   $('#call-mute').replaceChildren(icon('mic'), Object.assign(document.createElement('span'), { textContent: 'Micro' }));
   document.body.style.overflow = 'hidden';
@@ -1103,12 +1211,14 @@ async function startCall() {
     const channel = pc.createDataChannel('oai-events');
     call.channel = channel;
     channel.onopen = () => {
-      channel.send(JSON.stringify({ type: 'session.update', session: { type: 'realtime', instructions: session.instructions } }));
+      channel.send(JSON.stringify({ type: 'session.update', session: { type: 'realtime', instructions: session.instructions, tools: [CALL_TOOL], tool_choice: 'auto' } }));
       channel.send(JSON.stringify({ type: 'response.create', response: { instructions: greeting(preferences.language) } }));
     };
     channel.onmessage = (event) => {
       let data; try { data = JSON.parse(event.data); } catch { return; }
       if (data.type === 'error') console.warn('Mande-IA appel :', data.error?.message || data.error);
+      else if (data.type === 'response.output_item.done' && data.item?.type === 'function_call') handleLiveTool(call, data.item);
+      else if (data.type === 'response.function_call_arguments.done' && data.name) handleLiveTool(call, data);
     };
     pc.onconnectionstatechange = () => {
       if (state.call === call && pc.connectionState === 'failed') endCall('La connexion a été coupée. Vérifiez votre réseau, puis rappelez.');
@@ -1299,10 +1409,25 @@ $('#install-app').onclick = async () => {
   $('#install-app').hidden = true;
 };
 
+async function handleLaunchAction() {
+  const action = new URLSearchParams(location.search).get('action');
+  if (!action) return;
+  history.replaceState(null, '', location.pathname);
+  if (action === 'parler') { setStatus('Touchez le bouton rond pour parler à Mande-IA.', { timeout: 8000 }); return; }
+  if (action !== 'appeler') return;
+  let granted = false;
+  try { granted = (await navigator.permissions.query({ name: 'microphone' })).state === 'granted'; } catch {}
+  if (granted && !state.recorder) { startRecording(); return; }
+  setStatus('Touchez le micro et dites « Appelle », puis le nom.', { timeout: 10000 });
+  $('#dictate-button').classList.add('is-pulse');
+  setTimeout(() => $('#dictate-button').classList.remove('is-pulse'), 10000);
+}
+
 applyPreferences();
 applyCapabilities();
 renderMessages();
 checkHealth().catch(() => {});
 loadNews().catch(() => {});
+handleLaunchAction().catch(() => {});
 checkAuth().catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});

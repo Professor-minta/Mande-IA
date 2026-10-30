@@ -25,5 +25,33 @@
       "type": "image/svg+xml",
       "purpose": "any"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Appeler un contact",
+      "short_name": "Appeler",
+      "description": "Dites « Appelle Mamadou »",
+      "url": "/?action=appeler",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Parler à Mande-IA",
+      "short_name": "Parler",
+      "description": "Appel en direct avec Mande-IA",
+      "url": "/?action=parler",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
