@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=19">
+    <link rel="stylesheet" href="/style.css?v=20">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -164,7 +164,7 @@
             </div>
             <h3 class="group-title">Demander à Mande-IA</h3>
             <div class="list">
-              <button class="row" id="discover-calls"><span class="row-icon"><svg><use href="#i-phone"/></svg></span><span class="row-text">Appeler un contact<small>Écrivez ou dites « Appelle Mamadou »</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" id="discover-calls"><span class="row-icon"><svg><use href="#i-phone"/></svg></span><span class="row-text">Appeler un contact<small>Touchez le micro et dites « Appelle Mamadou »</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row" data-prompt="Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens."><span class="row-icon"><svg><use href="#i-briefcase"/></svg></span><span class="row-text">Conseil entrepreneurial</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row" data-prompt="Explique-moi simplement comment fonctionne l'école au Mali, du fondamental jusqu'à l'université."><span class="row-icon"><svg><use href="#i-school"/></svg></span><span class="row-text">L'école malienne expliquée</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row" data-prompt="Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple."><span class="row-icon"><svg><use href="#i-book"/></svg></span><span class="row-text">Leçon du jour en bambara</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
@@ -199,7 +199,7 @@
             </div>
             <h3 class="group-title">Appels</h3>
             <div class="list">
-              <button class="row" id="contacts-open"><span class="row-icon"><svg><use href="#i-phone"/></svg></span><span class="row-text">Mes contacts pour les appels<small>Écrivez « Appelle Mamadou » : Mande-IA ouvre votre téléphone</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row" id="contacts-open"><span class="row-icon"><svg><use href="#i-phone"/></svg></span><span class="row-text">Mes contacts pour les appels<small>Dites ou écrivez « Appelle Mamadou » : Mande-IA ouvre votre téléphone</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
             </div>
             <h3 class="group-title">Application</h3>
             <div class="list">
@@ -270,6 +270,7 @@
         </div>
         <p class="call-status" id="call-status" role="status">Connexion…</p>
         <p class="call-note" id="call-note"></p>
+        <div class="call-dial" id="call-dial" hidden></div>
         <a class="pill-button is-gold" id="call-upgrade" target="_blank" rel="noopener" hidden>Passer à Pro</a>
       </div>
       <div class="call-controls">
@@ -334,6 +335,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=19"></script>
+    <script src="/app.js?v=20"></script>
   </body>
 </html>

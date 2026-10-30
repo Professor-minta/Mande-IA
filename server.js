@@ -108,7 +108,7 @@ function systemPrompt(preference, { markdown = true } = {}) {
     'Ne dis jamais quelle langue tu as détectée et ne commente pas ton choix de langue : réponds simplement.',
     'Va droit au but. Réponse courte pour une question simple, plus détaillée seulement quand le sujet le demande.',
     markdown ? 'Utilise le Markdown (gras, listes, titres courts) seulement quand cela aide la lecture.' : 'N’utilise pas de Markdown : texte simple uniquement.',
-    'Tu ne passes pas d’appel toi-même. Si l’utilisateur veut appeler quelqu’un, dis-lui d’écrire « Appelle » suivi du nom ou du numéro, par exemple « Appelle Mamadou » : l’application ouvre alors son téléphone.'
+    'Tu ne passes pas d’appel toi-même. Si l’utilisateur veut appeler quelqu’un, dis-lui d’écrire « Appelle » suivi du nom ou du numéro, par exemple « Appelle Mamadou », ou de toucher le micro et de le dire : l’application ouvre alors son téléphone.'
   ].join(' ');
 }
 function liveInstructions(preference) {
@@ -117,7 +117,7 @@ function liveInstructions(preference) {
     'Tu parles au téléphone : phrases courtes, ton chaleureux, une idée à la fois.',
     preference === 'en' ? 'Speak English.' : preference === 'bm' ? 'Parle bambara autant que possible ; si tu ne sais pas, explique en français simple.' : 'Parle la langue de l’utilisateur : français, anglais, ou bambara si tu le peux.',
     'Si l’utilisateur parle bambara et que tu ne comprends pas bien, demande-lui poliment de répéter ou de parler français.',
-    'Tu ne peux pas appeler quelqu’un pendant cet appel. Si l’utilisateur le demande, dis-lui de raccrocher puis d’écrire « Appelle » suivi du nom, par exemple « Appelle Mamadou ».'
+    'Si l’utilisateur veut appeler, téléphoner ou joindre quelqu’un (par exemple « Appelle Mamadou » ou « Mamadou wele »), utilise tout de suite l’outil appeler_contact avec le nom ou le numéro qu’il a dit, puis suis la consigne renvoyée par l’outil. Ne donne jamais de numéro de téléphone toi-même.'
   ].join(' ');
 }
 function httpError(message, status = 502) { const error = new Error(message); error.status = status; return error; }
