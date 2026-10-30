@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=18">
+    <link rel="stylesheet" href="/style.css?v=19">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -86,6 +86,7 @@
       <symbol id="i-file" viewBox="0 0 24 24"><path d="M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13.5 3.5v5h5M9 13h6M9 16.5h4"/></symbol>
       <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M15 10.5V6a3 3 0 0 0-5.6-1.5M9 9v2.5a3 3 0 0 0 4.6 2.5M5.5 11a6.5 6.5 0 0 0 10.6 5M18.4 12.7c.1-.6.1-1.1.1-1.7M12 17.5V21M8.5 21h7M4 4l16 16"/></symbol>
       <symbol id="i-phone-down" viewBox="0 0 24 24"><path d="M3.5 13.5c4.7-4.3 12.3-4.3 17 0l-1.9 2.6-3.4-1.2-.3-2.3a10 10 0 0 0-5.8 0l-.3 2.3-3.4 1.2z"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 3.5h2.6l1.5 4-1.9 1.3a11 11 0 0 0 6.4 6.4l1.3-1.9 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/></symbol>
       <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/></symbol>
       <symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M4 20l1.2-4A8 8 0 1 1 8.3 19z"/><path d="M9 8.5c0 3.4 3 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.5-2.5l.8-1-1-2z"/></symbol>
     </svg>
@@ -163,6 +164,7 @@
             </div>
             <h3 class="group-title">Demander à Mande-IA</h3>
             <div class="list">
+              <button class="row" id="discover-calls"><span class="row-icon"><svg><use href="#i-phone"/></svg></span><span class="row-text">Appeler un contact<small>Écrivez ou dites « Appelle Mamadou »</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row" data-prompt="Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens."><span class="row-icon"><svg><use href="#i-briefcase"/></svg></span><span class="row-text">Conseil entrepreneurial</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row" data-prompt="Explique-moi simplement comment fonctionne l'école au Mali, du fondamental jusqu'à l'université."><span class="row-icon"><svg><use href="#i-school"/></svg></span><span class="row-text">L'école malienne expliquée</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row" data-prompt="Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple."><span class="row-icon"><svg><use href="#i-book"/></svg></span><span class="row-text">Leçon du jour en bambara</span><svg class="chevron"><use href="#i-chevron"/></svg></button>
@@ -194,6 +196,10 @@
               <label class="row is-static"><span class="row-text">Thème sombre<small>Plus reposant le soir</small></span><input class="switch" id="theme-toggle" type="checkbox"></label>
               <label class="row is-static"><span class="row-text">Langue des réponses<small>Automatique : Mande-IA répond dans la langue de votre message</small></span><select class="select" id="language-select"><option value="auto">Automatique</option><option value="bm">Bambara</option><option value="fr">Français</option><option value="en">English</option></select></label>
               <label class="row is-static"><span class="row-text">Lire les réponses à voix haute<small id="voice-description">Voix Moussa, par Djelia</small></span><input class="switch" id="voice-toggle" type="checkbox"></label>
+            </div>
+            <h3 class="group-title">Appels</h3>
+            <div class="list">
+              <button class="row" id="contacts-open"><span class="row-icon"><svg><use href="#i-phone"/></svg></span><span class="row-text">Mes contacts pour les appels<small>Écrivez « Appelle Mamadou » : Mande-IA ouvre votre téléphone</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
             </div>
             <h3 class="group-title">Application</h3>
             <div class="list">
@@ -302,6 +308,21 @@
       <div class="news-list" id="news-list"></div>
     </dialog>
 
+    <dialog class="sheet" id="contacts-dialog" aria-labelledby="contacts-title">
+      <button class="icon-button sheet-close" id="close-contacts" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
+      <h2 id="contacts-title">Mes contacts</h2>
+      <p class="sheet-intro">Écrivez ou dites « Appelle » suivi du nom, par exemple « Appelle Mamadou ». Vos contacts restent sur ce téléphone : ils ne sont jamais envoyés à Mande-IA.</p>
+      <button class="pill-button is-wide" id="contacts-import" type="button" hidden><svg><use href="#i-user"/></svg>Importer depuis mon téléphone</button>
+      <form class="auth-form contact-form" id="contact-form">
+        <label>Nom<input id="contact-name" type="text" autocomplete="name" maxlength="60" required></label>
+        <label>Numéro<input id="contact-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="77 29 52 59" required></label>
+        <p class="form-error" id="contact-error" role="alert"></p>
+        <button class="pill-button is-wide is-ghost" type="submit"><svg><use href="#i-plus"/></svg>Ajouter le contact</button>
+      </form>
+      <p class="contacts-empty" id="contacts-empty">Aucun contact pour l'instant.</p>
+      <div class="list contact-list" id="contact-list" hidden></div>
+    </dialog>
+
     <dialog class="sheet" id="about-dialog" aria-labelledby="about-title">
       <button class="icon-button sheet-close" id="close-about" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
       <h2 id="about-title">À propos de Mande-IA</h2>
@@ -313,6 +334,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=18"></script>
+    <script src="/app.js?v=19"></script>
   </body>
 </html>

@@ -5,7 +5,7 @@
 Par **Minta Services** — Bamako / Ségou, Mali 🇲🇱
 
 > Discutez en Bambara, Français ou Anglais.  
-> Réponses en direct • Photos et PDF • Voix bambara • Appel vocal en direct • WhatsApp
+> Réponses en direct • Photos et PDF • Voix bambara • Appel vocal en direct • Appels vers vos contacts • WhatsApp
 
 **Démo en ligne** → [ia.mintaservices.com](https://ia.mintaservices.com)
 
@@ -32,6 +32,7 @@ Par **Minta Services** — Bamako / Ségou, Mali 🇲🇱
 - **Écouter les réponses** : voix bambara avec Djelia, voix naturelle en français et en anglais
 - **Dictée** au micro
 - **Appel vocal en direct** (OpenAI Realtime, WebRTC) : 3 minutes en gratuit, 15 minutes en Pro
+- **Appeler un contact** : « Appelle Mamadou » ouvre le téléphone avec le bon numéro (contacts gardés sur l'appareil, import depuis le téléphone sur Android)
 - Mode invité, comptes et conversations sauvegardées
 - Limite gratuite de 5 questions par jour
 - **Nouveautés** affichées dans l'application après chaque mise à jour
