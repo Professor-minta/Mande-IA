@@ -541,11 +541,17 @@ function clearAttachment({ keepPreview = false } = {}) {
   renderAttachment();
 }
 
-async function send(prefill) {
+async function send(prefill, { allowCall = true } = {}) {
   const fromInput = prefill === undefined;
   const typed = (fromInput ? $('#prompt').value : prefill).trim();
   const attachment = fromInput ? state.attachment : null;
   if ((!typed && !attachment) || state.busy) return;
+  const callIntent = allowCall && !attachment ? parseCallIntent(typed) : null;
+  if (callIntent) {
+    if (fromInput) { $('#prompt').value = ''; autoresize(); }
+    startPhoneCall(callIntent, typed);
+    return;
+  }
   showView('home');
   stopSpeech();
   state.busy = true;
@@ -629,13 +635,209 @@ async function send(prefill) {
       if (fromInput && !$('#prompt').value) { $('#prompt').value = typed; autoresize(); }
       postJSON('/api/auth', { action: 'check' }).then((data) => { state.usage = data.usage; renderUsage(); }).catch(() => {});
     }
-    if (!state.messages.length) renderMessages();
+    if (!state.messages.length && !$('#messages').children.length) renderMessages();
   }
   renderUsage();
   updateRoundAction();
   if (state.user) loadConversations().catch(() => {});
 }
 function stopReply() { state.streamController?.abort(); }
+
+const CONTACTS_KEY = 'mande-contacts';
+const canPickContacts = 'contacts' in navigator && 'ContactsManager' in window;
+const CALL_REQUEST = /^(?:(?:mande ?i[ae]|mandeia)\s+)?(?:(?:je veux|je voudrais|peux tu|tu peux|pouvez vous|vous pouvez|i want to|can you|please|stp|svp)\s+)?(?:appelle|appelles|appeler|appelez|telephone a|telephoner a|telephonez a|compose|composer|call|phone|ring|wele|weele)\s+(?:moi\s+|me\s+)?(.+)$/;
+const CALL_BAMBARA = /^(?:(?:n b a fe ka|a b a fe ka|i ka|aw ka)\s+)?(.+?)\s+(?:wele|weele)$/;
+const CALL_TAIL = /\s+(?:s il te plait|s il vous plait|stp|svp|please|maintenant|now|tout de suite|pour moi|au telephone)$/;
+const NOT_A_NAME = /^(?:t on|t il|t elle|on|ca|cela|ceci|comment|quoi|qui|quel|quelle|pourquoi|en|un|une|des|du|de|what|how|who|it|this|that)(?:\s|$)/;
+const PRONOUNS = new Set(['le', 'la', 'les', 'lui', 'moi', 'toi', 'nous', 'vous', 'eux', 'elle', 'il', 'me', 'him', 'her', 'them', 'a']);
+
+function foldText(value) {
+  return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/ɛ/g, 'e').replace(/ɔ/g, 'o').replace(/ɲ/g, 'ny').replace(/ŋ/g, 'ng')
+    .replace(/[^a-z0-9+ ]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function cleanNumber(value) {
+  const raw = String(value || '').trim();
+  const digits = raw.replace(/\D/g, '').replace(/^00/, '');
+  if (digits.length < 6 || digits.length > 15) return '';
+  return raw.startsWith('+') || raw.startsWith('00') ? `+${digits}` : digits;
+}
+function sameNumber(a, b) { return a.replace(/\D/g, '').slice(-8) === b.replace(/\D/g, '').slice(-8); }
+function formatNumber(tel) {
+  const match = tel.match(/^(\+223)?(\d{8})$/);
+  return match ? `${match[1] ? '+223 ' : ''}${match[2].replace(/(\d{2})(?=\d)/g, '$1 ')}` : tel;
+}
+function mdSafe(text) { return String(text).replace(/[*_`[\]#]/g, ''); }
+function titleCase(text) { return text.replace(/(^|\s)\S/g, (c) => c.toUpperCase()); }
+
+function parseCallIntent(text) {
+  if (!text || text.length > 80) return null;
+  const folded = foldText(text);
+  const match = folded.match(CALL_REQUEST) || folded.match(CALL_BAMBARA);
+  if (!match) return null;
+  const target = match[1].replace(CALL_TAIL, '').trim();
+  const withNumber = target.match(/^(.*?)\s*(?:\b(?:au|a|on|at|sur le)\s+)?(\+?\d[\d ]{4,}\d)$/);
+  if (withNumber && cleanNumber(withNumber[2])) {
+    const name = withNumber[1].trim();
+    return { type: 'TRIGGER_PHONE_CALL', name: name && !PRONOUNS.has(name) ? titleCase(name) : '', number: cleanNumber(withNumber[2]) };
+  }
+  const name = target.replace(/^(?:mon|ma|mes|le|la|les|l|my|the|n)\s+/, '');
+  if (!name || /\d/.test(name) || PRONOUNS.has(name) || NOT_A_NAME.test(target) || name.split(' ').length > 4) return null;
+  return { type: 'TRIGGER_PHONE_CALL', name: titleCase(name), number: '' };
+}
+
+function loadContacts() {
+  try {
+    const list = JSON.parse(store.get(CONTACTS_KEY, '[]'));
+    return Array.isArray(list) ? list.filter((c) => c && typeof c.name === 'string' && typeof c.tel === 'string') : [];
+  } catch { return []; }
+}
+function saveContacts(list) { store.set(CONTACTS_KEY, JSON.stringify(list.slice(0, 500))); }
+function addContact(name, tel, alias = '') {
+  const contacts = loadContacts();
+  const label = (name || formatNumber(tel)).trim().slice(0, 60);
+  let contact = contacts.find((c) => sameNumber(c.tel, tel));
+  if (!contact) { contact = { name: label, tel, aliases: [] }; contacts.unshift(contact); }
+  const known = [contact.name, ...(contact.aliases || [])].map(foldText);
+  const spoken = foldText(alias);
+  if (spoken && !known.some((n) => n === spoken || n.split(' ').includes(spoken))) contact.aliases = [...(contact.aliases || []), alias].slice(-5);
+  saveContacts(contacts);
+  renderContactList();
+  return contact;
+}
+function removeContact(tel) { saveContacts(loadContacts().filter((c) => c.tel !== tel)); renderContactList(); }
+function findContacts(name) {
+  const wanted = foldText(name);
+  if (!wanted) return [];
+  const score = (contact) => {
+    const names = [contact.name, ...(contact.aliases || [])].map(foldText);
+    if (names.includes(wanted)) return 3;
+    if (names.some((n) => n.startsWith(`${wanted} `) || n.split(' ').includes(wanted))) return 2;
+    return wanted.length >= 3 && names.some((n) => n.includes(wanted)) ? 1 : 0;
+  };
+  const scored = loadContacts().map((contact) => [score(contact), contact]).filter(([points]) => points > 0);
+  const best = Math.max(0, ...scored.map(([points]) => points));
+  return scored.filter(([points]) => points === best).map(([, contact]) => contact).slice(0, 6);
+}
+async function pickPhoneContacts(multiple) {
+  const picked = await navigator.contacts.select(['name', 'tel'], { multiple });
+  return picked.map((c) => ({ name: String(c.name?.[0] || '').trim(), tel: cleanNumber(c.tel?.[0]) })).filter((c) => c.tel);
+}
+
+function telLink(contact, label, extraClass = '') {
+  const link = Object.assign(document.createElement('a'), { className: `pill-button is-small ${extraClass}`.trim(), href: `tel:${contact.tel}` });
+  link.append(icon('phone'), document.createTextNode(label));
+  return link;
+}
+function canDialNow() {
+  const touch = matchMedia('(pointer: coarse)').matches;
+  return touch && (navigator.userActivation ? navigator.userActivation.isActive : true);
+}
+function callCardButton(label, handler, ghost = true) {
+  const button = Object.assign(document.createElement('button'), { type: 'button', className: `pill-button is-small${ghost ? ' is-ghost' : ''}` });
+  button.textContent = label;
+  button.onclick = handler;
+  return button;
+}
+function fillCallCard(card, markdown, ...controls) {
+  card.classList.remove('pending');
+  $('.md', card).innerHTML = renderMarkdown(markdown);
+  const actions = $('.call-actions', card) || Object.assign(document.createElement('div'), { className: 'call-actions' });
+  actions.replaceChildren(...controls);
+  $('.msg-body', card).append(actions);
+  requestAnimationFrame(() => scrollToEnd());
+}
+function showCallReady(card, contact) {
+  const number = formatNumber(contact.tel);
+  const who = contact.name && contact.name !== number ? `**${mdSafe(contact.name)}** au ${number}` : `le ${number}`;
+  const link = telLink(contact, contact.name && contact.name !== number ? `Appeler ${contact.name}` : `Appeler le ${number}`);
+  const dialNow = canDialNow();
+  fillCallCard(card, `J'appelle ${who}.\n\n${dialNow ? 'Votre téléphone s\'ouvre' : 'Touchez le bouton'} : appuyez ensuite sur le bouton vert pour lancer l'appel.`, link);
+  if (dialNow) link.click();
+}
+function showCallChoices(card, contacts) {
+  fillCallCard(card, 'J\'ai trouvé plusieurs contacts. Lequel voulez-vous appeler ?', ...contacts.map((c) => telLink(c, `${c.name} · ${formatNumber(c.tel)}`, 'is-ghost')));
+}
+function showCallForm(card, name, text) {
+  const form = Object.assign(document.createElement('form'), { className: 'call-form' });
+  const nameInput = Object.assign(document.createElement('input'), { type: 'text', value: name, placeholder: 'Nom', autocomplete: 'name', required: true });
+  const telInput = Object.assign(document.createElement('input'), { type: 'tel', placeholder: 'Numéro, ex. 77 29 52 59', inputMode: 'tel', autocomplete: 'tel', required: true });
+  const error = Object.assign(document.createElement('p'), { className: 'form-error', role: 'alert' });
+  const submit = Object.assign(document.createElement('button'), { type: 'submit', className: 'pill-button is-small', textContent: 'Enregistrer et appeler' });
+  form.append(nameInput, telInput, error, submit);
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    const tel = cleanNumber(telInput.value);
+    if (!tel) { error.textContent = 'Entrez un numéro valide.'; return; }
+    showCallReady(card, addContact(nameInput.value.trim() || name, tel, name));
+  };
+  fillCallCard(card, `Entrez le numéro de **${mdSafe(name)}**. Il restera seulement sur ce téléphone.`, form, callCardButton('Annuler', () => showCallMissing(card, name, text)));
+  telInput.focus({ preventScroll: true });
+}
+function showCallMissing(card, name, text) {
+  const controls = [];
+  if (canPickContacts) controls.push(callCardButton('Choisir dans mes contacts', async () => {
+    try {
+      const [picked] = await pickPhoneContacts(false);
+      if (picked) showCallReady(card, addContact(picked.name, picked.tel, name));
+    } catch { setStatus('Impossible d’ouvrir vos contacts. Entrez le numéro à la main.', { timeout: 5000 }); }
+  }, false));
+  controls.push(callCardButton('Entrer le numéro', () => showCallForm(card, name, text), canPickContacts));
+  controls.push(callCardButton('Demander à Mande-IA', () => { card.remove(); send(text, { allowCall: false }); }));
+  fillCallCard(card, `Je n'ai pas encore **${mdSafe(name)}** dans vos contacts Mande-IA.`, ...controls);
+}
+function startPhoneCall(intent, text) {
+  showView('home');
+  stopSpeech();
+  addMessage('user', text);
+  const card = addMessage('assistant', '', { pending: true });
+  if (intent.number) return showCallReady(card, intent.name ? addContact(intent.name, intent.number) : { name: formatNumber(intent.number), tel: intent.number });
+  const matches = findContacts(intent.name);
+  if (matches.length === 1) return showCallReady(card, matches[0]);
+  if (matches.length > 1) return showCallChoices(card, matches);
+  return showCallMissing(card, intent.name, text);
+}
+
+function renderContactList() {
+  const list = $('#contact-list');
+  if (!list) return;
+  const contacts = loadContacts().sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+  $('#contacts-empty').hidden = contacts.length > 0;
+  list.hidden = !contacts.length;
+  list.replaceChildren(...contacts.map((contact) => {
+    const row = Object.assign(document.createElement('div'), { className: 'row is-static' });
+    const text = Object.assign(document.createElement('span'), { className: 'row-text', textContent: contact.name });
+    text.append(Object.assign(document.createElement('small'), { textContent: [formatNumber(contact.tel), ...(contact.aliases || [])].join(' · ') }));
+    const remove = Object.assign(document.createElement('button'), { type: 'button', className: 'icon-button is-small', title: `Retirer ${contact.name}` });
+    remove.setAttribute('aria-label', `Retirer ${contact.name}`);
+    remove.append(icon('trash'));
+    remove.onclick = () => removeContact(contact.tel);
+    row.append(text, telLink(contact, 'Appeler'), remove);
+    return row;
+  }));
+}
+function openContacts() {
+  renderContactList();
+  $('#contacts-import').hidden = !canPickContacts;
+  $('#contact-error').textContent = '';
+  $('#contacts-dialog').showModal();
+}
+async function importContacts() {
+  try {
+    const picked = await pickPhoneContacts(true);
+    picked.forEach((c) => addContact(c.name, c.tel));
+    if (picked.length) setStatus(`${picked.length} contact${picked.length > 1 ? 's' : ''} ajouté${picked.length > 1 ? 's' : ''}.`, { timeout: 3000 });
+  } catch { $('#contact-error').textContent = 'Impossible d’ouvrir vos contacts. Ajoutez-les à la main.'; }
+}
+function submitContact(event) {
+  event.preventDefault();
+  const name = $('#contact-name').value.trim();
+  const tel = cleanNumber($('#contact-tel').value);
+  if (!name || !tel) { $('#contact-error').textContent = 'Entrez un nom et un numéro valide.'; return; }
+  addContact(name, tel);
+  $('#contact-form').reset();
+  $('#contact-error').textContent = '';
+}
 
 function audioContext() {
   if (!state.audioCtx) {
@@ -1073,6 +1275,11 @@ $('#support-link').href = waLink("Bonjour, j'ai besoin d'aide avec Mande-IA.");
 $('#feedback-link').href = waLink('Bonjour, voici mon avis sur Mande-IA : ');
 $('#meet-link').href = waLink('Bonjour Professor Minta, je souhaite échanger avec vous au sujet de Mande-IA.');
 $('#about-app').onclick = openAbout;
+$('#contacts-open').onclick = openContacts;
+$('#discover-calls').onclick = openContacts;
+$('#close-contacts').onclick = () => $('#contacts-dialog').close();
+$('#contacts-import').onclick = importContacts;
+$('#contact-form').addEventListener('submit', submitContact);
 $('#discover-about').onclick = openAbout;
 $('#discover-news').onclick = openNews;
 $('#news-banner-open').onclick = openNews;

@@ -1,6 +1,15 @@
 {
-  "version": "2026-10-29-2",
+  "version": "2026-10-30-1",
   "entries": [
+    {
+      "date": "2026-10-30",
+      "titre": "Appeler vos contacts",
+      "points": [
+        "Écrivez ou dictez « Appelle Mamadou » : Mande-IA ouvre votre téléphone avec le bon numéro.",
+        "Sur Android, choisissez le contact directement dans votre téléphone. Sinon, entrez le numéro une fois : Mande-IA s'en souvient.",
+        "Vos contacts restent sur votre téléphone. Retrouvez-les dans Paramètres, puis Mes contacts pour les appels."
+      ]
+    },
     {
       "date": "2026-10-29",
       "titre": "Vos données",

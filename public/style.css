@@ -368,3 +368,15 @@ body:not([data-view="home"]) .dock { display: none; }
   .input-row { gap: 8px; }
   .tab { font-size: 11.5px; }
 }
+.call-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.call-actions .pill-button { white-space: normal; text-align: left; }
+.call-form { display: grid; gap: 8px; width: min(100%, 340px); }
+.call-form input { min-height: 46px; padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: 14px; background: var(--surface-2); color: var(--ink); font: inherit; }
+.call-form input:focus { outline: 0; border-color: var(--cyan); }
+.call-form .form-error:empty { display: none; }
+.contact-form { margin: 14px 0 18px; }
+.contacts-empty { margin: 0; color: var(--muted); text-align: center; }
+.contact-list { max-height: 42dvh; overflow-y: auto; }
+.contact-list .row { gap: 10px; padding: 10px 12px; }
+.contact-list .row-text { min-width: 0; overflow-wrap: anywhere; }
+#contacts-import { margin-bottom: 4px; }
