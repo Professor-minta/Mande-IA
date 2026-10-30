@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=20">
+    <link rel="stylesheet" href="/style.css?v=21">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -324,6 +324,21 @@
       <div class="list contact-list" id="contact-list" hidden></div>
     </dialog>
 
+    <dialog class="sheet install-sheet" id="install-dialog" aria-labelledby="install-title">
+      <button class="icon-button sheet-close" id="close-install" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
+      <img class="install-logo" src="/icons/icon-192.png" alt="" width="72" height="72">
+      <h2 id="install-title">Installez Mande-IA</h2>
+      <p class="sheet-intro">Gardez Mande-IA sur votre écran d'accueil, comme une application. Sans Play Store, et presque sans place sur le téléphone.</p>
+      <ul class="install-points">
+        <li>Ouvrez Mande-IA d'un seul geste, en plein écran</li>
+        <li>Appui long sur l'icône, puis « Appeler » : Mande-IA vous écoute</li>
+        <li>Toujours la dernière version, sans rien télécharger</li>
+      </ul>
+      <ol class="install-steps" id="install-steps" hidden></ol>
+      <button class="pill-button is-wide" id="install-confirm" type="button"><svg><use href="#i-download"/></svg>Installer</button>
+      <button class="pill-button is-wide is-ghost" id="install-later" type="button">Plus tard</button>
+    </dialog>
+
     <dialog class="sheet" id="about-dialog" aria-labelledby="about-title">
       <button class="icon-button sheet-close" id="close-about" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
       <h2 id="about-title">À propos de Mande-IA</h2>
@@ -335,6 +350,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=20"></script>
+    <script src="/app.js?v=21"></script>
   </body>
 </html>

@@ -33,6 +33,7 @@ Par **Minta Services** — Bamako / Ségou, Mali 🇲🇱
 - **Dictée** au micro
 - **Appel vocal en direct** (OpenAI Realtime, WebRTC) : 3 minutes en gratuit, 15 minutes en Pro
 - **Appeler un contact** : « Appelle Mamadou » ou « Mamadou wele », écrit ou dit au micro ou pendant l'appel en direct, ouvre le téléphone avec le bon numéro (contacts gardés sur l'appareil, import depuis le téléphone sur Android, raccourci « Appeler » sur l'icône)
+- **Installation** sur l'écran d'accueil proposée à la première visite (Android, et explications pour iPhone)
 - Mode invité, comptes et conversations sauvegardées
 - Limite gratuite de 5 questions par jour
 - **Nouveautés** affichées dans l'application après chaque mise à jour

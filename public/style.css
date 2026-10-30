@@ -392,3 +392,13 @@ body:not([data-view="home"]) .dock { display: none; }
 .bar-button.is-pulse { color: var(--cyan); animation: mic-pulse 1.2s ease-in-out infinite; }
 @keyframes mic-pulse { 50% { transform: scale(1.18); } }
 @media (prefers-reduced-motion: reduce) { .bar-button.is-pulse { animation: none; } }
+.install-sheet { text-align: center; }
+.install-sheet h2 { margin: 0 0 6px; }
+.install-logo { display: block; width: 72px; height: 72px; margin: 4px auto 14px; border-radius: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
+.install-points, .install-steps { display: grid; gap: 10px; margin: 0 0 20px; padding: 0; text-align: left; }
+.install-points { list-style: none; }
+.install-points li { position: relative; padding-left: 28px; }
+.install-points li::before { content: ""; position: absolute; left: 4px; top: .45em; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); }
+.install-steps { padding-left: 1.4em; }
+.install-steps li::marker { color: var(--cyan); font-weight: 700; }
+#install-confirm { margin-bottom: 10px; }

@@ -664,8 +664,17 @@ const CALL_SPEECH = {
     choose: (name) => `I found several contacts named ${name}. Tap the one you want to call.`,
     missing: (name) => `I can't find ${name} in your Mande-IA contacts. ${canPickContacts ? 'Tap “Choisir dans mes contacts”.' : 'Enter the number once.'}`,
     who: 'Who do you want to call? Say “Call”, then the name.'
+  },
+  bm: {
+    ready: (name) => `Maka bɔton la ka ${name} wɛlɛ yɛn.`,
+    missing: (name) => `Nɛmɛ ${name} sɔrɔ ika contact la.`,
+    who: 'Ɛ bɛna djoɔni wɛlɛ ?'
   }
 };
+function speechLanguage(text) {
+  if (['fr', 'en', 'bm'].includes(preferences.language)) return preferences.language;
+  return /(^|\s)we+le($|\s)/.test(foldText(text)) || /[ɛɔɲŋ]/i.test(text) ? 'bm' : 'fr';
+}
 
 function foldText(value) {
   return String(value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -755,13 +764,14 @@ function canDialNow() {
   const touch = matchMedia('(pointer: coarse)').matches;
   return touch && (navigator.userActivation ? navigator.userActivation.isActive : true);
 }
-async function speakHint(key, name = '') {
+async function speakHint(key, name = '', voice = 'fr') {
   if (!state.voiceEnabled) return;
-  const lines = CALL_SPEECH[preferences.language === 'en' ? 'en' : 'fr'];
-  const text = typeof lines[key] === 'function' ? lines[key](name) : lines[key];
+  const language = CALL_SPEECH[voice]?.[key] ? voice : 'fr';
+  const line = CALL_SPEECH[language][key];
+  const text = typeof line === 'function' ? line(name) : line;
   try {
     stopSpeech();
-    const data = await postJSON('/api/voice/prepare', { text, language: preferences.language === 'en' ? 'en' : 'fr' });
+    const data = await postJSON('/api/voice/prepare', { text, language });
     const player = new Audio(data.url);
     state.activeAudio = player; state.activeSpeechButton = null;
     player.onended = () => { if (state.activeAudio === player) stopSpeech(); };
@@ -797,11 +807,11 @@ function showCallReady(card, contact, { voice = false } = {}) {
   const dialNow = canDialNow();
   fillCallCard(card, `J'appelle ${who}.\n\n${dialNow ? 'Votre téléphone s\'ouvre' : 'Touchez le bouton vert'} : appuyez ensuite sur le bouton vert de votre téléphone pour lancer l'appel.`, link);
   if (dialNow) link.click();
-  else if (voice) speakHint('ready', label);
+  else if (voice) speakHint('ready', label, voice);
 }
 function showCallChoices(card, contacts, { voice = false, name = '' } = {}) {
   fillCallCard(card, 'J\'ai trouvé plusieurs contacts. Lequel voulez-vous appeler ?', ...contacts.map((c) => telLink(c, `${c.name} · ${formatNumber(c.tel)}`)));
-  if (voice) speakHint('choose', name);
+  if (voice) speakHint('choose', name, voice);
 }
 function showCallForm(card, name, text) {
   const form = Object.assign(document.createElement('form'), { className: 'call-form' });
@@ -825,13 +835,13 @@ function showCallMissing(card, name, text, { voice = false } = {}) {
   controls.push(callCardButton('Entrer le numéro', () => showCallForm(card, name, text), canPickContacts));
   controls.push(callCardButton('Demander à Mande-IA', () => { card.remove(); send(text, { allowCall: false }); }));
   fillCallCard(card, `Je n'ai pas encore **${mdSafe(name)}** dans vos contacts Mande-IA.`, ...controls);
-  if (voice) speakHint('missing', name);
+  if (voice) speakHint('missing', name, voice);
 }
 function showCallWho(card, { voice = false } = {}) {
   const recent = loadContacts().slice(0, 6).map((c) => telLink(c, contactLabel(c)));
   const controls = canPickContacts ? [pickButton('', (contact) => showCallReady(card, contact), recent.length > 0), ...recent] : recent;
   fillCallCard(card, `Qui voulez-vous appeler ? Dites ou écrivez « Appelle » suivi du nom, par exemple « Appelle Mamadou ».${controls.length ? '' : '\n\nAjoutez d\'abord vos contacts dans Paramètres, puis Mes contacts pour les appels.'}`, ...controls);
-  if (voice) speakHint('who');
+  if (voice) speakHint('who', '', voice);
 }
 function startPhoneCall(intent, text, { voice = false } = {}) {
   showView('home');
@@ -877,13 +887,13 @@ function handleLiveTool(call, item) {
   const intent = parseCallIntent(`appelle ${asked}`, { voice: true }) || { name: titleCase(foldText(asked)), number: '' };
   const ready = (contact) => {
     showLiveDial([liveDialLink(contact)]);
-    return { statut: 'pret', contact: contactLabel(contact), consigne: `Dis en une phrase courte que l’utilisateur doit toucher le gros bouton vert à l’écran pour appeler ${contactLabel(contact)}. Ne dis pas le numéro.` };
+    return { statut: 'pret', contact: contactLabel(contact), consigne: `Dis en une phrase courte que l’utilisateur doit toucher le gros bouton vert à l’écran pour appeler ${contactLabel(contact)}. Ne dis pas le numéro. Si l’utilisateur parle bambara, dis exactement : « ${CALL_SPEECH.bm.ready(contactLabel(contact))} »` };
   };
   let result;
   if (intent.number) result = ready(intent.name ? addContact(intent.name, intent.number) : { name: formatNumber(intent.number), tel: intent.number });
   else if (!intent.name) {
     showLiveDial(loadContacts().slice(0, 4).map(liveDialLink));
-    result = { statut: 'nom_manquant', consigne: 'Demande à l’utilisateur, en une phrase courte, qui il veut appeler.' };
+    result = { statut: 'nom_manquant', consigne: `Demande à l’utilisateur, en une phrase courte, qui il veut appeler. En bambara, dis exactement : « ${CALL_SPEECH.bm.who} »` };
   } else {
     const matches = findContacts(intent.name);
     if (matches.length === 1) result = ready(matches[0]);
@@ -893,8 +903,8 @@ function handleLiveTool(call, item) {
     } else {
       showLiveDial(canPickContacts ? [pickButton(intent.name, (contact) => showLiveDial([liveDialLink(contact)]))] : []);
       result = canPickContacts
-        ? { statut: 'introuvable', consigne: `Dis en une phrase courte que tu ne trouves pas ${intent.name} dans ses contacts Mande-IA et qu’il peut toucher le bouton « Choisir dans mes contacts » à l’écran.` }
-        : { statut: 'introuvable', consigne: `Dis en une phrase courte que ${intent.name} n’est pas encore enregistré, et qu’il doit raccrocher puis l’ajouter dans Paramètres, Mes contacts pour les appels.` };
+        ? { statut: 'introuvable', consigne: `Dis en une phrase courte que tu ne trouves pas ${intent.name} dans ses contacts Mande-IA et qu’il peut toucher le bouton « Choisir dans mes contacts » à l’écran. En bambara, dis exactement : « ${CALL_SPEECH.bm.missing(intent.name)} »` }
+        : { statut: 'introuvable', consigne: `Dis en une phrase courte que ${intent.name} n’est pas encore enregistré, et qu’il doit raccrocher puis l’ajouter dans Paramètres, Mes contacts pour les appels. En bambara, commence par dire exactement : « ${CALL_SPEECH.bm.missing(intent.name)} »` };
     }
   }
   answerLiveTool(call, item.call_id, result);
@@ -1046,7 +1056,7 @@ async function finishRecording(stream) {
     if (!transcript) throw new Error('Aucun mot reconnu. Parlez plus près du microphone et réessayez.');
     const input = $('#prompt');
     const callIntent = !input.value.trim() && !state.attachment && parseCallIntent(transcript, { voice: true });
-    if (callIntent) { setStatus(''); startPhoneCall(callIntent, transcript, { voice: true }); return; }
+    if (callIntent) { setStatus(''); startPhoneCall(callIntent, transcript, { voice: speechLanguage(transcript) }); return; }
     input.value = input.value.trim() ? `${input.value.trim()} ${transcript}` : transcript;
     autoresize();
     setStatus('Vérifiez le texte, puis appuyez sur la flèche pour envoyer.', { timeout: 6000 });
@@ -1400,14 +1410,65 @@ $$('.segmented button').forEach((b) => { b.onclick = () => renderAbout(b.dataset
 $('#delete-conversation').onclick = () => deleteConversation().catch((error) => setStatus(error.message, { timeout: 5000 }));
 $$('dialog').forEach((dialog) => dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); }));
 
-window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); state.installEvent = event; $('#install-app').hidden = false; });
-$('#install-app').onclick = async () => {
-  if (!state.installEvent) return;
-  state.installEvent.prompt();
-  await state.installEvent.userChoice;
+const INSTALL_LATER_KEY = 'mande-install-later';
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const INSTALL_STEPS = {
+  ios: ['Touchez le bouton Partager de Safari (le carré avec une flèche vers le haut).', 'Choisissez « Sur l\'écran d\'accueil ».', 'Touchez « Ajouter ».'],
+  menu: ['Ouvrez le menu du navigateur (les trois points ⋮).', 'Choisissez « Installer l\'application » ou « Ajouter à l\'écran d\'accueil ».', 'Confirmez : l\'icône Mande-IA apparaît sur votre écran d\'accueil.']
+};
+let installedApp = false;
+function snoozeInstall(days) { store.set(INSTALL_LATER_KEY, String(Date.now() + days * 24 * 60 * 60 * 1000)); }
+function installBlocked() {
+  return installedApp || isStandalone() || Date.now() < Number(store.get(INSTALL_LATER_KEY, '0')) || Boolean($('dialog[open]')) || !$('#call').hidden || state.recorder?.state === 'recording';
+}
+function openInstall(mode) {
+  const prompt = mode === 'prompt';
+  $('#install-confirm').hidden = !prompt;
+  $('#install-later').textContent = prompt ? 'Plus tard' : 'J\'ai compris';
+  $('#install-steps').hidden = prompt;
+  $('#install-steps').replaceChildren(...(prompt ? [] : INSTALL_STEPS[mode]).map((step) => Object.assign(document.createElement('li'), { textContent: step })));
+  if (!$('#install-dialog').open) $('#install-dialog').showModal();
+}
+function offerInstall(mode, retry = true) {
+  if (!installBlocked()) { openInstall(mode); return; }
+  if (retry && !installedApp && !isStandalone()) setTimeout(() => offerInstall(state.installEvent ? 'prompt' : mode, false), 20000);
+}
+async function installApp() {
+  if (!state.installEvent) { openInstall(isIOS ? 'ios' : 'menu'); return; }
+  const event = state.installEvent;
+  state.installEvent = null;
+  event.prompt();
+  const choice = await event.userChoice.catch(() => null);
+  $('#install-dialog').close();
+  if (choice?.outcome !== 'accepted') snoozeInstall(7);
+}
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  state.installEvent = event;
+  $('#install-app').hidden = false;
+  setTimeout(() => offerInstall('prompt'), 3000);
+});
+window.addEventListener('appinstalled', () => {
+  installedApp = true;
   state.installEvent = null;
   $('#install-app').hidden = true;
-};
+  if ($('#install-dialog').open) $('#install-dialog').close();
+  setStatus('Mande-IA est installé : retrouvez son icône sur votre écran d\'accueil.', { timeout: 6000 });
+});
+$('#install-app').onclick = installApp;
+$('#install-confirm').onclick = installApp;
+$('#install-later').onclick = () => { snoozeInstall(7); $('#install-dialog').close(); };
+$('#close-install').onclick = () => { snoozeInstall(7); $('#install-dialog').close(); };
+$('#install-dialog').addEventListener('close', () => { if (Date.now() >= Number(store.get(INSTALL_LATER_KEY, '0'))) snoozeInstall(3); });
+async function setupInstall() {
+  if (isStandalone()) return;
+  try { installedApp = (await navigator.getInstalledRelatedApps?.())?.length > 0 || false; } catch {}
+  if (installedApp) return;
+  $('#install-app').hidden = false;
+  if (isIOS) setTimeout(() => offerInstall('ios'), 5000);
+  else if (matchMedia('(pointer: coarse)').matches) setTimeout(() => { if (!state.installEvent) offerInstall('menu'); }, 40000);
+}
 
 async function handleLaunchAction() {
   const action = new URLSearchParams(location.search).get('action');
@@ -1429,5 +1490,6 @@ renderMessages();
 checkHealth().catch(() => {});
 loadNews().catch(() => {});
 handleLaunchAction().catch(() => {});
+setupInstall().catch(() => {});
 checkAuth().catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});
