@@ -16,7 +16,13 @@ const now = () => new Date().toISOString();
 
 function openDb({ quiet = false } = {}) {
   fs.mkdirSync(AUDIO_DIR, { recursive: true });
-  const db = new Database(path.join(DATA_DIR, 'data.db'));
+  let db;
+  try { db = new Database(path.join(DATA_DIR, 'data.db')); }
+  catch (error) {
+    if (!/bindings|\.node|ERR_DLOPEN_FAILED/.test(`${error.code} ${error.message}`)) throw error;
+    console.error('SQLite n’est pas construit pour ce serveur. Dans le dossier du site, lancez :\n  npm install-scripts approve better-sqlite3   (ou : npm approve-scripts better-sqlite3)\n  npm rebuild better-sqlite3\npuis relancez.');
+    process.exit(1);
+  }
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   db.exec(`
