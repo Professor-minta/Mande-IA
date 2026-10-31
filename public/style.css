@@ -402,3 +402,12 @@ body:not([data-view="home"]) .dock { display: none; }
 .install-steps { padding-left: 1.4em; }
 .install-steps li::marker { color: var(--cyan); font-weight: 700; }
 #install-confirm { margin-bottom: 10px; }
+.plan-list { display: grid; gap: 10px; }
+.auth-form .plan-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--line-strong); border-radius: 18px; background: var(--surface-2); cursor: pointer; }
+.plan-option:has(input:checked) { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.auth-form .plan-option input { width: 20px; height: 20px; min-height: 0; margin: 0; padding: 0; accent-color: var(--gold); flex: none; }
+.plan-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.plan-text small { color: var(--muted); font-size: 13px; font-weight: 400; }
+.plan-price { font-weight: 700; white-space: nowrap; }
+#plan-form .pill-button { white-space: normal; text-align: center; }
+#plan-form > * { min-width: 0; }

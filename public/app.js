@@ -257,6 +257,13 @@ async function shareText(content, button) {
   await copyText(content, button);
 }
 
+function proSummary() {
+  const until = state.user?.proUntil ? new Date(state.user.proUntil) : null;
+  if (!until || Number.isNaN(until.getTime())) return 'Plan Pro : questions illimitées.';
+  const date = until.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  const minutes = Number(state.user.callMinutes) || 0;
+  return `Plan Pro jusqu’au ${date} · ${minutes} min d’appel restante${minutes > 1 ? 's' : ''}.`;
+}
 function renderUsage() {
   const usage = state.usage;
   const remaining = Number(usage?.remaining);
@@ -267,7 +274,7 @@ function renderUsage() {
   $('#upgrade-gate').hidden = !limitReached;
   const line = $('#usage');
   line.replaceChildren();
-  if (isPro) line.textContent = 'Plan Pro : questions illimitées.';
+  if (isPro) line.textContent = proSummary();
   else if (usage?.limit && !limitReached) {
     line.append(`${remaining} question${remaining === 1 ? '' : 's'} gratuite${remaining === 1 ? '' : 's'} restante${remaining === 1 ? '' : 's'} aujourd'hui. `);
     const upgrade = Object.assign(document.createElement('button'), { type: 'button', textContent: 'Passer à Pro' });
@@ -277,7 +284,7 @@ function renderUsage() {
   const label = state.user ? state.user.email : 'Se connecter';
   $$('.account-label').forEach((el) => { el.textContent = label; });
   $('#settings-account').textContent = state.user ? state.user.email : 'Invité';
-  $('#settings-plan').textContent = isPro ? 'Plan Pro' : 'Plan gratuit : 5 questions par jour';
+  $('#settings-plan').textContent = isPro ? proSummary() : 'Plan gratuit : 5 questions par jour';
   $('#settings-auth').textContent = state.user ? 'Gérer' : 'Se connecter';
   $('#settings-upgrade').hidden = isPro;
   $('#delete-conversation').disabled = !state.user || !state.conversationId;
@@ -628,7 +635,7 @@ async function send(prefill, { allowCall = true } = {}) {
       userItem.remove();
       if (fromInput && !$('#prompt').value) { $('#prompt').value = typed; autoresize(); }
       const limit = failure.status === 429 && failure.usage;
-      if (!limit) addMessage('assistant', failure.error || 'Mande-IA n’a pas pu répondre. Réessayez.', { error: true });
+      if (!limit || state.user?.plan === 'pro') addMessage('assistant', failure.error || 'Mande-IA n’a pas pu répondre. Réessayez.', { error: true });
     } else {
       state.messages.pop();
       userItem.remove();
@@ -1160,8 +1167,10 @@ function cleanupCall(call) {
   try { call.micMeter?.source.disconnect(); } catch {}
   try { call.aiMeter?.source.disconnect(); } catch {}
   if (call.audio) { call.audio.pause(); call.audio.srcObject = null; }
+  if (call.billed) { call.billed = false; if (!navigator.sendBeacon?.('/api/live/end')) fetch('/api/live/end', { method: 'POST', credentials: 'same-origin', keepalive: true }).catch(() => {}); }
   if (state.call === call) state.call = null;
 }
+addEventListener('pagehide', () => { if (state.call) cleanupCall(state.call); });
 function greeting(language) {
   if (language === 'en') return 'Greet the user in one short, warm sentence and say you are listening.';
   return 'Salue l’utilisateur en une phrase courte et chaleureuse, par exemple « I ni ce ! Je suis Mande-IA, je vous écoute. »';
@@ -1207,6 +1216,7 @@ async function startCall() {
     if (state.call !== call) return;
     state.usage = session.usage; renderUsage();
     call.maxSeconds = Number(session.maxSeconds) || 180;
+    call.billed = true;
     call.mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     if (state.call !== call) { call.mic.getTracks().forEach((track) => track.stop()); return; }
     const pc = new RTCPeerConnection();
@@ -1258,11 +1268,12 @@ async function startCall() {
     cleanupCall(call);
     if (error.payload?.usage) { state.usage = error.payload.usage; renderUsage(); }
     const limit = error.status === 429;
-    const message = limit ? "Vos 5 questions gratuites d'aujourd'hui sont utilisées. Revenez demain, ou passez à Pro."
+    const message = limit && (error.payload?.callLimit || state.user?.plan === 'pro') ? error.message
+      : limit ? "Vos 5 questions gratuites d'aujourd'hui sont utilisées. Revenez demain, ou passez à Pro."
       : error.name === 'NotAllowedError' ? 'Autorisez le microphone dans votre navigateur pour appeler Mande-IA.'
       : error.message || 'L’appel n’a pas pu démarrer. Réessayez dans un instant.';
     setCallState('error', 'Appel impossible', message);
-    $('#call-upgrade').hidden = !limit;
+    $('#call-upgrade').hidden = !limit || state.user?.plan === 'pro';
   }
 }
 function hangUp() {
@@ -1283,7 +1294,61 @@ function toggleMute() {
 
 function waLink(message) { return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`; }
 const UPGRADE_MESSAGE = 'Bonjour, je souhaite passer à Mande-IA Pro. Quels sont les moyens de paiement disponibles ?';
-function openUpgrade() { window.open(waLink(UPGRADE_MESSAGE), '_blank', 'noopener'); }
+const formatFCFA = (value) => `${Number(value).toLocaleString('fr-FR').replace(/\u202f|\u00a0/g, ' ')} FCFA`;
+async function openUpgrade(event) {
+  event?.preventDefault?.();
+  let offers = null;
+  try { offers = await api('/api/paiement/offres'); } catch {}
+  if (!offers?.enabled) { window.open(waLink(UPGRADE_MESSAGE), '_blank', 'noopener'); return; }
+  const list = $('#plan-list');
+  list.replaceChildren(...offers.plans.map((plan, index) => {
+    const label = document.createElement('label');
+    label.className = 'plan-option';
+    const input = Object.assign(document.createElement('input'), { type: 'radio', name: 'plan', value: plan.id, checked: index === 1 });
+    const text = document.createElement('span');
+    text.className = 'plan-text';
+    text.append(Object.assign(document.createElement('strong'), { textContent: plan.label }), Object.assign(document.createElement('small'), { textContent: `${plan.days}\u00a0jours · ${plan.minutes >= 60 ? `${plan.minutes / 60}\u00a0h` : `${plan.minutes}\u00a0min`} d’appel` }));
+    label.append(input, text, Object.assign(document.createElement('span'), { className: 'plan-price', textContent: formatFCFA(plan.price) }));
+    return label;
+  }));
+  $('#plan-error').textContent = '';
+  $('#plan-note').textContent = `Questions illimitées (jusqu’à ${offers.proDailyQuestions} par jour), appels jusqu’à 15 minutes, photos, PDF et voix.`;
+  $('#plan-pay').textContent = state.user ? 'Payer avec Orange Money ou Moov' : 'Se connecter pour payer';
+  $('#upgrade-dialog').showModal();
+}
+async function payPlan(event) {
+  event.preventDefault();
+  if (!state.user) { $('#upgrade-dialog').close(); openAuth(); return; }
+  const plan = new FormData($('#plan-form')).get('plan');
+  const button = $('#plan-pay');
+  button.disabled = true;
+  try {
+    const data = await postJSON('/api/paiement/checkout', { plan });
+    location.href = data.url;
+  } catch (error) {
+    $('#plan-error').textContent = error.message;
+    button.disabled = false;
+  }
+}
+async function handlePaymentReturn() {
+  const params = new URLSearchParams(location.search);
+  const kind = params.get('paiement');
+  if (!kind) return;
+  const reference = params.get('ref') || '';
+  history.replaceState(null, '', location.pathname);
+  if (kind === 'annule') { setStatus('Paiement annulé. Vous pouvez réessayer quand vous voulez.', { timeout: 6000 }); return; }
+  if (!reference) return;
+  setStatus('Vérification du paiement…');
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      const data = await postJSON('/api/paiement/verifier', { reference });
+      if (data.status === 'paid') { await checkAuth(); setStatus('Merci ! Mande-IA Pro est activé.', { timeout: 8000 }); return; }
+      if (data.status === 'failed') { setStatus('Le paiement n’a pas abouti. Aucun montant n’a été pris pour Pro. Réessayez.', { timeout: 8000 }); return; }
+    } catch (error) { if (error.status === 404) break; }
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+  setStatus('Paiement en cours de confirmation. Pro s’activera tout seul dans quelques minutes.', { timeout: 10000 });
+}
 function shareApp() {
   const share = { title: 'Mande-IA', text: 'Parlez avec Mande-IA, l\'assistant IA qui parle bambara.', url: location.origin };
   if (navigator.share) navigator.share(share).catch(() => {});
@@ -1371,6 +1436,9 @@ $('#attachment-remove').onclick = () => { clearAttachment(); $('#prompt').focus(
 $('#call-hangup').onclick = hangUp;
 $('#call-mute').onclick = toggleMute;
 $('#call-upgrade').href = waLink(UPGRADE_MESSAGE);
+$('#call-upgrade').onclick = openUpgrade;
+$('#plan-form').onsubmit = payPlan;
+$('#close-upgrade').onclick = () => $('#upgrade-dialog').close();
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('#call').hidden) hangUp(); });
 $$('[data-prompt]').forEach((el) => { el.addEventListener('click', () => send(el.dataset.prompt)); });
 $$('.tab').forEach((tab) => { tab.onclick = () => showView(tab.dataset.target); });
@@ -1387,6 +1455,7 @@ $('#delete-form').addEventListener('submit', (event) => { event.preventDefault()
 $('#settings-auth').onclick = openAuth;
 $('#settings-upgrade').onclick = openUpgrade;
 $('#upgrade-link').href = waLink(UPGRADE_MESSAGE);
+$('#upgrade-link').onclick = openUpgrade;
 $('#theme-toggle').onchange = (event) => { preferences.theme = event.target.checked ? 'dark' : 'light'; store.set('mande-theme', preferences.theme); applyPreferences(); };
 $('#language-select').onchange = (event) => { preferences.language = event.target.value; store.set('mande-language', preferences.language); };
 $('#voice-toggle').onchange = (event) => { preferences.voice = event.target.checked; store.set('mande-voice', String(preferences.voice)); };
@@ -1491,5 +1560,5 @@ checkHealth().catch(() => {});
 loadNews().catch(() => {});
 handleLaunchAction().catch(() => {});
 setupInstall().catch(() => {});
-checkAuth().catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
+checkAuth().then(handlePaymentReturn).catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});

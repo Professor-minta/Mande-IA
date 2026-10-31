@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=21">
+    <link rel="stylesheet" href="/style.css?v=22">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -189,7 +189,7 @@
             <h3 class="group-title">Compte</h3>
             <div class="list">
               <div class="row is-static"><span class="row-icon"><svg><use href="#i-user"/></svg></span><span class="row-text"><span id="settings-account">Invité</span><small id="settings-plan">5 questions gratuites par jour</small></span><button class="pill-button is-small" id="settings-auth">Se connecter</button></div>
-              <button class="row is-gold-row" id="settings-upgrade"><span class="row-icon is-gold"><svg><use href="#i-wave"/></svg></span><span class="row-text">Passer à Pro<small>500&nbsp;FCFA par semaine ou 1&nbsp;500&nbsp;FCFA par mois</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
+              <button class="row is-gold-row" id="settings-upgrade"><span class="row-icon is-gold"><svg><use href="#i-wave"/></svg></span><span class="row-text">Passer à Pro<small>1&nbsp;000&nbsp;FCFA la semaine ou 3&nbsp;000&nbsp;FCFA le mois</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
             </div>
             <h3 class="group-title">Préférences</h3>
             <div class="list">
@@ -339,6 +339,18 @@
       <button class="pill-button is-wide is-ghost" id="install-later" type="button">Plus tard</button>
     </dialog>
 
+    <dialog class="sheet" id="upgrade-dialog" aria-labelledby="upgrade-title">
+      <button class="icon-button sheet-close" id="close-upgrade" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
+      <h2 id="upgrade-title">Passer à Mande-IA Pro</h2>
+      <p class="sheet-intro" id="plan-note"></p>
+      <form class="auth-form" id="plan-form">
+        <div class="plan-list" id="plan-list" role="radiogroup" aria-label="Formule"></div>
+        <p class="form-error" id="plan-error" role="alert"></p>
+        <button class="pill-button is-wide is-gold" id="plan-pay" type="submit">Payer avec Orange Money ou Moov</button>
+        <p class="legal-note">Paiement sécurisé. Mande-IA ne voit jamais votre code Mobile Money. Pas de renouvellement automatique. Voir les <a href="/conditions" target="_blank" rel="noopener">conditions</a>.</p>
+      </form>
+    </dialog>
+
     <dialog class="sheet" id="about-dialog" aria-labelledby="about-title">
       <button class="icon-button sheet-close" id="close-about" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
       <h2 id="about-title">À propos de Mande-IA</h2>
@@ -350,6 +362,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=21"></script>
+    <script src="/app.js?v=22"></script>
   </body>
 </html>
