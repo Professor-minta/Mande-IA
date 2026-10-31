@@ -62,7 +62,9 @@ async function tokenInfo() {
 
 function wabaIds(info) {
   const scopes = info.granular_scopes || [];
-  return [...new Set(scopes.filter((s) => s.scope === 'whatsapp_business_management').flatMap((s) => s.target_ids || []))];
+  const ids = scopes.filter((s) => s.scope === 'whatsapp_business_management').flatMap((s) => s.target_ids || []);
+  if (env.WHATSAPP_BUSINESS_ACCOUNT_ID) ids.push(env.WHATSAPP_BUSINESS_ACCOUNT_ID.trim());
+  return [...new Set(ids.filter(Boolean))];
 }
 
 async function diagnostic() {
@@ -93,7 +95,11 @@ async function diagnostic() {
 
   console.log('\n3. Compte WhatsApp Business, numéros et abonnement de l’app');
   const ids = wabaIds(info);
-  if (!ids.length) bad('Compte WhatsApp', 'le jeton n’a pas accès au compte WhatsApp (System users → Assign assets → WhatsApp accounts)');
+  if (!ids.length) {
+    const reach = PHONE_ID ? await graph('GET', `/${PHONE_ID}?fields=id`) : { ok: false };
+    if (reach.ok) note('Compte WhatsApp', 'accès par l’utilisateur système admin (Meta ne donne pas l’ID du compte). Ajoutez WHATSAPP_BUSINESS_ACCOUNT_ID dans .env pour vérifier l’abonnement de l’app');
+    else bad('Compte WhatsApp', 'le jeton n’a pas accès au compte WhatsApp (System users → Assign assets → WhatsApp accounts)');
+  }
   const numbers = [];
   for (const id of ids) {
     const subs = await graph('GET', `/${id}/subscribed_apps`);
