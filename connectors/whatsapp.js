@@ -11,6 +11,7 @@ const MIN_PARAGRAPH_SEND = 350;
 const MAX_PARTIAL_SENDS = 3;
 const GITHUB_REPO = 'Professor-minta/Mande-IA';
 const WEBHOOK_PATHS = ['/whatsapp/webhook', '/api/whatsapp/webhook', '/webhook/whatsapp', '/api/webhook', '/webhook'];
+const WELCOME_IMAGE = process.env.WHATSAPP_WELCOME_IMAGE ?? 'https://ia.mintaservices.com/icons/whatsapp-accueil.jpg';
 
 function isWebhookPath(url) {
   return WEBHOOK_PATHS.includes(String(url).split('?')[0].replace(/(.)\/+$/, '$1'));
@@ -30,7 +31,7 @@ const MENU = [
     title: 'Demander à Mande-IA',
     rows: [
       { id: 'conseil', title: 'Conseil entrepreneurial', description: 'Lancer une activité au Mali avec peu de moyens', prompt: 'Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens.' },
-      { id: 'ecole', title: 'École au Mali', description: 'Du fondamental à l’université, expliqué simplement', prompt: 'Explique-moi simplement comment fonctionne l’école au Mali, du fondamental jusqu’à l’université.' },
+      { id: 'ecole', title: 'École malienne expliquée', description: 'Du fondamental à l’université, expliqué simplement', prompt: 'Explique-moi simplement comment fonctionne l’école au Mali, du fondamental jusqu’à l’université.' },
       { id: 'lecon', title: 'Leçon du jour', description: 'Une phrase en bambara, traduite et expliquée', prompt: 'Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple.' },
       { id: 'ia', title: 'Crée ton propre IA', description: 'Débuter avec l’IA locale, pas à pas', prompt: 'Comment créer ma propre IA locale avec Ollama, étape par étape, pour un débutant ?' },
       { id: 'mali', title: 'À propos du Mali', description: 'Géographie, régions, langues et histoire', prompt: 'Présente-moi le Mali : sa géographie, ses régions, ses langues et son histoire.' }
@@ -56,11 +57,19 @@ const STATIC_REPLIES = {
   professeur: 'Pour écrire directement au Professeur Issa Minta : https://wa.me/22377295259'
 };
 
+const MENU_WORDS = /^\/?(menu|aide|help)$/;
 const GREETING = /^(\/?menu|\/?aide|help|start|commencer|bonjour|bonsoir|salut|slt|hello|hi|hey|coucou|(i|aw|an) ni (ce|sogoma|tile|wula|su))( (mande ?ia|mande ?ai))?$/;
 function normalize(text) {
   return String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9/ ]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 function isMenuRequest(text) { return GREETING.test(normalize(text)); }
+function firstName(name) {
+  const first = String(name || '').replace(/[*_~`]/g, '').trim().split(/\s+/)[0] || '';
+  return /^[\p{L}][\p{L}'’-]{1,19}$/u.test(first) ? first : '';
+}
+function welcomeText(name) {
+  return `I ni ce${name ? `, ${name}` : ''} ! Je suis *Mande-IA*, votre assistant en bambara, en français et en anglais.\n\nComment puis-je vous aider aujourd’hui ? Écrivez votre question, ou choisissez un sujet.`;
+}
 
 function whatsappFormat(text) {
   return String(text)
@@ -104,7 +113,7 @@ function showTyping(phoneId, messageId) {
   return graphPost(phoneId, 'messages', { status: 'read', message_id: messageId, typing_indicator: { type: 'text' } });
 }
 
-function sendMenu(phoneId, to) {
+function sendMenu(phoneId, to, name = '') {
   return graphPost(phoneId, 'messages', {
     recipient_type: 'individual',
     to,
@@ -112,7 +121,7 @@ function sendMenu(phoneId, to) {
     interactive: {
       type: 'list',
       header: { type: 'text', text: 'Mande-IA' },
-      body: { text: 'I ni ce ! Je suis *Mande-IA*, votre assistant en bambara, en français et en anglais.\n\nÉcrivez votre question, ou choisissez un sujet dans le menu.' },
+      body: { text: welcomeText(name) },
       footer: { text: 'Tapez menu pour revoir ce choix' },
       action: {
         button: 'Voir le menu',
@@ -120,6 +129,29 @@ function sendMenu(phoneId, to) {
       }
     }
   });
+}
+
+async function sendWelcome(phoneId, to, name) {
+  if (WELCOME_IMAGE) {
+    const sent = await graphPost(phoneId, 'messages', {
+      recipient_type: 'individual',
+      to,
+      type: 'interactive',
+      interactive: {
+        type: 'button',
+        header: { type: 'image', image: { link: WELCOME_IMAGE } },
+        body: { text: welcomeText(name) },
+        footer: { text: 'Tapez menu à tout moment' },
+        action: { buttons: [
+          { type: 'reply', reply: { id: 'menu', title: 'Voir tout le menu' } },
+          { type: 'reply', reply: { id: 'lecon', title: 'Leçon du jour' } },
+          { type: 'reply', reply: { id: 'conseil', title: 'Conseil d’entreprise' } }
+        ] }
+      }
+    });
+    if (sent) return true;
+  }
+  return sendMenu(phoneId, to, name);
 }
 
 let githubCache = { at: 0, text: '' };
@@ -189,7 +221,7 @@ function setupWhatsApp(app, { db, day, now }) {
     if (pending.trim()) await sendText(phoneId, from, pending);
   }
 
-  async function handleMessage(message, phoneId) {
+  async function handleMessage(message, phoneId, name) {
     const from = String(message.from || '');
     const messageId = String(message.id || '');
     if (!messageId || !from) return;
@@ -198,11 +230,12 @@ function setupWhatsApp(app, { db, day, now }) {
     catch (error) { if (String(error.message).includes('UNIQUE constraint failed')) return; throw error; }
     console.log(`WhatsApp [${maskNumber(from)}] : ${message.type} reçu`);
 
-    if (message.type === 'request_welcome') { await sendMenu(phoneId, from); return; }
+    if (message.type === 'request_welcome') { await sendWelcome(phoneId, from, name); return; }
     await showTyping(phoneId, messageId);
 
     if (message.type === 'interactive') {
       const choice = message.interactive?.list_reply || message.interactive?.button_reply;
+      if (choice?.id === 'menu') { await sendMenu(phoneId, from, name); return; }
       const row = ROWS[choice?.id];
       if (!row) { await sendText(phoneId, from, TEXT.unknownChoice); return; }
       if (row.prompt) { await answer(phoneId, from, row.prompt, messageId); return; }
@@ -211,15 +244,15 @@ function setupWhatsApp(app, { db, day, now }) {
     }
     if (message.type !== 'text' || !message.text?.body) { await sendText(phoneId, from, TEXT.notText); return; }
     const text = String(message.text.body).trim().slice(0, 4000);
-    if (isMenuRequest(text)) { await sendMenu(phoneId, from); return; }
+    if (isMenuRequest(text)) { await (MENU_WORDS.test(normalize(text)) ? sendMenu(phoneId, from, name) : sendWelcome(phoneId, from, name)); return; }
     await answer(phoneId, from, text, messageId);
   }
 
   const queues = new Map();
-  function enqueue(message, phoneId) {
+  function enqueue(message, phoneId, name) {
     const key = String(message.from || '');
     const previous = queues.get(key) || Promise.resolve();
-    const next = previous.then(() => handleMessage(message, phoneId)).catch((error) => console.error('WhatsApp :', error.message));
+    const next = previous.then(() => handleMessage(message, phoneId, name)).catch((error) => console.error('WhatsApp :', error.message));
     queues.set(key, next);
     next.finally(() => { if (queues.get(key) === next) queues.delete(key); });
   }
@@ -235,9 +268,10 @@ function setupWhatsApp(app, { db, day, now }) {
     res.sendStatus(200);
     for (const change of (req.body?.entry || []).flatMap((entry) => entry.changes || [])) {
       const phoneId = change.value?.metadata?.phone_number_id;
-      for (const message of change.value?.messages || []) enqueue(message, phoneId);
+      const contacts = change.value?.contacts || [];
+      for (const message of change.value?.messages || []) enqueue(message, phoneId, firstName(contacts.find((c) => c.wa_id === message.from)?.profile?.name));
     }
   });
 }
 
-module.exports = { setupWhatsApp, MENU, WEBHOOK_PATHS, isWebhookPath, isMenuRequest, whatsappFormat };
+module.exports = { setupWhatsApp, MENU, WEBHOOK_PATHS, isWebhookPath, isMenuRequest, whatsappFormat, firstName };

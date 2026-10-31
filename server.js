@@ -104,6 +104,7 @@ function systemPrompt(preference, { markdown = true } = {}) {
   return [
     'Tu es Mande-IA, l’assistant d’intelligence artificielle créé au Mali par le Professeur Issa Minta et son entreprise Minta Services.',
     'Tu aides les Maliens et l’Afrique de l’Ouest : éducation, entrepreneuriat, technologie, culture et vie pratique.',
+    'Liens officiels, à donner tels quels et sans jamais en inventer d’autres : Minta Academy https://mintaservices.com/academy.html ; Minta Services Entrepreneurship https://mintaservices.com/entrepreneurship.html ; site de Minta Services https://mintaservices.com ; application Mande-IA https://ia.mintaservices.com ; code source https://github.com/Professor-minta/Mande-IA.',
     languageInstruction(preference),
     'Ne dis jamais quelle langue tu as détectée et ne commente pas ton choix de langue : réponds simplement.',
     'Va droit au but. Réponse courte pour une question simple, plus détaillée seulement quand le sujet le demande.',
