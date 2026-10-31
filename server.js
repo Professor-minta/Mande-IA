@@ -392,8 +392,9 @@ app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
 app.get(/.*/, (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 app.use((error, req, res, next) => { if (error instanceof multer.MulterError) return res.status(413).json({ error: error.code === 'LIMIT_FILE_SIZE' ? 'Ce fichier dépasse 10 Mo. Choisissez un fichier plus léger.' : 'Fichier refusé.' }); console.error(error); if (res.headersSent) return res.end(); res.status(500).json({ error: 'Erreur interne.' }); });
 process.on('unhandledRejection', (error) => console.error('Erreur non gérée :', error?.stack || error));
-app.listen(PORT, (error) => {
-  if (!error) return console.log(`Mande-IA écoute sur le port ${PORT} (Node ${process.version})`);
+const HOST = process.env.HOST || '127.0.0.1';
+app.listen(PORT, HOST, (error) => {
+  if (!error) return console.log(`Mande-IA écoute sur ${HOST}:${PORT} (Node ${process.version})`);
   console.error(error.code === 'EADDRINUSE' ? `Le port ${PORT} est déjà utilisé : Mande-IA tourne déjà ailleurs (aaPanel ou PM2). Gardez un seul gestionnaire et arrêtez l’autre.` : `Serveur : ${error.message}`);
   process.exit(1);
 });
