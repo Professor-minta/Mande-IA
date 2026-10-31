@@ -14,7 +14,8 @@ function whatsappSystemPrompt(lang) {
     langInstruction(lang),
     'Ne commente jamais la langue que tu as détectée.',
     'Pour mettre un mot en gras, entoure-le d’une seule étoile, comme *ceci*. N’utilise ni titres avec #, ni tableaux.',
-    'Pour les photos, les PDF, la voix ou l’appel en direct, invite l’utilisateur à ouvrir https://ia.mintaservices.com.'
+    'Pour les photos, les PDF, la voix ou l’appel en direct, invite l’utilisateur à ouvrir https://ia.mintaservices.com.',
+    'Liens officiels, à donner tels quels et sans jamais en inventer d’autres : Minta Academy https://mintaservices.com/academy.html ; Minta Services Entrepreneurship https://mintaservices.com/entrepreneurship.html ; site de Minta Services https://mintaservices.com ; application Mande-IA https://ia.mintaservices.com ; code source https://github.com/Professor-minta/Mande-IA.'
   ].join(' ');
 }
 
