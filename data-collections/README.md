@@ -36,25 +36,41 @@ La première adresse donne les contributions validées, la seconde tout (en atte
 
 ## Mettre en ligne sur aaPanel
 
-Le code arrive avec Mande-IA, dans `/www/wwwroot/mande-ia-v2/data-collections`.
+On garde le site et le Node project déjà en place (`data_mintaservices_com`, dossier `/www/wwwroot/data.mintaservices.com`, port 3003) : le domaine et le certificat HTTPS ne changent pas. On remplace seulement le contenu, après une sauvegarde.
+
+**1.** Dans aaPanel, **Website → Node.js Project → data_mintaservices_com → Stop**.
+
+**2.** Dans le Terminal d'aaPanel :
 
 ```bash
 cd /www/wwwroot/mande-ia-v2 && git pull
-cd data-collections && npm install --omit=dev
-cp .env.example .env && nano .env
-chown -R www:www /www/wwwroot/mande-ia-v2/data-collections && chmod 600 .env
+cd /www/wwwroot/data.mintaservices.com
+mkdir -p /root/sauvegarde-data && cp -a . /root/sauvegarde-data/
+rm -rf public node_modules package-lock.json yarn.lock script.js server.js1 server.js2 server.js3 server.js4 text_submissions.json metadata.json phrases.json
+cp -a /www/wwwroot/mande-ia-v2/data-collections/. .
+npm install --omit=dev
+printf 'PORT=3003\nSESSION_SECRET=%s\nADMIN_TOKEN=%s\nVOTES_REQUIS=2\nOBJECTIF=10000\n' "$(openssl rand -hex 32)" "$(openssl rand -hex 24)" > .env
+node scripts/importer-ancien.js /root/sauvegarde-data
 ```
 
-Dans `.env`, collez le résultat de `openssl rand -hex 32` dans `SESSION_SECRET` et celui de `openssl rand -hex 24` dans `ADMIN_TOKEN`.
+La dernière commande **vérifie seulement** les anciennes données (textes, voix, phrases) et n'écrit rien. Si les nombres sont justes :
 
-Puis dans aaPanel, **Website → Node project → Add Node project** :
+```bash
+node scripts/importer-ancien.js /root/sauvegarde-data --ok
+chown -R www:www /www/wwwroot/data.mintaservices.com 2>/dev/null; chmod 600 .env
+```
 
-| Réglage | Valeur |
-|---|---|
-| Path | `/www/wwwroot/mande-ia-v2/data-collections` |
-| Run opt | `start` |
-| Port | `3002` |
-| User | `www` |
-| Domaine | `data.mintaservices.com`, puis SSL Let's Encrypt |
+**3.** Dans aaPanel, sur `data_mintaservices_com` : **Run opt** reste `node server.js`, **Port** `3003`, **Node** v24, **Pkg Manager** `npm`. Puis **Start**.
 
-Si `data.mintaservices.com` est déjà attribué à l'ancien site, retirez d'abord le domaine de l'ancien site (ou arrêtez l'ancien projet), après avoir sauvegardé son dossier.
+**4.** Ouvrez https://data.mintaservices.com.
+
+Tout l'ancien site reste en sécurité dans `/root/sauvegarde-data/`. Les dossiers `uploads/` et `dataset/` restent aussi en place, mais ne sont plus accessibles depuis internet. Les anciennes contributions sont rangées sous « Première collecte » et attendent la validation de la communauté. Pour les marquer directement validées, ajoutez `--valider` à la commande d'import.
+
+Mettre à jour plus tard :
+
+```bash
+cd /www/wwwroot/mande-ia-v2 && git pull && cp -a data-collections/. /www/wwwroot/data.mintaservices.com/
+cd /www/wwwroot/data.mintaservices.com && npm install --omit=dev
+```
+
+Puis **Restart** du projet. Le dossier `data/` et le fichier `.env` ne sont jamais écrasés.

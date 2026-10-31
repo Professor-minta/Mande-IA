@@ -171,7 +171,7 @@
       $('#val-vide').hidden = Boolean(data.element);
       if (!data.element) return;
       const e = data.element;
-      $('#val-q').textContent = e.type === 'voix' ? 'Cette voix lit-elle bien la phrase, de façon claire ?' : e.type === 'traduction' ? 'Cette traduction en bambara est-elle juste ?' : 'Cette phrase est-elle du bambara correct et naturel ?';
+      $('#val-q').textContent = e.type === 'voix' ? (e.bm ? 'Cette voix lit-elle bien la phrase, de façon claire ?' : 'Cette voix parle-t-elle bambara, clairement et sans bruit gênant ?') : e.type === 'traduction' ? 'Cette traduction en bambara est-elle juste ?' : 'Cette phrase est-elle du bambara correct et naturel ?';
       $('#val-bm').textContent = e.bm || '';
       $('#val-fr').textContent = e.fr || '';
       const audio = $('#val-audio');
