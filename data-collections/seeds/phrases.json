@@ -1,0 +1,4078 @@
+{
+ "lire": [
+  {
+   "bm": "Aw ni ce!",
+   "fr": "Bonjour !",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I ka kɛnɛ wa?",
+   "fr": "Comment vas-tu ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N ka kɛnɛ, i ni ce.",
+   "fr": "Je vais bien, merci.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I tɔgɔ ye mun ye?",
+   "fr": "Comment t’appelles-tu ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N tɔgɔ ye Issa ye.",
+   "fr": "Je m’appelle Issa.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I bɔra min?",
+   "fr": "D’où viens-tu ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɔra Niono.",
+   "fr": "Je viens de Niono.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "An bɛ se ka kuma?",
+   "fr": "Pouvons-nous parler ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Ayiwa, an bɛ se ka kuma.",
+   "fr": "Oui, nous pouvons parler.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Ka tile hɛrɛ!",
+   "fr": "Bonne journée !",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N ye Minta Services dabaga ye.",
+   "fr": "Je suis le fondateur de Minta Services.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N ye Mande-IA da.",
+   "fr": "J’ai créé Mande-IA.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Mande-IA ye dɛmɛbagan ye bamanankan na.",
+   "fr": "Mande-IA est un assistant en bambara.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka teknoloji kɛ ka nafa mɔgɔw ma.",
+   "fr": "Je veux que la technologie aide les gens.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka bamanankan kalan ani sɛbɛnni dɛmɛ.",
+   "fr": "Je veux aider à apprendre et écrire le bambara.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Mande-IA bɛ se ka jaabi di bamanankan na.",
+   "fr": "Mande-IA peut répondre en bambara.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɛ baara kɛ Mali la.",
+   "fr": "Je travaille au Mali.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "An ka baara ye teknoloji ni kalan ye.",
+   "fr": "Notre travail concerne la technologie et l’éducation.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka bamanankan kalan.",
+   "fr": "Je veux apprendre le bambara.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Bamanankan kɔrɔ ye mun ye?",
+   "fr": "Que signifie ce mot bambara ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I bɛ se ka o ɲɛfɔ n ye?",
+   "fr": "Peux-tu m’expliquer cela ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka sɛbɛnni kɛ ka ɲuman.",
+   "fr": "Je veux mieux écrire.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I bɛ se ka n dɛmɛ ka baro sɛbɛn?",
+   "fr": "Peux-tu m’aider à écrire un message ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka janko ɲuman kɛ.",
+   "fr": "Je veux faire une bonne présentation.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɛ baarakɛcogo kura kalan.",
+   "fr": "J’apprends une nouvelle méthode de travail.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Sɛbɛnni in ɲuman wa?",
+   "fr": "Cette phrase est-elle correcte ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I bɛ se ka kɔrɔsili kɛ?",
+   "fr": "Peux-tu corriger ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka kalan ni n ka terikɛw ye.",
+   "fr": "Je veux apprendre avec mes amis.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɛ taa sugu la.",
+   "fr": "Je vais au marché.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Sugu bɛ min?",
+   "fr": "Où est le marché ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka dumuni kɛ.",
+   "fr": "Je veux manger.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Ji bɛ min?",
+   "fr": "Où est l’eau ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɛ taa baara la.",
+   "fr": "Je vais au travail.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɛna na sɔgɔma.",
+   "fr": "Je viendrai demain.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Ayiwa, an bɛna ɲɔgɔn ye.",
+   "fr": "D’accord, nous nous verrons.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka n ka telefonu labɛn.",
+   "fr": "Je veux réparer mon téléphone.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Réseau tɛ yan.",
+   "fr": "Il n’y a pas de réseau ici.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N bɛ se ka internet sɔrɔ.",
+   "fr": "Je peux avoir Internet.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Kɛnɛya ye fɔlɔ ye.",
+   "fr": "La santé est importante.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I ka kɛnɛya lajɛ.",
+   "fr": "Prends soin de ta santé.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "An ka fɔ ji ɲuman nafa kan.",
+   "fr": "Parlons de l’importance de l’eau propre.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka denmisenw kalan dɛmɛ.",
+   "fr": "Je veux aider les enfants à apprendre.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "An ka kɛlɛ ɲuman kɛ an ka dugu la.",
+   "fr": "Faisons de bonnes actions dans notre village.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "An ka ɲɔgɔn dɛmɛ.",
+   "fr": "Aidons-nous les uns les autres.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka baara kura daminɛ.",
+   "fr": "Je veux commencer un nouveau travail.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I bɛ se ka baara in ɲɛfɔ n ye?",
+   "fr": "Peux-tu m’expliquer ce travail ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka site web da.",
+   "fr": "Je veux créer un site web.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka programme kalan.",
+   "fr": "Je veux apprendre la programmation.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "Mande-IA bɛ dɛmɛ ka miiri kura bɔ.",
+   "fr": "Mande-IA aide à produire de nouvelles idées.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "An ka fɛɛrɛ kura ɲini.",
+   "fr": "Cherchons une nouvelle solution.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka n ka projet ɲɛsin.",
+   "fr": "Je veux améliorer mon projet.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I bɛ se ka plan di n ma?",
+   "fr": "Peux-tu me donner un plan ?",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "N b’a fɛ ka demo kɛ.",
+   "fr": "Je veux faire une démonstration.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I ni ce n ka projet dɛmɛ na.",
+   "fr": "Merci de m’aider avec mon projet.",
+   "source": "mande-ia-demo"
+  },
+  {
+   "bm": "I ni ce",
+   "fr": "Bonjour",
+   "source": "collection de data"
+  },
+  {
+   "bm": "K'an bɛn",
+   "fr": "Au revoir",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Awo",
+   "fr": "Oui",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ayi",
+   "fr": "Non",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I tɔgɔ ye di?",
+   "fr": "Comment tu t'appelles",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne tɔgɔ ye",
+   "fr": "Je m'appelle",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Sabari",
+   "fr": "S'il te plaît",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Hakɛ to",
+   "fr": "Excuse-moi",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Min?",
+   "fr": "Où est",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Joli?",
+   "fr": "Combien",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne ma a faamu",
+   "fr": "Je ne comprends pas",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kuma somma somma",
+   "fr": "Parle lentement",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Dɛmɛ n ye",
+   "fr": "Aide-moi",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛna",
+   "fr": "Je suis perdu",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Nyɛgɛn bɛ min?",
+   "fr": "Où sont les toilettes",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne kɔngɔ bɛ",
+   "fr": "J'ai faim",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne ɔgɔ bɛ",
+   "fr": "J'ai soif",
+   "source": "collection de data"
+  },
+  {
+   "bm": "A sara ye joli?",
+   "fr": "C'est combien",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne b'a fɛ",
+   "fr": "Je veux",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne t'a fɛ",
+   "fr": "Je ne veux pas",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ayiwa",
+   "fr": "D'accord",
+   "source": "collection de data"
+  },
+  {
+   "bm": "K'an bɛn sini",
+   "fr": "À demain",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Su hɛɛrɛ",
+   "fr": "Bonne nuit",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I ni baara",
+   "fr": "Bon travail",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne kungolo dimi",
+   "fr": "J'ai mal à la tête",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne kɔnɔ dimi",
+   "fr": "J'ai mal au ventre",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ banbali la",
+   "fr": "Je suis malade",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Dɔgɔtɔrɔso bɛ min?",
+   "fr": "Où est l'hôpital",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ dɔgɔtɔrɔ fɛ",
+   "fr": "J'ai besoin d'un médecin",
+   "source": "collection de data"
+  },
+  {
+   "bm": "A saraninyɛ kosɛbɛ",
+   "fr": "C'est trop cher",
+   "source": "collection de data"
+  },
+  {
+   "bm": "A sara dilan",
+   "fr": "Baisse le prix",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛna a miiri",
+   "fr": "Je vais réfléchir",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ ɲinini kɛ",
+   "fr": "Je cherche",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Mobiliso bɛ min?",
+   "fr": "Où est la gare",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne b'a fɛ ka taa",
+   "fr": "Je veux aller à",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ka taa yen, a sara ye joli?",
+   "fr": "Combien pour aller à",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Jɔ yan",
+   "fr": "Arrête ici",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne ba",
+   "fr": "Ma mère",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne fa",
+   "fr": "Mon père",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne kɔrɔkɛ",
+   "fr": "Mon frère",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne kɔrɔmuso",
+   "fr": "Ma sœur",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne muso",
+   "fr": "Ma femme",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne cɛ",
+   "fr": "Mon mari",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne denw",
+   "fr": "Mes enfants",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I somɔgɔw ka kɛnɛ wa?",
+   "fr": "Comment va ta famille",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Bɛɛ ka kɛnɛ",
+   "fr": "Tout le monde va bien",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kalanso bɛ min?",
+   "fr": "Où est l'école",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne ye kalanden ye",
+   "fr": "Je suis étudiant",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne ye karamɔgɔ ye",
+   "fr": "Je suis enseignant",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ baara kɛ",
+   "fr": "Je travaille",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I baara yɔrɔ bɛ min?",
+   "fr": "Où est ton travail",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne b'a fɛ ka dumuni kɛ",
+   "fr": "Je veux manger",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I bɛ mun dumuni?",
+   "fr": "Qu'est-ce que tu manges",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ji",
+   "fr": "De l'eau",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Malo",
+   "fr": "Du riz",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Buru",
+   "fr": "Du pain",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Dɛmɛ!",
+   "fr": "Au secours",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Polisi wele",
+   "fr": "Appelle la police",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ambilansi wele",
+   "fr": "Appelle une ambulance",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne ye gɛlɛya sɔrɔ",
+   "fr": "J'ai un problème",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kelen",
+   "fr": "Un",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Fila",
+   "fr": "Deux",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Saba",
+   "fr": "Trois",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Naani",
+   "fr": "Quatre",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Duuru",
+   "fr": "Cinq",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Wɔɔrɔ",
+   "fr": "Six",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Wolonfila",
+   "fr": "Sept",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Segin",
+   "fr": "Huit",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kɔnɔntɔn",
+   "fr": "Neuf",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Tan",
+   "fr": "Dix",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Mugan",
+   "fr": "Vingt",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Bi duuru",
+   "fr": "Cinquante",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kɛmɛ",
+   "fr": "Cent",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Numan fɛ",
+   "fr": "À gauche",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kinin fɛ",
+   "fr": "À droite",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Tilenen",
+   "fr": "Tout droit",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Jukɔrɔ",
+   "fr": "Près de",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Janjana",
+   "fr": "Loin",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Yan",
+   "fr": "Ici",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Yen",
+   "fr": "Là-bas",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Tile ye joli?",
+   "fr": "Quelle heure est-il",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Bi",
+   "fr": "Aujourd'hui",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Sini",
+   "fr": "Demain",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kunu",
+   "fr": "Hier",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Sisan",
+   "fr": "Maintenant",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Kɔfɛ",
+   "fr": "Plus tard",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I ni wula",
+   "fr": "Bonsoir",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I ni tile",
+   "fr": "Bonne après-midi",
+   "source": "collection de data"
+  },
+  {
+   "bm": "I su kerale?",
+   "fr": "Comment s'est passée ta nuit",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne seginnen",
+   "fr": "Je suis content",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ dimi",
+   "fr": "Je suis triste",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ kamalen",
+   "fr": "Je suis en colère",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ jigi",
+   "fr": "J'ai peur",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne seginken",
+   "fr": "Je suis fatigué",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ baara la",
+   "fr": "Je suis occupé",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne bɛ yɛrɛmahɔrɔnya la",
+   "fr": "Je suis libre",
+   "source": "collection de data"
+  },
+  {
+   "bm": "A ka ɲi",
+   "fr": "C'est bien",
+   "source": "collection de data"
+  },
+  {
+   "bm": "A man ɲi",
+   "fr": "C'est mauvais",
+   "source": "collection de data"
+  },
+  {
+   "bm": "Ne b'i fɛ",
+   "fr": "Je t'aime",
+   "source": "collection de data"
+  },
+  {
+   "bm": "K'an bɛn kɛsɛkɛsɛ",
+   "fr": "À bientôt",
+   "source": "collection de data"
+  },
+  {
+   "bm": "K'an ben",
+   "fr": "Au revoir",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Kelen, fila, saba, naani, duuru, wɔɔrɔ, wolonwula, seegin, kɔnɔntɔn, tan",
+   "fr": "Compter jusqu'à dix",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Denbaya kɔnɔ: fa, ba, denmisɛnw, balimaw",
+   "fr": "Ma famille",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "I ni ce, walima Barka",
+   "fr": "Comment dire merci",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Aw ni ce dumuni na",
+   "fr": "Bon appétit",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "I ni ce kosɛbɛ, aw ni waso",
+   "fr": "Félicitations",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "N sɛgɛnna",
+   "fr": "Je suis fatigué",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "N ni ka nisɔndiya",
+   "fr": "Je suis content",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "N kɔngɔla",
+   "fr": "J'ai faim",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Mindiya bɛ n na",
+   "fr": "J'ai soif",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "I bɛ waati fɔ n ye wa?",
+   "fr": "Quelle heure est-il",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Kunun",
+   "fr": "Hier",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Ɔridinatɛri",
+   "fr": "Ordinateur",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Telefɔni",
+   "fr": "Téléphone",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Ɛntɛrinɛti",
+   "fr": "Internet",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Baara",
+   "fr": "Travail",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Wari",
+   "fr": "Argent",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Kalanso",
+   "fr": "École",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Bon walima So",
+   "fr": "Maison",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "I ka se ka bamanankan kalan ni ɲininkali caman ye, n bɛ yan ka i dɛmɛ",
+   "fr": "Comment apprendre le bambara",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "I ni ce dɛmɛ la,",
+   "fr": "Merci pour ton aide",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Malidenw bɛ tigadegena, jɛ, ni to dun ka caya",
+   "fr": "Nourriture malienne",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "To ye Mali balo kɔrɔ ye, a bɛ dilan ni nɔɔ ye, a bɛ dun ni na ye",
+   "fr": "Le tô",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Festival sur Niger ye fɛti belebeleba ye Ségou la, a bɛ dɔnkili ni fɔli kɛ",
+   "fr": "Fêtes maliennes",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Silamɛya ye diinɛ caman ye Mali la, nka Krista ni laadala diinɛw fana bɛ yen",
+   "fr": "Religion au mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Mali funteni ka bon, sanjida bɛ juyu ni ut kalo cɛ",
+   "fr": "Climat du mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Mali mɔgɔw ka caya ni miliyɔn 20 ye",
+   "fr": "Population du mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Malidenw bɛ malo, ɲɔ, ni kaba sɛnɛ kosɛbɛ",
+   "fr": "Agriculture au mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Ntolatan (foot) ye jamana ka jɛ fɛn min ka di mɔgɔw ye kosɛbɛ",
+   "fr": "Sport au mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Bamako ye Mali jamana faaba ye",
+   "fr": "Capitale du mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Mali kɔrɔ tun ye masaya belebeleba ye, Timbuktu ni Sunjata Keita tɔgɔ bɔra a la",
+   "fr": "Histoire du mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Tombouctou ye dugu kɔrɔba ye, a kalanso ni kitabu kɔrɔw tɔgɔ bɔra duniya kɔnɔ",
+   "fr": "Tombouctou",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Baji (Niger) ye baji belebeleba ye, a bɛ tɛmɛn Mali cɛmancɛ fɛ",
+   "fr": "Fleuve niger",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Mali ye fɔlikɛlaw jamana ye, i n'a fɔ Salif Keita ni Ali Farka Touré",
+   "fr": "La musique malienne",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Kan caman bɛ Mali la: bamanankan, fulfulde, sɔnninkanko, dogokan, ni wɛrɛ caman",
+   "fr": "Les langues du mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Dogon jamana ye yɔrɔ kabakoma ye Mali kɔnɔ, a kulu ni sigicogo tɔgɔ bɔra duniya kɔnɔ",
+   "fr": "Dogon",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "Mali ye jamana yɛrɛmahɔrɔnya sɔrɔ san 1960 la",
+   "fr": "Indépendance du mali",
+   "source": "public/Collection de Data Autantic"
+  },
+  {
+   "bm": "I ka kene wa?",
+   "fr": "Comment vas-tu",
+   "source": "public/Collection de Data Autantic"
+  }
+ ],
+ "traduire": [
+  {
+   "fr": "Bonjour",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bonsoir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bonne nuit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Au revoir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À demain",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À bientôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Merci",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "De rien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "S'il te plaît",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Excuse-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Oui",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Non",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "D'accord",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Comment vas-tu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je vais bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne vais pas bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Comment tu t'appelles",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je m'appelle",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Enchanté",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où habites-tu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'habite à",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "D'où viens-tu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je viens de",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quel âge as-tu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où est",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où sont",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ici",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Là-bas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À gauche",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À droite",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout droit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Près de",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Loin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Combien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est combien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est trop cher",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Baisse le prix",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne veux pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je cherche",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Aidez-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne comprends pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parlez lentement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Répétez s'il vous plaît",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai faim",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai soif",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux manger",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux boire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "De l'eau",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Du riz",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Du pain",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "De la viande",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Du poisson",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Des fruits",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où est le marché",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où est l'hôpital",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où est l'école",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où sont les toilettes",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où est la gare",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis perdu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis malade",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai mal à la tête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai mal au ventre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai besoin d'un médecin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Appelez une ambulance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Appelez la police",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Au secours",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai un problème",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ma mère",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mon père",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mon frère",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ma sœur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mon mari",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ma femme",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mes enfants",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ma famille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis enseignant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis étudiant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je travaille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne travaille pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Aujourd'hui",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Demain",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Hier",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Maintenant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Plus tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quelle heure est-il",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dix",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cent",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Lundi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mardi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mercredi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Jeudi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vendredi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Samedi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dimanche",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Janvier",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Février",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mars",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Avril",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mai",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Juin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Juillet",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Août",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Septembre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Octobre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Novembre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Décembre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis content",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis triste",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis fatigué",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en colère",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai peur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis occupé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis libre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est mauvais",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est bon",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'aime",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'aime pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je t'aime",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ouvre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ferme",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Viens",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Va",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Attends",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Regarde",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Écoute",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parle",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Silence",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Arrête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Continue",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Donne-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Montre-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dis-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne sais pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Peut-être",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bien sûr",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vraiment",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Beaucoup",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Un peu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Rien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quelque chose",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Personne",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Qui",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quoi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quand",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pourquoi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Comment",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Combien de temps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis prêt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas prêt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Attend un peu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dépêche-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Doucement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Attention",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Danger",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est dangereux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis d'accord",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas d'accord",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pas de problème",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout va bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ça ne va pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux dormir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux me reposer",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il fait chaud",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il fait froid",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il pleut",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a du soleil",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Beau temps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mauvais temps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en retard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Prend ton temps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis pressé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Attends-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je reviens",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je reviens tout de suite",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où vas-tu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je vais au marché",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je vais à l'école",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je rentre à la maison",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis à la maison",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il n'y a personne",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a quelqu'un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ouvre la porte",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ferme la porte",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Allume la lumière",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Éteins la lumière",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il fait trop chaud",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il fait trop froid",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai chaud",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai froid",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en sueur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Asseyez-vous",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Levez-vous",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Entrez",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sortez",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Suivez-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Attendez ici",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne bougez pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parlez plus fort",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parlez moins fort",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'entends pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne vois pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est clair",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas clair",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis d'accord avec toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas d'accord avec toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est vrai",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est faux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je pense que",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À mon avis",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Peut-être que oui",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Peut-être que non",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis sûr",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas sûr",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est possible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est impossible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pas de souci",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout est bon",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ça ne marche pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ça marche",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai compris",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai pas compris",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Explique-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Montre-moi comment",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Encore une fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est fini",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On commence",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On arrête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On continue",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai terminé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai pas terminé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est mon tour",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est ton tour",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Donne-moi ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Prends ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Laisse ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne touche pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Fais attention",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Regarde bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Écoute bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je connais cet endroit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne connais pas cet endroit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est loin d'ici",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est près d'ici",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On est arrivé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On n'est pas encore arrivé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ça va prendre longtemps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ça va être rapide",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis fatigué de ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'en ai marre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est trop",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est suffisant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Encore un peu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est tout",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il n'y a plus rien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il reste encore",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis prêt à partir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Restons ici",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Allons-y",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On se voit plus tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bonne chance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bon courage",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Félicitations",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bravo",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis fier de toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de manger",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de boire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de parler",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train d'écouter",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de regarder",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train d'écrire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de lire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de travailler",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de me reposer",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train de dormir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Réveille-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dors bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Fais de beaux rêves",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai bien dormi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai pas bien dormi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai mal dormi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en forme",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas en forme",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai de l'énergie",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai plus d'énergie",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis motivé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas motivé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis confiant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai pas confiance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis stressé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis détendu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Calme-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne t'inquiète pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout va s'arranger",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est normal",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas normal",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est bizarre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est intéressant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est ennuyeux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est amusant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je m'amuse",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je m'ennuie",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu m'amuses",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Arrête de rire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est drôle",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas drôle",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis sérieux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je plaisante",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est une blague",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sans blague",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es sûr",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es certain",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te crois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne te crois pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu mens",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne mens pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dis la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne mens pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te fais confiance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne te fais pas confiance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Compte sur moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu peux compter sur moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis là pour toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu n'es pas seul",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On est ensemble",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te soutiens",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Merci pour ton aide",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je t'ai aidé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu m'as aidé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai pas besoin d'aide",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai besoin de toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai besoin d'aide",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Peux-tu m'aider",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Est-ce que tu peux m'aider",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je vais t'aider",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne peux pas t'aider",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est gentil",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est très gentil",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es gentil",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es méchant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne sois pas méchant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sois gentil",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Respecte-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te respecte",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu me manques",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu me manques beaucoup",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je pense à toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne m'oublie pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne t'oublie pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On se parle bientôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Appelle-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Envoie-moi un message",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je t'appelle plus tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te réponds plus tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis disponible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas disponible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en réunion",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en classe",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en route",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'arrive bientôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'arrive dans cinq minutes",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Attends-moi dehors",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je t'attends",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je t'ai attendu longtemps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en train d'apprendre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'apprends le bambara",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est difficile",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est facile",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je comprends maintenant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je commence à comprendre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Répète s'il te plaît",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parle plus lentement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parle plus vite",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Comment on dit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Que veut dire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne connais pas ce mot",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Écris-le",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Montre-moi l'exemple",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Donne-moi un exemple",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est correct",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas correct",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai fait une erreur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas grave",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Essaie encore",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu progresses",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Continue comme ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bravo continue",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis fier de mes progrès",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai besoin de pratiquer",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On peut pratiquer ensemble",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux pratiquer",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parlons en bambara",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parle-moi en bambara",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je préfère le français",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je préfère le bambara",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mélange les deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est comment en bambara",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Traduis en bambara",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Traduis en français",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux apprendre plus",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Enseigne-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis ton élève",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es mon professeur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Merci pour la leçon",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À la prochaine leçon",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je dois partir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je dois rentrer",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il se fait tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On se revoit demain",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Même heure demain",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je serai disponible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne serai pas disponible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Appelle-moi ce soir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je t'envoie ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai envoyé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu as reçu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai rien reçu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vérifie ton téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il n'y a pas de réseau",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le réseau est mauvais",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le réseau est bon",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ma batterie est faible",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai plus de batterie",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Recharge ton téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Où est le chargeur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Prête-moi ton chargeur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai perdu mon téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai trouvé mon téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mon téléphone est cassé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Mon téléphone ne marche plus",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Redémarre le téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Éteins le téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Allume le téléphone",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a un message",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a un appel",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Qui m'appelle",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne peux pas parler maintenant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te rappelle",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Rappelle-moi plus tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en ligne",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne suis pas en ligne",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Connecte-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Déconnecte-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il n'y a pas d'internet",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "L'internet est lent",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "L'internet est rapide",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Partage ta connexion",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quel est le mot de passe",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le mot de passe est incorrect",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai oublié le mot de passe",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Change le mot de passe",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est sécurisé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas sécurisé",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Fais attention aux arnaques",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne donne pas tes informations",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est confidentiel",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Garde ça secret",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne dis rien à personne",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est entre nous",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Promets-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te promets",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne mentirai pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dis-moi la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je veux la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Toute la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Rien que la vérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis honnête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sois honnête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est honnête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce n'est pas honnête",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je respecte ton avis",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Chacun son avis",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On n'est pas d'accord",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On est d'accord",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trouvons un compromis",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est un bon compromis",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je comprends ton point de vue",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Voici mon point de vue",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À mon sens",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Selon moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Personnellement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Franchement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Honnêtement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Clairement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Évidemment",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bien sûr que oui",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bien sûr que non",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Absolument",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pas du tout",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Totalement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Complètement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Presque",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À peu près",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Exactement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Précisément",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Surtout",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Principalement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Généralement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Souvent",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Rarement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Jamais",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Toujours",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Parfois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "De temps en temps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tous les jours",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Toutes les semaines",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tous les mois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tous les ans",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Une fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Deux fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Plusieurs fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "La dernière fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "La prochaine fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cette fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "La première fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pour la première fois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Depuis longtemps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Depuis peu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a longtemps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a peu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Bientôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout de suite",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Immédiatement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dans un moment",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dans quelques minutes",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dans une heure",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dans deux heures",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce matin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cet après-midi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ce soir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cette nuit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Demain matin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Demain soir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Hier matin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Hier soir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le week-end",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pendant le week-end",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "En semaine",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le matin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "L'après-midi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le soir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "La nuit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À midi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À minuit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trop tôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trop tard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "À temps",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "En avance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "En retard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis en avance",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es en retard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne sois pas en retard",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Arrive à l'heure",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Pars maintenant",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Reste encore un peu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je dois y aller",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Reste avec moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne pars pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Reviens vite",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Reviens bientôt",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je reviendrai",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne reviendrai pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est promis",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Motus",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Chut",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tais-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne dis rien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Écoute seulement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Regarde seulement",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Observe",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Fais attention à ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Note ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "N'oublie pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Souviens-toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je me souviens",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne me souviens plus",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai oublié",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je n'ai pas oublié",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Rappelle-moi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je te rappellerai",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est noté",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est marqué",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "J'ai compris le message",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Message reçu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ok c'est noté",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je m'en occupe",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Laisse-moi faire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je m'en charge",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est ma responsabilité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est ta responsabilité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On partage la responsabilité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Personne n'est responsable",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tout le monde est responsable",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est collectif",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est individuel",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ensemble on est plus forts",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Seul on va plus vite",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ensemble on va plus loin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis avec toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu n'es pas seul dans ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On va y arriver",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On va réussir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "N'abandonne pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Continue le combat",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Reste fort",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Garde espoir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il y a toujours de l'espoir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Demain sera meilleur",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ça va s'améliorer",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le pire est derrière nous",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Le meilleur est à venir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Croire en soi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je crois en toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu peux le faire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je sais que tu peux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne doute pas de toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Aie confiance en toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es capable",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es fort",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es intelligent",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es courageux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu me rends fier",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Continue à briller",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu vas réussir",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Succès garanti",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On célèbre ça",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Félicitations encore",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu l'as mérité",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est ta victoire",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Profite bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Savoure le moment",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est historique",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "On s'en souviendra",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Merci d'être là",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Merci pour tout",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je ne sais pas comment te remercier",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es quelqu'un de bien",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Reste comme tu es",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Ne change pas",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Tu es unique",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Il n'y a personne comme toi",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Je suis chanceux de te connaître",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Rencontre importante",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'est le destin",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "C'était écrit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Inch'Allah",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Si Dieu le veut",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Grâce à Dieu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Merci Dieu",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dieu est grand",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Que Dieu t'aide",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Que Dieu te bénisse",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Amen",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Onze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Douze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Treize",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatorze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quinze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Seize",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dix-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dix-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dix-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt et un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Vingt-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente et un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trente-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante et un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quarante-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante et un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinquante-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante et un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-dix",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante et onze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-douze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-treize",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-quatorze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-quinze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-seize",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-dix-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-dix-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Soixante-dix-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingts",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-un",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-deux",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-trois",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-quatre",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-cinq",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-six",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-dix",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-onze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-douze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-treize",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-quatorze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-quinze",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-seize",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-dix-sept",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-dix-huit",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre-vingt-dix-neuf",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Deux cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trois cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinq cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Six cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sept cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Huit cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Neuf cents",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Deux mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Trois mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Quatre mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Cinq mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Six mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Sept mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Huit mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Neuf mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  },
+  {
+   "fr": "Dix mille",
+   "source": "Bambara Dataset/Bambara autantic"
+  }
+ ]
+}

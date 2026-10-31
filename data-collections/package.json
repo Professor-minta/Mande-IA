@@ -1,0 +1,21 @@
+{
+  "name": "data-collections",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Data-Collections by Minta Services : collecte de voix et de textes en bambara pour Mande-IA (data.mintaservices.com)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2"
+  }
+}

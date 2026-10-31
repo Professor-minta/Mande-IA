@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data-Collections : donnez votre voix au bambara</title>
+<meta name="description" content="Enregistrez votre voix, écrivez et traduisez des phrases en bambara pour entraîner Mande-IA. Data-Collections by Minta Services.">
+<meta name="theme-color" content="#14173a">
+<meta property="og:title" content="Data-Collections : donnez votre voix au bambara">
+<meta property="og:description" content="Enregistrez, écrivez, traduisez et validez des phrases en bambara pour Mande-IA.">
+<meta property="og:image" content="https://data.mintaservices.com/icon-192.png">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400;100,500;100,700;125,800&display=swap">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<a class="skip" href="#vue">Aller au contenu</a>
+<header class="top">
+  <a class="brand" href="#tableau">
+    <img src="data-collections.webp" alt="" width="52" height="52">
+    <span><strong>Data-Collections</strong><small>by Minta Services</small></span>
+  </a>
+  <nav class="tabs" aria-label="Navigation">
+    <a href="#tableau" data-vue="tableau">Tableau de bord</a>
+    <a href="#contribuer" data-vue="contribuer">Contribuer</a>
+    <a href="#valider" data-vue="valider">Valider</a>
+    <a href="#classement" data-vue="classement">Classement</a>
+    <a href="#compte" data-vue="compte" class="tab-compte"><span class="avatar" id="avatar" aria-hidden="true">?</span><span>Compte</span></a>
+  </nav>
+</header>
+
+<main id="vue">
+
+<section class="vue" data-vue="tableau" aria-labelledby="t-titre">
+  <div class="dash">
+    <div class="dash-main">
+      <div class="hero-card">
+        <h1 id="t-titre">Contribuez à Mande-IA</h1>
+        <p class="hero-sub">Aidez à préserver le bambara : chaque voix, chaque phrase apprend à Mande-IA à mieux comprendre notre langue.</p>
+        <div class="stats">
+          <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Phrases</span><strong id="s-phrases">0</strong></div>
+          <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Voix</span><strong id="s-voix">0</strong></div>
+          <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>Validées</span><strong id="s-validees">0</strong></div>
+          <div class="stat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 20c0-2.4 1.3-4.3 3.5-4.3S22 17.6 22 20"/></svg><span>Contributeurs</span><strong id="s-contributeurs">0</strong></div>
+        </div>
+      </div>
+
+      <h2 class="sec-title">Actions de contribution</h2>
+      <p class="sec-sub">Choisissez une façon de contribuer aux données en bambara.</p>
+      <div class="actions-grid">
+        <article class="action a-teal">
+          <span class="action-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+          <h3>Enregistrer votre voix en bambara</h3>
+          <p>Lisez une phrase à voix haute. Votre voix aide Mande-IA à comprendre le bambara parlé.</p>
+          <a class="btn btn-teal" href="#contribuer/voix">Enregistrer</a>
+        </article>
+        <article class="action a-gold">
+          <span class="action-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/></svg></span>
+          <h3>Écrire une phrase en bambara</h3>
+          <p>Proposez des phrases naturelles, comme on les dit vraiment, pour enrichir le jeu de données.</p>
+          <a class="btn btn-gold" href="#contribuer/phrase">Écrire une phrase</a>
+        </article>
+        <article class="action a-red">
+          <span class="action-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11l-3-3M20 17H9l3 3"/></svg></span>
+          <h3>Traduire du français vers le bambara</h3>
+          <p>Traduisez des phrases courantes. Chaque traduction est ensuite vérifiée par d'autres contributeurs.</p>
+          <a class="btn btn-red" href="#contribuer/traduction">Commencer la traduction</a>
+        </article>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-head"><h2>Progression globale de la collecte</h2><strong id="p-pct">0 %</strong></div>
+        <div class="bar" role="progressbar" aria-labelledby="p-texte" aria-valuemin="0" aria-valuemax="100" id="p-bar"><i id="p-fill"></i></div>
+        <p class="progress-text" id="p-texte">Objectif : 10 000 contributions validées.</p>
+        <ul class="chips">
+          <li id="c-qualite">Qualité de validation : à venir</li>
+          <li id="c-minutes">Voix validées : 0 min</li>
+          <li>Langue : bambara (bm)</li>
+        </ul>
+      </div>
+    </div>
+
+    <aside class="top-card" aria-labelledby="top-titre">
+      <h2 id="top-titre">Top contributeurs <span class="flag" aria-hidden="true"><i></i><i></i><i></i></span></h2>
+      <p class="top-mois" id="top-mois"></p>
+      <ol class="top-list" id="top-list"></ol>
+      <p class="empty" id="top-vide" hidden>Personne encore ce mois-ci. Soyez le premier !</p>
+      <a class="btn btn-line" href="#classement">Voir le classement complet</a>
+    </aside>
+  </div>
+</section>
+
+<section class="vue" data-vue="contribuer" aria-labelledby="c-titre" hidden>
+  <div class="panel">
+    <h1 id="c-titre">Contribuer</h1>
+    <div class="seg" role="tablist" aria-label="Type de contribution">
+      <button type="button" role="tab" data-mode="voix">Voix</button>
+      <button type="button" role="tab" data-mode="phrase">Phrase</button>
+      <button type="button" role="tab" data-mode="traduction">Traduction</button>
+    </div>
+
+    <div class="mode" data-mode="voix">
+      <p class="hint">Lisez la phrase clairement, à votre rythme normal, dans un endroit calme.</p>
+      <div class="sentence"><p class="bm" id="v-bm">…</p><p class="fr" id="v-fr"></p></div>
+      <div class="recorder">
+        <button class="rec" id="v-rec" type="button" aria-label="Enregistrer"><span></span></button>
+        <p class="rec-time" id="v-time">0:00 / 0:15</p>
+      </div>
+      <audio id="v-player" controls hidden></audio>
+      <div class="row-btns">
+        <button class="btn btn-teal" id="v-send" type="button" disabled>Envoyer ma voix</button>
+        <button class="btn btn-line" id="v-redo" type="button" hidden>Recommencer</button>
+        <button class="btn btn-ghost" id="v-skip" type="button">Changer de phrase</button>
+      </div>
+    </div>
+
+    <form class="mode" data-mode="phrase" id="f-phrase">
+      <p class="hint">Écrivez une phrase de tous les jours, comme vous la diriez. Avec la traduction en français si vous pouvez.</p>
+      <label>Phrase en bambara<textarea id="p-bm" rows="3" maxlength="300" required placeholder="Ex. : Sini n bɛna taa sugu la."></textarea></label>
+      <label>Traduction en français (facultatif)<textarea id="p-fr" rows="2" maxlength="300"></textarea></label>
+      <p class="keys">Lettres du bambara : <button type="button" data-car="ɛ">ɛ</button><button type="button" data-car="ɔ">ɔ</button><button type="button" data-car="ɲ">ɲ</button><button type="button" data-car="ŋ">ŋ</button><button type="button" data-car="Ɛ">Ɛ</button><button type="button" data-car="Ɔ">Ɔ</button><button type="button" data-car="Ɲ">Ɲ</button></p>
+      <button class="btn btn-gold" type="submit">Envoyer la phrase</button>
+    </form>
+
+    <form class="mode" data-mode="traduction" id="f-trad">
+      <p class="hint">Traduisez en bambara courant. Il n'y a pas une seule bonne réponse : écrivez comme vous parlez.</p>
+      <div class="sentence"><p class="fr-big" id="t-fr">…</p></div>
+      <label>Traduction en bambara<textarea id="t-bm" rows="3" maxlength="300" required></textarea></label>
+      <p class="keys">Lettres du bambara : <button type="button" data-car="ɛ">ɛ</button><button type="button" data-car="ɔ">ɔ</button><button type="button" data-car="ɲ">ɲ</button><button type="button" data-car="ŋ">ŋ</button><button type="button" data-car="Ɛ">Ɛ</button><button type="button" data-car="Ɔ">Ɔ</button><button type="button" data-car="Ɲ">Ɲ</button></p>
+      <div class="row-btns">
+        <button class="btn btn-red" type="submit">Envoyer la traduction</button>
+        <button class="btn btn-ghost" id="t-skip" type="button">Changer de phrase</button>
+      </div>
+    </form>
+    <p class="status" id="c-status" role="status"></p>
+  </div>
+</section>
+
+<section class="vue" data-vue="valider" aria-labelledby="val-titre" hidden>
+  <div class="panel">
+    <h1 id="val-titre">Valider</h1>
+    <p class="hint">Écoutez ou lisez, puis dites si c'est juste. Une contribution est validée quand <span id="val-n">2</span> personnes sont d'accord.</p>
+    <div class="seg" role="tablist" aria-label="Type de validation">
+      <button type="button" role="tab" data-val="voix">Voix</button>
+      <button type="button" role="tab" data-val="texte">Textes</button>
+    </div>
+    <div class="val-card" id="val-card" hidden>
+      <p class="val-q" id="val-q"></p>
+      <div class="sentence"><p class="bm" id="val-bm"></p><p class="fr" id="val-fr"></p></div>
+      <audio id="val-audio" controls preload="none" hidden></audio>
+      <div class="row-btns">
+        <button class="btn btn-teal" id="val-oui" type="button">Oui, c'est juste</button>
+        <button class="btn btn-red" id="val-non" type="button">Non, c'est faux</button>
+        <button class="btn btn-ghost" id="val-skip" type="button">Je ne sais pas</button>
+      </div>
+    </div>
+    <p class="empty" id="val-vide" hidden>Plus rien à valider pour l'instant. Merci ! Revenez plus tard, ou contribuez vous-même.</p>
+    <p class="status" id="val-status" role="status"></p>
+  </div>
+</section>
+
+<section class="vue" data-vue="classement" aria-labelledby="cl-titre" hidden>
+  <div class="panel">
+    <h1 id="cl-titre">Classement</h1>
+    <div class="seg" role="tablist" aria-label="Période">
+      <button type="button" role="tab" data-periode="mois">Ce mois-ci</button>
+      <button type="button" role="tab" data-periode="tout">Depuis le début</button>
+    </div>
+    <ol class="rank" id="rank"></ol>
+    <p class="empty" id="rank-vide" hidden>Pas encore de contributions sur cette période.</p>
+  </div>
+</section>
+
+<section class="vue" data-vue="compte" aria-labelledby="co-titre" hidden>
+  <div class="panel">
+    <h1 id="co-titre">Compte</h1>
+    <div id="co-moi" hidden>
+      <p class="hello">I ni ce, <strong id="co-pseudo"></strong> !</p>
+      <ul class="mine" id="co-compteurs"></ul>
+    </div>
+    <form class="profile" id="f-profil">
+      <p class="hint" id="co-intro">Choisissez un pseudo pour contribuer. Pas d'e-mail ni de mot de passe : votre profil est lié à ce navigateur.</p>
+      <label>Pseudo (visible dans le classement)<input id="pr-pseudo" maxlength="30" required autocomplete="nickname"></label>
+      <div class="three">
+        <label>Région<select id="pr-region"><option value="">Ne pas répondre</option></select></label>
+        <label>Âge<select id="pr-age"><option value="">Ne pas répondre</option></select></label>
+        <label>Genre<select id="pr-genre"><option value="">Ne pas répondre</option></select></label>
+      </div>
+      <p class="why">La région, l'âge et le genre sont facultatifs. Ils aident Mande-IA à comprendre toutes les voix du Mali, pas seulement certaines.</p>
+      <div id="pr-consent">
+        <label class="check"><input type="checkbox" id="pr-majeur"> J'ai 18 ans ou plus.</label>
+        <label class="check"><input type="checkbox" id="pr-ok"> J'accepte que mes enregistrements et mes textes soient utilisés par Minta Services pour développer Mande-IA et des outils en langues africaines. Je peux tout supprimer à tout moment depuis cette page.</label>
+      </div>
+      <button class="btn btn-teal" type="submit" id="pr-submit">Créer mon profil</button>
+      <p class="status" id="co-status" role="status"></p>
+    </form>
+    <div class="danger" id="co-danger" hidden>
+      <h2>Supprimer mes données</h2>
+      <p>Votre profil, vos enregistrements, vos phrases et vos votes seront effacés définitivement.</p>
+      <button class="btn btn-red" type="button" id="co-delete">Tout supprimer</button>
+    </div>
+    <div class="how">
+      <h2>Comment ça marche</h2>
+      <ol>
+        <li><strong>Vous contribuez</strong> : une voix, une phrase ou une traduction.</li>
+        <li><strong>D'autres contributeurs vérifient</strong> : chaque contribution est validée quand plusieurs personnes sont d'accord.</li>
+        <li><strong>Les données validées</strong> servent à entraîner Mande-IA, pour qu'il comprenne et parle mieux le bambara.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p><strong>Data-Collections</strong> by <a href="https://mintaservices.com">Minta Services</a>, pour <a href="https://ia.mintaservices.com">Mande-IA</a>.</p>
+  <p><a href="mailto:data@mintaservices.com">data@mintaservices.com</a> <a href="mailto:professorminta@gmail.com">professorminta@gmail.com</a> <a href="https://wa.me/22377295259">WhatsApp +223 77 29 52 59</a></p>
+</footer>
+<script src="app.js?v=1" defer></script>
+</body>
+</html>
