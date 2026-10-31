@@ -42,7 +42,7 @@ const MENU = [
     rows: [
       { id: 'github', title: 'Mande-IA sur GitHub', description: 'Le code ouvert du projet' },
       { id: 'createur', title: 'Qui a créé Mande-IA', description: 'Le Professeur Issa Minta et Minta Services' },
-      { id: 'academy', title: 'Rejoindre Minta Academy', description: 'Formation pratique : cloud, serveurs et IA' },
+      { id: 'academy', title: 'Rejoindre Minta Academy', description: 'Cours gratuits : cloud, serveurs et IA locale' },
       { id: 'entrepreneuriat', title: 'Minta Entrepreneurship', description: 'Le programme pour les porteurs de projets' },
       { id: 'professeur', title: 'Rencontrer Pr Issa Minta', description: 'Écrire au Professeur sur WhatsApp' }
     ]
@@ -52,7 +52,7 @@ const ROWS = Object.fromEntries(MENU.flatMap((section) => section.rows).map((row
 
 const STATIC_REPLIES = {
   createur: '*Mande-IA* a été créé au Mali par le Professeur *Issa Minta*, professeur de technologie et fondateur de *Minta Services*.\n\nSon objectif : rendre l’intelligence artificielle accessible en bambara, en français et en anglais.\n\nEssayez aussi Mande-IA sur le web : https://ia.mintaservices.com',
-  academy: '*Minta Academy* propose une formation pratique de 10 jours sur le cloud, les serveurs et l’intelligence artificielle.\n\nInformations et inscription : https://mintaservices.com/academy.html',
+  academy: '*Minta Academy* est une formation *gratuite* en 10 modules : nom de domaine, serveur VPS, aaPanel, Node.js, Python et intelligence artificielle sans internet avec Mande-IA v3.\n\nCommencez ici : https://mintaservices.com/academy/\n\nPour essayer Mande-IA sur votre ordinateur : installez Ollama puis tapez `ollama run professor-minta/mande-ia.v3`',
   entrepreneuriat: '*Minta Services Entrepreneurship* accompagne les porteurs de projets.\n\nDécouvrez le programme : https://mintaservices.com/entrepreneurship.html',
   professeur: 'Pour écrire directement au Professeur Issa Minta : https://wa.me/22377295259'
 };
