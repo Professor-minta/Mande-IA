@@ -38,7 +38,8 @@ Par **Minta Services** — Bamako / Ségou, Mali 🇲🇱
 - Limite gratuite de 5 questions par jour
 - **Nouveautés** affichées dans l'application après chaque mise à jour
 - Modèle local **Ollama** en secours si Claude ne répond pas
-- Intégration **WhatsApp** (en cours)
+- **WhatsApp** : +223 92 27 58 84, carte d'accueil, menu de 10 sujets
+- **Mande-IA Pro** : paiement Orange Money et Moov (PayDunya ou CinetPay)
 - Génération d'images (bientôt)
 
 ---
@@ -94,7 +95,7 @@ Toutes les variables sont listées dans [`.env.example`](.env.example).
 | `DJELIA_API_KEY` | Voix et dictée en bambara |
 | `OLLAMA_API_URL`, `OLLAMA_MODEL` | Modèle local de secours (laisser vide sans Ollama) |
 | `WHATSAPP_*`, `META_*` | Connecteur WhatsApp |
-| `PAIEMENT_*` | Paiement CinetPay (à venir) |
+| `PAIEMENT_PROVIDER`, `PAYDUNYA_*`, `CINETPAY_*` | Paiement de Mande-IA Pro (voir ci-dessous) |
 
 Le fichier `.env` ne doit **jamais** être envoyé sur GitHub. Voir [SECURITY.md](SECURITY.md).
 
@@ -125,6 +126,32 @@ cd /www/wwwroot/mande-ia-v2 && git pull --ff-only origin main && chown -R www:ww
 Puis **Restart** dans aaPanel. En cas de problème, regardez l'onglet **Project log**.
 
 ---
+
+## Mande-IA Pro et paiement
+
+| Formule | Prix | Durée | Appels en direct |
+|---|---|---|---|
+| Gratuit | 0 | chaque jour | 1 appel de 3 min par jour |
+| Pro Semaine | 1 000 FCFA | 7 jours | 15 min |
+| Pro Mois | 3 000 FCFA | 30 jours | 1 h |
+| Pro 3 mois | 8 000 FCFA | 90 jours | 3 h |
+
+Pro : questions illimitées (100 par jour au plus), appels de 15 minutes au plus. Pas de renouvellement automatique.
+
+1. Dans `.env` : `PAIEMENT_PROVIDER=paydunya`, les trois clés `PAYDUNYA_*` et `PAYDUNYA_MODE=test` pour essayer sans argent réel.
+2. **Restart** dans aaPanel. Le journal affiche `Paiement : paydunya (mode test).`
+3. Testez un achat, puis passez `PAYDUNYA_MODE=live` et **Restart**.
+
+Le prestataire prévient Mande-IA sur `https://ia.mintaservices.com/api/paiement/webhook`. Mande-IA revérifie chaque paiement directement auprès du prestataire avant d'activer Pro.
+
+Entreprises, écoles ou activation à la main (le compte doit exister) :
+
+```bash
+cd /www/wwwroot/mande-ia-v2
+sudo -u www node scripts/pro.js activer ecole@exemple.com 90 180   # 90 jours, 180 min d'appel
+sudo -u www node scripts/pro.js voir ecole@exemple.com
+sudo -u www node scripts/pro.js paiements                          # 30 derniers paiements et total
+```
 
 ## WhatsApp
 

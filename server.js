@@ -18,6 +18,7 @@ const fs = require('fs');
 const { Readable } = require('stream');
 const path = require('path');
 const { setupWhatsApp, isWebhookPath } = require('./connectors/whatsapp');
+const { setupPayments, migrate: migratePayments, isPro, PRO_DAILY_QUESTIONS } = require('./connectors/paiement');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
@@ -32,6 +33,9 @@ const CLAUDE_MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 const GEMINI_MODEL = process.env.GEMINI_VISION_MODEL || 'gemini-3.6-flash';
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || 'gpt-realtime-2.1-mini';
 const LIVE_SECONDS = { free: 180, pro: 900 };
+const FREE_DAILY_QUESTIONS = 5;
+const freeCallSetting = Number.parseInt(process.env.FREE_CALLS_PER_DAY ?? '1', 10);
+const FREE_CALLS_PER_DAY = Number.isFinite(freeCallSetting) && freeCallSetting >= 0 ? freeCallSetting : 1;
 const OLLAMA_URL = process.env.OLLAMA_API_URL || process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || '';
 const TTS_MODEL = process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
@@ -47,13 +51,17 @@ const db = new Database(path.join(DATA_DIR, 'mande-ia.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 db.exec(`CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, plan TEXT NOT NULL DEFAULT 'free' CHECK(plan IN ('free', 'pro')), created_at TEXT NOT NULL); CREATE TABLE IF NOT EXISTS conversations (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, title TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL); CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE, role TEXT NOT NULL CHECK(role IN ('user', 'assistant')), content TEXT NOT NULL, created_at TEXT NOT NULL); CREATE TABLE IF NOT EXISTS daily_usage (identity TEXT NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(identity, day)); CREATE TABLE IF NOT EXISTS whatsapp_inbound (message_id TEXT PRIMARY KEY, created_at TEXT NOT NULL);`);
+migratePayments(db);
 const now = () => new Date().toISOString(); const day = () => new Date().toISOString().slice(0, 10); const id = () => crypto.randomUUID();
 const emailIsValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const getUser = (userId) => db.prepare('SELECT id, email, plan FROM users WHERE id = ?').get(userId);
+const getUser = (userId) => db.prepare('SELECT id, email, plan, pro_until, call_seconds FROM users WHERE id = ?').get(userId);
 const usageIdentity = (req) => { if (req.session.userId) return `user:${req.session.userId}`; if (!req.session.guestId) req.session.guestId = id(); return `guest:${req.session.guestId}`; };
-function usageFor(req, user) { if (user?.plan === 'pro') return { used: 0, remaining: null, limit: null }; const key = usageIdentity(req); const row = db.prepare('SELECT count FROM daily_usage WHERE identity = ? AND day = ?').get(key, day()); const used = row?.count || 0; return { used, remaining: Math.max(0, 5 - used), limit: 5 }; }
-function refundQuestion(req, user) { if (user?.plan === 'pro') return; db.prepare('UPDATE daily_usage SET count = MAX(0, count - 1) WHERE identity = ? AND day = ?').run(usageIdentity(req), day()); }
-function consumeQuestion(req, user) { if (user?.plan === 'pro') return usageFor(req, user); const usage = usageFor(req, user); if (usage.used >= 5) return null; db.prepare(`INSERT INTO daily_usage(identity, day, count) VALUES (?, ?, 1) ON CONFLICT(identity, day) DO UPDATE SET count = count + 1`).run(usageIdentity(req), day()); return usageFor(req, user); }
+const countFor = (identity) => db.prepare('SELECT count FROM daily_usage WHERE identity = ? AND day = ?').get(identity, day())?.count || 0;
+const addCount = (identity, delta) => { if (delta > 0) db.prepare('INSERT INTO daily_usage(identity, day, count) VALUES (?, ?, 1) ON CONFLICT(identity, day) DO UPDATE SET count = count + 1').run(identity, day()); else db.prepare('UPDATE daily_usage SET count = MAX(0, count - 1) WHERE identity = ? AND day = ?').run(identity, day()); };
+function usageFor(req, user) { const used = countFor(usageIdentity(req)); if (isPro(user)) return { used, remaining: null, limit: null }; return { used, remaining: Math.max(0, FREE_DAILY_QUESTIONS - used), limit: FREE_DAILY_QUESTIONS }; }
+function refundQuestion(req) { addCount(usageIdentity(req), -1); }
+function consumeQuestion(req, user) { const cap = isPro(user) ? PRO_DAILY_QUESTIONS : FREE_DAILY_QUESTIONS; if (countFor(usageIdentity(req)) >= cap) return null; addCount(usageIdentity(req), 1); return usageFor(req, user); }
+const limitMessage = (user) => isPro(user) ? `Vous avez posé ${PRO_DAILY_QUESTIONS} questions aujourd’hui, le maximum de Pro. Revenez demain.` : 'Limite atteinte.';
 
 function purgeOldRecords() {
   db.prepare("DELETE FROM daily_usage WHERE day < date('now', '-30 day')").run();
@@ -67,12 +75,13 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false 
 app.use(express.json({ limit: '1mb', verify: (req, res, buffer) => { if (isWebhookPath(req.originalUrl)) req.rawBody = buffer; }}));
 app.use(express.urlencoded({ extended: false }));
 app.use(session({ store: new (SQLiteStoreFactory(session))({ db: 'sessions.db', dir: DATA_DIR }), secret: SESSION_SECRET, proxy: true, resave: false, saveUninitialized: false, cookie: { httpOnly: true, secure: 'auto', sameSite: 'lax', maxAge: 30 * 24 * 60 * 60 * 1000 } }));
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false, skip: (req) => isWebhookPath(req.originalUrl) }));
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false, skip: (req) => isWebhookPath(req.originalUrl) || req.path === '/paiement/webhook' }));
 const voiceLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
 const aiLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 25, standardHeaders: true, legacyHeaders: false });
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
-function sessionInfo(req) { const user = req.session.userId ? getUser(req.session.userId) : null; if (!user && !req.session.guestId) req.session.guestId = id(); const usage = usageFor(req, user); return { success: true, user: user ? { email: user.email, plan: user.plan } : null, is_guest: !user, usage }; }
+function publicUser(user) { if (!user) return null; const pro = isPro(user); return { email: user.email, plan: pro ? 'pro' : 'free', proUntil: pro ? user.pro_until || null : null, callMinutes: pro && user.pro_until ? Math.floor((user.call_seconds || 0) / 60) : null }; }
+function sessionInfo(req) { const user = req.session.userId ? getUser(req.session.userId) : null; if (!user && !req.session.guestId) req.session.guestId = id(); const usage = usageFor(req, user); return { success: true, user: publicUser(user), is_guest: !user, usage }; }
 function saveSessionInfo(req, res, next) { req.session.save((error) => { if (error) return next(error); return res.json(sessionInfo(req)); }); }
 
 app.post('/api/auth', async (req, res, next) => {
@@ -202,12 +211,12 @@ async function askClaude(messages, preference = 'auto', maxTokens = 300) {
 app.post('/api/ai', aiLimit, async (req, res, next) => {
   try {
     const user = req.session.userId ? getUser(req.session.userId) : null; const messages = Array.isArray(req.body?.messages) ? req.body.messages.slice(-12) : []; if (!messages.length) return res.status(400).json({ error: 'Message invalide.' });
-    const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: 'Limite atteinte.', usage: usageFor(req, user) });
+    const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: limitMessage(user), usage: usageFor(req, user) });
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     let reply; try { reply = await askClaude(messages, preference); } catch (error) { return res.status(error.status || 502).json({ error: error.message }); }
     const conversation = selectedConversation(req, req.body?.conversationId);
     if (conversation) { const lastUser = messages[messages.length - 1]; const created = now(); const insert = db.prepare('INSERT INTO messages (id, conversation_id, role, content, created_at) VALUES (?, ?, ?, ?, ?)'); const save = db.transaction(() => { insert.run(id(), conversation.id, 'user', lastUser.content, created); insert.run(id(), conversation.id, 'assistant', reply, created); const title = conversation.title === 'Nouvelle conversation' ? lastUser.content.slice(0, 60) || conversation.title : conversation.title; db.prepare('UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?').run(title, created, conversation.id); }); save(); }
-    res.json({ reply, usage, plan: user?.plan || 'free' });
+    res.json({ reply, usage, plan: isPro(user) ? 'pro' : 'free' });
   } catch (error) { next(error); }
 });
 
@@ -217,7 +226,7 @@ app.post('/api/ai/stream', aiLimit, upload.single('file'), async (req, res, next
     const messages = parseMessages(req.body?.messages); if (!messages) return res.status(400).json({ error: 'Message invalide.' });
     const file = req.file || null;
     if (file && !ATTACHMENT_TYPES.includes(file.mimetype)) return res.status(415).json({ error: 'Ce type de fichier n’est pas accepté. Envoyez une photo (JPG, PNG, WebP) ou un PDF.' });
-    const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: 'Limite atteinte.', usage: usageFor(req, user) });
+    const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: limitMessage(user), usage: usageFor(req, user) });
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     const conversation = selectedConversation(req, req.body?.conversationId);
     const userContent = messages[messages.length - 1].content;
@@ -225,7 +234,7 @@ app.post('/api/ai/stream', aiLimit, upload.single('file'), async (req, res, next
     const send = (event) => { if (!res.writableEnded) res.write(`data: ${JSON.stringify(event)}\n\n`); };
     const controller = new AbortController();
     res.on('close', () => { if (!res.writableFinished) controller.abort(); });
-    send({ type: 'start', usage, plan: user?.plan || 'free' });
+    send({ type: 'start', usage, plan: isPro(user) ? 'pro' : 'free' });
     let reply = '';
     try {
       const sources = file ? (process.env.GEMINI_API_KEY ? [streamGemini, streamClaude] : [streamClaude]) : (OLLAMA_MODEL ? [streamClaude, streamOllama] : [streamClaude]);
@@ -243,9 +252,9 @@ app.post('/api/ai/stream', aiLimit, upload.single('file'), async (req, res, next
       }
       if (!reply.trim()) throw httpError('Mande-IA n’a pas pu répondre. Reformulez votre question.');
       saveExchange(conversation, userContent, reply);
-      send({ type: 'done', usage, plan: user?.plan || 'free' });
+      send({ type: 'done', usage, plan: isPro(user) ? 'pro' : 'free' });
     } catch (error) {
-      if (reply.trim()) saveExchange(conversation, userContent, reply); else refundQuestion(req, user);
+      if (reply.trim()) saveExchange(conversation, userContent, reply); else refundQuestion(req);
       if (controller.signal.aborted) return res.end();
       if (!error.status) console.error('Stream failed:', error.message);
       send({ type: 'error', error: error.status ? error.message : 'La connexion a été interrompue. Réessayez.', usage: usageFor(req, user) });
@@ -258,16 +267,45 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
   try {
     if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'L’appel en direct n’est pas encore activé.' });
     const user = req.session.userId ? getUser(req.session.userId) : null;
-    const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: 'Limite atteinte.', usage: usageFor(req, user) });
+    const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: limitMessage(user), usage: usageFor(req, user) });
+    const grant = liveGrant(req, user);
+    if (!grant) { refundQuestion(req); return res.status(429).json({ error: 'Vous avez déjà utilisé votre appel gratuit d’aujourd’hui. Revenez demain, ou passez à Pro pour appeler plus longtemps.', usage: usageFor(req, user), callLimit: true }); }
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
     let response;
     try { response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) }); }
-    catch (error) { refundQuestion(req, user); console.error('Realtime session:', error.message); return res.status(504).json({ error: 'OpenAI ne répond pas. Réessayez dans un instant. (code openai-timeout)', usage: usageFor(req, user) }); }
+    catch (error) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', error.message); return res.status(504).json({ error: 'OpenAI ne répond pas. Réessayez dans un instant. (code openai-timeout)', usage: usageFor(req, user) }); }
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.value) { refundQuestion(req, user); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
-    req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: liveInstructions(preference), maxSeconds: user?.plan === 'pro' ? LIVE_SECONDS.pro : LIVE_SECONDS.free, usage }));
+    if (!response.ok || !data.value) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
+    req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: liveInstructions(preference), maxSeconds: grant.seconds, usage }));
   } catch (error) { next(error); }
+});
+
+function liveGrant(req, user) {
+  if (isPro(user) && !user.pro_until) return { kind: 'pro', seconds: LIVE_SECONDS.pro };
+  if (isPro(user) && user.call_seconds >= 60) {
+    const seconds = Math.min(LIVE_SECONDS.pro, user.call_seconds);
+    db.prepare('UPDATE users SET call_seconds = MAX(0, call_seconds - ?) WHERE id = ?').run(seconds, user.id);
+    req.session.live = { userId: user.id, seconds, startedAt: Date.now() };
+    return { kind: 'paid', seconds };
+  }
+  const identity = `live:${usageIdentity(req)}`;
+  if (countFor(identity) >= FREE_CALLS_PER_DAY) return null;
+  addCount(identity, 1);
+  return { kind: 'free', seconds: LIVE_SECONDS.free };
+}
+function releaseLive(req, grant) {
+  if (grant.kind === 'free') addCount(`live:${usageIdentity(req)}`, -1);
+  if (grant.kind === 'paid' && req.session.live) { db.prepare('UPDATE users SET call_seconds = call_seconds + ? WHERE id = ?').run(req.session.live.seconds, req.session.live.userId); delete req.session.live; }
+}
+app.post('/api/live/end', (req, res) => {
+  const live = req.session.live;
+  if (live) {
+    const used = Math.min(live.seconds, Math.max(0, Math.ceil((Date.now() - live.startedAt) / 1000)));
+    if (live.seconds > used) db.prepare('UPDATE users SET call_seconds = call_seconds + ? WHERE id = ?').run(live.seconds - used, live.userId);
+    delete req.session.live;
+  }
+  req.session.save(() => res.json({ success: true }));
 });
 
 // --- OLLAMA LOCAL ROUTE (BACK) ---
@@ -345,6 +383,7 @@ app.get('/api/voice/stream/:id', async (req, res) => {
 });
 
 setupWhatsApp(app, { db, day, now });
+setupPayments(app, { db, getUser, now, id });
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
