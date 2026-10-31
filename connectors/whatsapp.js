@@ -53,7 +53,7 @@ const ROWS = Object.fromEntries(MENU.flatMap((section) => section.rows).map((row
 const STATIC_REPLIES = {
   createur: '*Mande-IA* a été créé au Mali par le Professeur *Issa Minta*, professeur de technologie et fondateur de *Minta Services*.\n\nSon objectif : rendre l’intelligence artificielle accessible en bambara, en français et en anglais.\n\nEssayez aussi Mande-IA sur le web : https://ia.mintaservices.com',
   academy: '*Minta Academy* est une formation *gratuite* en 10 modules : nom de domaine, serveur VPS, aaPanel, Node.js, Python et intelligence artificielle sans internet avec Mande-IA v3.\n\nCommencez ici : https://mintaservices.com/academy/\n\nPour essayer Mande-IA sur votre ordinateur : installez Ollama puis tapez `ollama run professor-minta/mande-ia.v3`',
-  entrepreneuriat: '*Minta Services Entrepreneurship* accompagne les porteurs de projets.\n\nDécouvrez le programme : https://mintaservices.com/entrepreneurship.html',
+  entrepreneuriat: '*Minta Entrepreneurship* accompagne les entrepreneurs maliens et africains, de l’idée au premier client : incubation, outils numériques, intelligence artificielle et réseau.\n\nPrésentez votre projet : https://mintaservices.com/entrepreneuriat/\nE-mail : entrepreneuriat@mintaservices.com',
   professeur: 'Pour écrire directement au Professeur Issa Minta : https://wa.me/22377295259'
 };
 
