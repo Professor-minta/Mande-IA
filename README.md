@@ -168,13 +168,43 @@ node scripts/whatsapp.js test             # simule un message « menu » depuis 
 
 ---
 
+## Sauvegardes
+
+`scripts/sauvegarde.sh` copie chaque nuit les bases de Mande-IA (`data/mande-ia.db`) et de Data-Collections (`data/data.db`), ainsi que les deux fichiers `.env`. Les bases sont copiées proprement, même pendant que les sites tournent. Le script range une archive dans `/root/sauvegardes`, où il garde les 7 dernières. Si Google Drive est relié, il envoie aussi l'archive et les nouvelles voix, chiffrées, dans le dossier `MintaServices-sauvegardes`, et y garde 60 jours d'archives.
+
+**Relier Google Drive, une seule fois :**
+
+1. Sur l'ordinateur, dans PowerShell :
+   ```powershell
+   winget install Rclone.Rclone
+   rclone authorize "drive" "eyJzY29wZSI6ImRyaXZlLmZpbGUifQ"
+   ```
+   Le navigateur s'ouvre : choisissez le compte Google, puis autorisez. PowerShell affiche ensuite un jeton entre deux flèches. C'est la ligne qui commence par `{`.
+2. Sur le serveur, en root :
+   ```bash
+   apt install -y rclone
+   bash /www/wwwroot/mande-ia-v2/scripts/sauvegarde-drive.sh
+   ```
+   Collez le jeton, puis choisissez le mot de passe des sauvegardes. Gardez ce mot de passe dans un gestionnaire de mots de passe : sans lui, les sauvegardes ne peuvent pas être ouvertes.
+3. Dans aaPanel, allez dans **Cron**, puis **Add Task** : type **Shell Script**, tous les jours à 3 h 30, avec la commande `bash /www/wwwroot/mande-ia-v2/scripts/sauvegarde.sh`.
+
+**Restaurer :**
+
+```bash
+rclone copy sauvegarde:bases/minta-AAAA-MM-JJ.tar.gz /root/restauration/
+tar -xzf /root/restauration/minta-AAAA-MM-JJ.tar.gz -C /root/restauration/
+rclone copy sauvegarde:voix /root/restauration/voix
+```
+
+---
+
 ## Structure du projet
 
 ```
 server.js               Serveur Express : discussion, fichiers, voix, appel, WhatsApp
 ecosystem.config.js     Configuration PM2 (seulement si PM2 remplace aaPanel)
 verifier-cles.js        Vérifie les clés API sans les afficher
-scripts/                whatsapp.js (diagnostic et configuration), nettoyer-serveur.sh
+scripts/                whatsapp.js (diagnostic et configuration), pro.js, sauvegarde.sh, sauvegarde-drive.sh, nettoyer-serveur.sh
 chats/, connectors/     Connecteur WhatsApp (connectors/whatsapp.js) et logique multi-agents
 public/                 Application web (PWA)
   index.html, app.js, style.css
