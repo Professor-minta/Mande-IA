@@ -273,7 +273,7 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
     let response;
-    try { response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) }); }
+    try { response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { input: liveInputAudio(), output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) }); }
     catch (error) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', error.message); return res.status(504).json({ error: 'OpenAI ne répond pas. Réessayez dans un instant. (code openai-timeout)', usage: usageFor(req, user) }); }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.value) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
@@ -281,6 +281,14 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
+function liveInputAudio() {
+  const noise = ['near_field', 'far_field'].includes(process.env.OPENAI_REALTIME_NOISE_REDUCTION) ? process.env.OPENAI_REALTIME_NOISE_REDUCTION : 'near_field';
+  const threshold = Number.parseFloat(process.env.OPENAI_REALTIME_VAD_THRESHOLD);
+  return {
+    noise_reduction: process.env.OPENAI_REALTIME_NOISE_REDUCTION === 'off' ? null : { type: noise },
+    turn_detection: { type: 'server_vad', threshold: threshold >= 0.3 && threshold <= 0.95 ? threshold : 0.7, prefix_padding_ms: 300, silence_duration_ms: 700, create_response: true, interrupt_response: true }
+  };
+}
 function liveGrant(req, user) {
   if (isPro(user) && !user.pro_until) return { kind: 'pro', seconds: LIVE_SECONDS.pro };
   if (isPro(user) && user.call_seconds >= 60) {

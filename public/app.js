@@ -16,7 +16,7 @@ const state = {
   installEvent: null, busy: false, streamController: null, attachment: null,
   recorder: null, chunks: [], recordingStartedAt: 0, recordingTimer: null, transcribing: false,
   speechCache: new Map(), activeAudio: null, activeSpeechButton: null, speechLoading: false,
-  audioCtx: null, meterFrame: 0, call: null
+  audioCtx: null, meterFrame: 0, call: null, camera: null
 };
 
 const savedLanguage = store.get('mande-language', 'auto');
@@ -526,6 +526,42 @@ async function pickFile(file) {
   renderAttachment();
   $('#prompt').focus();
 }
+async function openCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) { $('#camera-input').click(); return; }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } } }); }
+  catch (error) {
+    if (error.name === 'NotAllowedError') setStatus('Autorisez la caméra dans votre navigateur, ou choisissez une photo avec le bouton +.', { timeout: 6000 });
+    else $('#camera-input').click();
+    return;
+  }
+  state.camera = stream;
+  const video = $('#camera-video');
+  video.srcObject = stream;
+  $('#camera-shoot').disabled = false;
+  $('#camera').hidden = false;
+  video.play().catch(() => {});
+}
+function closeCamera() {
+  state.camera?.getTracks().forEach((track) => track.stop());
+  state.camera = null;
+  $('#camera-video').srcObject = null;
+  $('#camera').hidden = true;
+}
+async function shootPhoto() {
+  const video = $('#camera-video');
+  if (!state.camera || !video.videoWidth) return;
+  $('#camera-shoot').disabled = true;
+  const scale = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(video.videoWidth * scale);
+  canvas.height = Math.round(video.videoHeight * scale);
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  closeCamera();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+  if (!blob) { setStatus('La photo n’a pas pu être prise. Réessayez.', { timeout: 5000 }); return; }
+  pickFile(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+}
 function renderAttachment() {
   const box = $('#attachment');
   const attachment = state.attachment;
@@ -1031,15 +1067,23 @@ async function startRecording() {
   setRecordingUI(true);
   setStatus("J'écoute… Parlez : je m'arrête quand vous avez fini.");
   let heardAt = 0;
+  let loud = 0;
+  const ambient = [];
   const tickTimer = () => {
     const elapsed = Date.now() - state.recordingStartedAt;
-    if (meter && levelOf(meter) > 0.15) heardAt = Date.now();
+    const level = meter ? levelOf(meter) : 0;
+    if (elapsed < 700) { if (elapsed >= 150) ambient.push(level); }
+    else {
+      const floor = ambient.length ? ambient.reduce((sum, value) => sum + value, 0) / ambient.length : 0;
+      if (level > Math.min(0.6, Math.max(0.22, floor * 2.5))) { loud += 1; if (loud >= 2) heardAt = Date.now(); }
+      else loud = 0;
+    }
     $('#recording-time').textContent = `${formatClock(Math.max(1, Math.ceil(elapsed / 1000)))} / 0:10`;
     const silent = heardAt && Date.now() - heardAt > 1800;
     if ((elapsed >= MAX_RECORDING_MS || silent) && state.recorder?.state === 'recording') state.recorder.stop();
   };
   tickTimer();
-  state.recordingTimer = setInterval(tickTimer, 250);
+  state.recordingTimer = setInterval(tickTimer, 100);
   if ('vibrate' in navigator) navigator.vibrate(30);
 }
 function stopRecording() { if (state.recorder?.state === 'recording') state.recorder.stop(); }
@@ -1429,7 +1473,11 @@ $('#prompt').addEventListener('paste', (event) => {
 });
 $('#dictate-button').onclick = () => (state.recorder?.state === 'recording' ? stopRecording() : startRecording());
 $('#attach-button').onclick = () => $('#file-input').click();
-$('#camera-button').onclick = () => $('#camera-input').click();
+$('#camera-button').onclick = openCamera;
+$('#camera-cancel').onclick = closeCamera;
+$('#camera-shoot').onclick = shootPhoto;
+$('#camera-gallery').onclick = () => { closeCamera(); $('#file-input').click(); };
+document.addEventListener('visibilitychange', () => { if (document.hidden && state.camera) closeCamera(); });
 $('#file-input').onchange = (event) => pickFile(event.target.files[0]);
 $('#camera-input').onchange = (event) => pickFile(event.target.files[0]);
 $('#attachment-remove').onclick = () => { clearAttachment(); $('#prompt').focus(); };

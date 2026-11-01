@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=22">
+    <link rel="stylesheet" href="/style.css?v=23">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -279,6 +279,16 @@
       </div>
     </section>
 
+    <section class="camera" id="camera" hidden role="dialog" aria-modal="true" aria-label="Prendre une photo">
+      <video id="camera-video" playsinline muted autoplay></video>
+      <p class="camera-hint">Cadrez, puis appuyez sur le rond blanc.</p>
+      <div class="camera-controls">
+        <button class="call-button" id="camera-cancel" type="button"><svg><use href="#i-close"/></svg><span>Annuler</span></button>
+        <button class="camera-shutter" id="camera-shoot" type="button" aria-label="Prendre la photo"></button>
+        <button class="call-button" id="camera-gallery" type="button"><svg><use href="#i-file"/></svg><span>Galerie</span></button>
+      </div>
+    </section>
+
     <dialog class="sheet" id="auth-dialog" aria-labelledby="auth-title">
       <button class="icon-button sheet-close" id="close-auth" aria-label="Fermer"><svg><use href="#i-close"/></svg></button>
       <h2 id="auth-title">Gardez vos conversations</h2>
@@ -362,6 +372,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=22"></script>
+    <script src="/app.js?v=23"></script>
   </body>
 </html>
