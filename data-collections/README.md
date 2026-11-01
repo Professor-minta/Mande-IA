@@ -49,6 +49,9 @@ mkdir -p /root/sauvegarde-data && cp -a . /root/sauvegarde-data/
 rm -rf public node_modules package-lock.json yarn.lock script.js server.js1 server.js2 server.js3 server.js4 text_submissions.json metadata.json phrases.json
 cp -a /www/wwwroot/mande-ia-v2/data-collections/. .
 npm install --omit=dev
+npm install-scripts approve better-sqlite3 2>/dev/null || npm approve-scripts better-sqlite3
+npm rebuild better-sqlite3
+node -e "require('better-sqlite3')(':memory:'); console.log('SQLite OK')"
 printf 'PORT=3003\nSESSION_SECRET=%s\nADMIN_TOKEN=%s\nVOTES_REQUIS=2\nOBJECTIF=10000\n' "$(openssl rand -hex 32)" "$(openssl rand -hex 24)" > .env
 node scripts/importer-ancien.js /root/sauvegarde-data
 ```
