@@ -2,12 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 const DOSSIER = path.join(__dirname, '..', 'connaissances');
-const LIMITE = 9000;
+const LIMITE = 12000;
 const RELIRE_MS = 60 * 1000;
 
 let cache = { lu: 0, fiches: [] };
 
-const simple = (texte) => String(texte || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const simple = (texte) => String(texte || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const echapper = (texte) => texte.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 function lireFiche(nom) {
@@ -39,9 +39,20 @@ function fiches() {
 function connaissancesPour(texte) {
   const cible = simple(texte);
   if (!cible.trim()) return '';
-  const trouvees = fiches().filter((f) => f.motifs.some((motif) => motif.test(cible)));
+  const trouvees = fiches()
+    .map((f) => ({ f, score: f.motifs.filter((motif) => motif.test(cible)).length }))
+    .filter((t) => t.score > 0)
+    .sort((a, b) => b.score - a.score);
   if (!trouvees.length) return '';
-  const corps = trouvees.map((f) => `### ${f.titre}\n${f.corps}`).join('\n\n').slice(0, LIMITE);
+  const blocs = [];
+  let taille = 0;
+  for (const { f } of trouvees) {
+    const bloc = `### ${f.titre}\n${f.corps}`;
+    if (blocs.length && taille + bloc.length > LIMITE) break;
+    blocs.push(bloc.slice(0, LIMITE));
+    taille += bloc.length;
+  }
+  const corps = blocs.join('\n\n');
   return [
     'Dossier vérifié par Minta Services sur le sujet de la question. Appuie-toi d’abord sur lui.',
     'Pour les faits anciens, dis « selon la tradition orale ». N’ajoute aucun fait, aucune date ni aucune citation qui n’y figure pas.',

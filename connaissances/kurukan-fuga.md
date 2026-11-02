@@ -1,6 +1,6 @@
 ---
 titre: Kurukan Fuga, la Charte du Manden et l'Empire du Mali
-mots: kurukan, kouroukan, kurugan, fuga, fouga, manden, charte du mande, charte de kurukan, soundiata, sundiata, sunjata, soundjata, kirina, krina, soumaoro, sumaworo, sumanguru, sosso, kangaba, kamablon, sanankunya, sinankunya, cousinage, empire du mali, mansa, gbara, sogolon, balla fasseke, serment des chasseurs, 1235, 1236
+mots: kurukan, kouroukan, kurugan, fuga, fouga, manden, charte du mande, charte de kurukan, soundiata, sundiata, sunjata, soundjata, kirina, krina, soumaoro, sumaworo, sumanguru, sosso, kangaba, kamablon, sanankunya, sinankunya, cousinage, empire du mali, gbara, sogolon, balla fasseke, serment des chasseurs, 1235, 1236
 source: https://claude.ai/artifact/5iMBm8fBamEHi44S4PyqHw
 ---
 

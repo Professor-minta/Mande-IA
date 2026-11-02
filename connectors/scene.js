@@ -5,7 +5,7 @@ const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthro
 
 const AGENTS = [
   { id: 'stratege', nom: 'Stratège', role: 'stratégie d’entreprise, idées de business et plans d’action au Mali' },
-  { id: 'historien', nom: 'Historien', role: 'histoire du Mali et de l’Afrique : Kurukan Fuga, Soundiata, les grands empires, les traditions', mots: 110 },
+  { id: 'historien', nom: 'Historien', role: 'histoire du Mali et de l’Afrique : Kurukan Fuga, Soundiata, Mansa Moussa, les grands empires, les traditions', mots: 110 },
   { id: 'chercheur', nom: 'Chercheur', role: 'explications claires : sciences, santé, géographie, culture générale' },
   { id: 'bambara', nom: 'Bambara', role: 'traductions et petites leçons de bambara' },
   { id: 'tech', nom: 'Tech', role: 'serveurs, sites web, code, cloud et IA locale' },
@@ -44,7 +44,7 @@ function sceneInstructions(preference) {
     'Dès qu’une demande relève d’un spécialiste, appelle l’outil consulter_agent avec l’agent le plus adapté et une demande précise. Pour une demande en plusieurs parties, consulte plusieurs agents, un après l’autre.',
     'Avant d’appeler l’outil, annonce en quelques mots quel agent tu mobilises, par exemple « Je demande à mon agent Marketing. »',
     'Ensuite, présente la réponse de l’agent à voix haute, en quelques phrases courtes, sans inventer ce qu’il n’a pas dit.',
-    'Pour l’histoire du Mali et de l’Afrique, par exemple Kurukan Fuga ou Soundiata, consulte toujours l’agent Historien.',
+    'Pour l’histoire du Mali et de l’Afrique, par exemple Kurukan Fuga, Soundiata ou Mansa Moussa, consulte toujours l’agent Historien.',
     'Pour une salutation ou une question très simple, réponds directement, sans agent.',
     'Phrases courtes, ton chaleureux et clair, une idée à la fois.',
     languageRule(preference)
