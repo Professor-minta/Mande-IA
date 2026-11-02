@@ -287,6 +287,7 @@ function renderUsage() {
   $('#settings-plan').textContent = isPro ? proSummary() : 'Plan gratuit : 5 questions par jour';
   $('#settings-auth').textContent = state.user ? 'Gérer' : 'Se connecter';
   $('#settings-upgrade').hidden = isPro;
+  $('#settings-scene').hidden = !isPro;
   $('#delete-conversation').disabled = !state.user || !state.conversationId;
 }
 
