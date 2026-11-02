@@ -245,6 +245,33 @@
     send(call, { type: 'response.create' });
   }
 
+  async function runDrive(call, callId, rawArgs) {
+    call.handled = call.handled || new Set();
+    if (call.handled.has(callId)) return;
+    call.handled.add(callId);
+    let args = {};
+    try { args = JSON.parse(rawArgs || '{}'); } catch {}
+    const titre = String(args.titre || 'Document Mande-IA').trim();
+    const log = logEntry({ id: 'drive', nom: 'Google Drive' }, `Enregistrer « ${titre.slice(0, 80)} »`);
+    let output;
+    try {
+      const response = await fetch('/api/drive/enregistrer', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ titre, contenu: args.contenu }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'L’enregistrement dans le Drive a échoué.');
+      log.item.className = '';
+      log.meta.textContent = 'enregistré';
+      log.answer.textContent = `Document « ${data.titre} » ajouté au Drive.`;
+      output = { enregistre: true, titre: data.titre };
+    } catch (error) {
+      log.item.className = 'is-error';
+      log.answer.textContent = error.message;
+      output = { enregistre: false, erreur: error.message, consigne: 'Dis simplement que l’enregistrement dans le Drive n’a pas marché.' };
+    }
+    if (state.call !== call) return;
+    send(call, { type: 'conversation.item.create', item: { type: 'function_call_output', call_id: callId, output: JSON.stringify(output) } });
+    send(call, { type: 'response.create' });
+  }
+
   function onEvent(call, data) {
     switch (data.type) {
       case 'input_audio_buffer.speech_started':
@@ -268,9 +295,11 @@
         break;
       case 'response.output_item.done':
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_agent') runAgent(call, data.item.call_id, data.item.arguments);
+        if (data.item?.type === 'function_call' && data.item.name === 'enregistrer_dans_drive') runDrive(call, data.item.call_id, data.item.arguments);
         break;
       case 'response.function_call_arguments.done':
         if (data.name === 'consulter_agent') runAgent(call, data.call_id, data.arguments);
+        if (data.name === 'enregistrer_dans_drive') runDrive(call, data.call_id, data.arguments);
         break;
       case 'error':
         console.warn('Mande-IA scène :', data.error?.message || data.error);
