@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=25">
+    <link rel="stylesheet" href="/style.css?v=26">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -82,6 +82,7 @@
       <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
       <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4.5h4M6.5 7l.9 11.6A1.5 1.5 0 0 0 8.9 20h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7M10 11v5M14 11v5"/></symbol>
       <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4.5v11M7 11l5 5 5-5M5 19.5h14"/></symbol>
+      <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5h9.5a4 4 0 0 0 .4-7.98A5.5 5.5 0 0 0 6.9 9.6 4.5 4.5 0 0 0 7.5 18.5zM12 16v-5.5M9.5 13l2.5-2.5 2.5 2.5"/></symbol>
       <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4.5 8h2.8l1.6-2.5h6.2L16.7 8h2.8A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-8A1.5 1.5 0 0 1 4.5 8z"/><circle cx="12" cy="13" r="3.5"/></symbol>
       <symbol id="i-file" viewBox="0 0 24 24"><path d="M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13.5 3.5v5h5M9 13h6M9 16.5h4"/></symbol>
       <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M15 10.5V6a3 3 0 0 0-5.6-1.5M9 9v2.5a3 3 0 0 0 4.6 2.5M5.5 11a6.5 6.5 0 0 0 10.6 5M18.4 12.7c.1-.6.1-1.1.1-1.7M12 17.5V21M8.5 21h7M4 4l16 16"/></symbol>
@@ -190,6 +191,7 @@
             <div class="list">
               <div class="row is-static"><span class="row-icon"><svg><use href="#i-user"/></svg></span><span class="row-text"><span id="settings-account">Invité</span><small id="settings-plan">5 questions gratuites par jour</small></span><button class="pill-button is-small" id="settings-auth">Se connecter</button></div>
               <a class="row" id="settings-scene" href="/scene" target="_blank" rel="noopener" hidden><span class="row-icon"><svg><use href="#i-sparkle"/></svg></span><span class="row-text">Mode scène<small>Mande-IA et ses agents sur grand écran, pour vos démonstrations</small></span><svg class="chevron"><use href="#i-external"/></svg></a>
+              <button class="row" id="settings-drive" type="button" hidden><span class="row-icon"><svg><use href="#i-cloud"/></svg></span><span class="row-text">Google Drive<small id="settings-drive-text">Reliez votre Drive pour y enregistrer les réponses de Mande-IA et de ses agents</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
               <button class="row is-gold-row" id="settings-upgrade"><span class="row-icon is-gold"><svg><use href="#i-wave"/></svg></span><span class="row-text">Passer à Pro<small>1&nbsp;000&nbsp;FCFA la semaine ou 3&nbsp;000&nbsp;FCFA le mois</small></span><svg class="chevron"><use href="#i-chevron"/></svg></button>
             </div>
             <h3 class="group-title">Préférences</h3>
@@ -373,6 +375,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=25"></script>
+    <script src="/app.js?v=26"></script>
   </body>
 </html>

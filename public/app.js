@@ -13,7 +13,7 @@ const store = {
 const state = {
   user: null, usage: null, conversationId: null, messages: [], conversations: [],
   djelia: false, voiceEnabled: false, canStream: false, filesEnabled: false, liveEnabled: false,
-  installEvent: null, busy: false, streamController: null, attachment: null,
+  installEvent: null, busy: false, streamController: null, attachment: null, drive: { proprietaire: false, connecte: false, dossier: '' },
   recorder: null, chunks: [], recordingStartedAt: 0, recordingTimer: null, transcribing: false,
   speechCache: new Map(), activeAudio: null, activeSpeechButton: null, speechLoading: false,
   audioCtx: null, meterFrame: 0, call: null, camera: null
@@ -175,6 +175,7 @@ function addActions(item, content) {
   const actions = document.createElement('div'); actions.className = 'msg-actions';
   const buttons = [actionButton('copy', 'Copier', (button) => copyText(content, button)), actionButton('share', 'Partager', (button) => shareText(content, button))];
   if (state.voiceEnabled) buttons.unshift(actionButton('speaker', 'Écouter', (button) => say(content, button)));
+  if (state.drive.connecte) buttons.push(actionButton('cloud', 'Drive', (button) => saveToDrive(content, button)));
   actions.append(...buttons);
   body.append(actions);
 }
@@ -329,7 +330,45 @@ async function checkAuth() {
   const data = await postJSON('/api/auth', { action: 'check' });
   state.user = data.user; state.usage = data.usage;
   renderUsage();
+  loadDrive().catch(() => {});
   if (state.user) await loadConversations();
+}
+async function loadDrive() {
+  const before = state.drive.connecte;
+  state.drive = state.user ? await api('/api/drive/etat') : { proprietaire: false, connecte: false, dossier: '' };
+  const row = $('#settings-drive');
+  row.hidden = !state.drive.proprietaire;
+  $('#settings-drive-text').textContent = state.drive.connecte ? `Relié : les textes vont dans le dossier « ${state.drive.dossier} ». Touchez pour délier.` : 'Reliez votre Drive pour y enregistrer les réponses de Mande-IA et de ses agents';
+  if (before !== state.drive.connecte && !state.busy) renderMessages();
+}
+async function toggleDrive() {
+  if (!state.drive.connecte) { location.href = '/api/drive/connecter'; return; }
+  if (!confirm('Délier Google Drive de Mande-IA ? Les documents déjà enregistrés restent dans votre Drive.')) return;
+  try { await postJSON('/api/drive/deconnecter', {}); await loadDrive(); setStatus('Google Drive est délié.', { timeout: 5000 }); }
+  catch (error) { setStatus(error.message, { timeout: 6000 }); }
+}
+async function saveToDrive(content, button) {
+  const first = content.split('\n').map((line) => line.replace(/[#*_>`]/g, '').trim()).find(Boolean) || 'Réponse';
+  const titre = `Mande-IA · ${first.length > 60 ? `${first.slice(0, 57)}…` : first}`;
+  button.disabled = true;
+  setButtonLabel(button, 'cloud', 'Envoi…');
+  try {
+    const data = await postJSON('/api/drive/enregistrer', { titre, contenu: content });
+    setButtonLabel(button, 'check', 'Enregistré');
+    setStatus(`Enregistré dans Google Drive : « ${data.titre} ».`, { timeout: 6000 });
+  } catch (error) {
+    button.disabled = false;
+    setButtonLabel(button, 'cloud', 'Drive');
+    setStatus(error.message, { timeout: 7000 });
+    if (error.status === 409) loadDrive().catch(() => {});
+  }
+}
+function handleDriveReturn() {
+  const result = new URLSearchParams(location.search).get('drive');
+  if (!result) return;
+  history.replaceState(null, '', location.pathname);
+  const messages = { ok: 'Google Drive est relié. Le bouton « Drive » apparaît sous les réponses.', annule: 'Liaison avec Google Drive annulée.', refuse: 'Connectez-vous d’abord avec le compte propriétaire du Drive.', erreur: 'La liaison avec Google Drive a échoué. Réessayez depuis Paramètres.' };
+  setStatus(messages[result] || '', { timeout: 8000 });
 }
 
 function openAuth() {
@@ -1502,6 +1541,7 @@ $('#logout').onclick = () => logout().catch((error) => setStatus(error.message, 
 $('#delete-account-open').onclick = () => { $('#delete-account-open').hidden = true; $('#delete-form').hidden = false; $('#delete-password').focus(); };
 $('#delete-form').addEventListener('submit', (event) => { event.preventDefault(); deleteAccount(); });
 $('#settings-auth').onclick = openAuth;
+$('#settings-drive').onclick = toggleDrive;
 $('#settings-upgrade').onclick = openUpgrade;
 $('#upgrade-link').href = waLink(UPGRADE_MESSAGE);
 $('#upgrade-link').onclick = openUpgrade;
@@ -1609,5 +1649,5 @@ checkHealth().catch(() => {});
 loadNews().catch(() => {});
 handleLaunchAction().catch(() => {});
 setupInstall().catch(() => {});
-checkAuth().then(handlePaymentReturn).catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
+checkAuth().then(handlePaymentReturn).then(handleDriveReturn).catch(() => setStatus('Impossible de joindre le serveur. Vérifiez votre connexion, puis rechargez la page.'));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js').catch(() => {});

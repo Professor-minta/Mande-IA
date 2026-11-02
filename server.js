@@ -21,6 +21,7 @@ const { setupWhatsApp, isWebhookPath } = require('./connectors/whatsapp');
 const { setupPayments, migrate: migratePayments, isPro, PRO_DAILY_QUESTIONS } = require('./connectors/paiement');
 const { setupScene, sceneInstructions, SCENE_TOOL } = require('./connectors/scene');
 const { connaissancesPour, derniereQuestion } = require('./connectors/connaissances');
+const { setupDrive } = require('./connectors/drive');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
@@ -277,6 +278,7 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     const grant = liveGrant(req, user);
     if (!grant) { refundQuestion(req); return res.status(429).json({ error: 'Vous avez déjà utilisé votre appel gratuit d’aujourd’hui. Revenez demain, ou passez à Pro pour appeler plus longtemps.', usage: usageFor(req, user), callLimit: true }); }
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
+    const outilsDrive = scene ? drive.outilsScene(user) : { tools: [], instruction: '' };
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
     const createSession = (input) => fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { input, output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) });
     let response;
@@ -289,7 +291,7 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     catch (error) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', error.message); return res.status(504).json({ error: 'OpenAI ne répond pas. Réessayez dans un instant. (code openai-timeout)', usage: usageFor(req, user) }); }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.value) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
-    req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: scene ? sceneInstructions(preference) : liveInstructions(preference), tools: scene ? [SCENE_TOOL] : undefined, maxSeconds: grant.seconds, usage }));
+    req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: scene ? [sceneInstructions(preference), outilsDrive.instruction].filter(Boolean).join(' ') : liveInstructions(preference), tools: scene ? [SCENE_TOOL, ...outilsDrive.tools] : undefined, maxSeconds: grant.seconds, usage }));
   } catch (error) { next(error); }
 });
 
@@ -405,6 +407,7 @@ app.get('/api/voice/stream/:id', async (req, res) => {
 setupWhatsApp(app, { db, day, now });
 setupPayments(app, { db, getUser, now, id });
 setupScene(app, { getUser, isPro });
+const drive = setupDrive(app, { db, getUser, now, secret: SESSION_SECRET });
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });

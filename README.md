@@ -178,6 +178,22 @@ Pendant l'appel en direct, Mande-IA choisit l'agent adapté et lui confie la tâ
 - Touches : **Espace** pour démarrer ou raccrocher, **M** pour couper le micro, **F** pour le plein écran.
 - Un appel dure 15 minutes au plus. Relancez pour continuer.
 
+### Enregistrer dans Google Drive
+
+Le propriétaire (`DRIVE_PROPRIETAIRE`) relie son Google Drive une fois, dans **Paramètres → Google Drive**. Ensuite :
+
+- dans le chat, un bouton **Drive** apparaît sous chaque réponse et l'enregistre comme document Google Docs ;
+- dans le mode scène, il suffit de dire « Enregistre ça dans mon Drive » : Mande-IA appelle l'outil `enregistrer_dans_drive` et le journal affiche le document créé.
+
+Les documents vont dans le dossier `DRIVE_DOSSIER` (« Mande-IA Agents » par défaut). Mande-IA ne voit que les fichiers qu'il a créés (accès `drive.file`). Le jeton de Google est chiffré dans la base. **Paramètres → Google Drive** permet aussi de délier le Drive, ce qui révoque l'accès. Les autres comptes ne voient ni le bouton ni l'outil.
+
+Mise en place, une seule fois, dans [Google Cloud Console](https://console.cloud.google.com) :
+
+1. Créez un projet « Mande-IA », puis activez **Google Drive API**.
+2. **Écran de consentement OAuth** : type Externe, nom « Mande-IA », votre e-mail, champ d'application `.../auth/drive.file`. Cliquez sur **Publier l'application**. En mode Test, Google coupe l'accès au bout de 7 jours.
+3. **Identifiants → Créer → ID client OAuth → Application Web**, avec l'URI de redirection `https://ia.mintaservices.com/api/drive/retour`.
+4. Copiez l'ID client et le code secret dans `.env` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`), réglez `DRIVE_PROPRIETAIRE`, puis redémarrez Mande-IA.
+
 ### Les dossiers vérifiés (`connaissances/`)
 
 Chaque fichier Markdown de `connaissances/` est un dossier vérifié : Kurukan Fuga, par exemple. Quand une question contient l'un de ses mots-clés, Mande-IA le reçoit avant de répondre : dans le chat, sur WhatsApp et chez les agents du mode scène. Il s'appuie dessus, dit « selon la tradition orale » pour les faits anciens, et n'ajoute rien qui n'y figure pas. Pour en ajouter un, suivez `connaissances/README.md`. Le serveur relit le dossier chaque minute, sans redémarrage.
