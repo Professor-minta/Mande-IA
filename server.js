@@ -19,6 +19,7 @@ const { Readable } = require('stream');
 const path = require('path');
 const { setupWhatsApp, isWebhookPath } = require('./connectors/whatsapp');
 const { setupPayments, migrate: migratePayments, isPro, PRO_DAILY_QUESTIONS } = require('./connectors/paiement');
+const { setupScene, sceneInstructions, SCENE_TOOL } = require('./connectors/scene');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
@@ -267,17 +268,25 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
   try {
     if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'L’appel en direct n’est pas encore activé.' });
     const user = req.session.userId ? getUser(req.session.userId) : null;
+    const scene = req.body?.mode === 'scene';
+    if (scene && !isPro(user)) return res.status(403).json({ error: 'Le mode scène est réservé aux comptes Pro. Connectez-vous avec votre compte Pro sur ia.mintaservices.com.' });
     const usage = consumeQuestion(req, user); if (!usage) return res.status(429).json({ error: limitMessage(user), usage: usageFor(req, user) });
     const grant = liveGrant(req, user);
     if (!grant) { refundQuestion(req); return res.status(429).json({ error: 'Vous avez déjà utilisé votre appel gratuit d’aujourd’hui. Revenez demain, ou passez à Pro pour appeler plus longtemps.', usage: usageFor(req, user), callLimit: true }); }
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
+    const createSession = (input) => fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { input, output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) });
     let response;
-    try { response = await fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { input: liveInputAudio(), output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) }); }
+    try {
+      if (scene) {
+        response = await createSession({ ...liveInputAudio(), transcription: { model: process.env.OPENAI_TRANSCRIBE_MODEL || 'gpt-transcribe' } });
+        if (response.status === 400) { console.warn('Realtime session : transcription refusée, appel lancé sans transcription.'); response = await createSession(liveInputAudio()); }
+      } else response = await createSession(liveInputAudio());
+    }
     catch (error) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', error.message); return res.status(504).json({ error: 'OpenAI ne répond pas. Réessayez dans un instant. (code openai-timeout)', usage: usageFor(req, user) }); }
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.value) { refundQuestion(req); releaseLive(req, grant); console.error('Realtime session:', response.status, data?.error?.code || '', data?.error?.message || ''); return res.status(502).json({ error: `L’appel en direct est momentanément indisponible. Réessayez dans un instant. (code openai-${response.status}${data?.error?.code ? `-${data.error.code}` : ''})`, usage: usageFor(req, user) }); }
-    req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: liveInstructions(preference), maxSeconds: grant.seconds, usage }));
+    req.session.save(() => res.json({ clientSecret: data.value, callsUrl: `${OPENAI_BASE_URL}/v1/realtime/calls`, instructions: scene ? sceneInstructions(preference) : liveInstructions(preference), tools: scene ? [SCENE_TOOL] : undefined, maxSeconds: grant.seconds, usage }));
   } catch (error) { next(error); }
 });
 
@@ -392,6 +401,7 @@ app.get('/api/voice/stream/:id', async (req, res) => {
 
 setupWhatsApp(app, { db, day, now });
 setupPayments(app, { db, getUser, now, id });
+setupScene(app, { getUser, isPro });
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });

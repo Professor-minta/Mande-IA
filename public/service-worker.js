@@ -1,4 +1,4 @@
-const VERSION = '23';
+const VERSION = '24';
 const CACHE = `mande-ia-shell-v${VERSION}`;
 const SHELL = ['/', `/style.css?v=${VERSION}`, `/app.js?v=${VERSION}`, '/manifest.webmanifest', '/icons/mande-ia.svg', '/icons/icon-192.png'];
 
@@ -17,7 +17,7 @@ self.addEventListener('fetch', (event) => {
 
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).then((response) => {
-      if (response.ok) caches.open(CACHE).then((cache) => cache.put('/', response.clone()));
+      if (response.ok && url.pathname === '/') caches.open(CACHE).then((cache) => cache.put('/', response.clone()));
       return response;
     }).catch(() => caches.match('/')));
     return;
