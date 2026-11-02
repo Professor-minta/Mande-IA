@@ -1,3 +1,5 @@
+const { connaissancesPour, derniereQuestion } = require('./connaissances');
+
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
 
 function langInstruction(pref) {
@@ -7,7 +9,8 @@ function langInstruction(pref) {
   return 'Réponds dans la langue du dernier message : bambara, français ou anglais.';
 }
 
-function whatsappSystemPrompt(lang) {
+function whatsappSystemPrompt(lang, question = '') {
+  const dossier = connaissancesPour(question);
   return [
     'Tu es Mande-IA, l’assistant d’intelligence artificielle créé au Mali par le Professeur Issa Minta et son entreprise Minta Services.',
     'Tu réponds sur WhatsApp : messages courts, faciles à lire sur un téléphone, une idée par paragraphe.',
@@ -15,8 +18,9 @@ function whatsappSystemPrompt(lang) {
     'Ne commente jamais la langue que tu as détectée.',
     'Pour mettre un mot en gras, entoure-le d’une seule étoile, comme *ceci*. N’utilise ni titres avec #, ni tableaux.',
     'Pour les photos, les PDF, la voix ou l’appel en direct, invite l’utilisateur à ouvrir https://ia.mintaservices.com.',
-    'Liens officiels, à donner tels quels et sans jamais en inventer d’autres : Minta Academy, formation gratuite en 10 modules (cloud, serveurs, IA locale avec Ollama et le modèle professor-minta/mande-ia.v3) https://mintaservices.com/academy/ ; pack Mande-IA hors ligne pour les entreprises https://mintaservices.com/academy/entreprises.html ; Minta Services Entrepreneurship https://mintaservices.com/entrepreneuriat/ ; site de Minta Services https://mintaservices.com ; application Mande-IA https://ia.mintaservices.com ; code source https://github.com/Professor-minta/Mande-IA.'
-  ].join(' ');
+    'Liens officiels, à donner tels quels et sans jamais en inventer d’autres : Minta Academy, formation gratuite en 10 modules (cloud, serveurs, IA locale avec Ollama et le modèle professor-minta/mande-ia.v3) https://mintaservices.com/academy/ ; pack Mande-IA hors ligne pour les entreprises https://mintaservices.com/academy/entreprises.html ; Minta Services Entrepreneurship https://mintaservices.com/entrepreneuriat/ ; site de Minta Services https://mintaservices.com ; application Mande-IA https://ia.mintaservices.com ; code source https://github.com/Professor-minta/Mande-IA.',
+    dossier ? `\n\n${dossier}` : ''
+  ].join(' ').trim();
 }
 
 async function askClaude(input, lang = 'auto') {
@@ -26,7 +30,7 @@ async function askClaude(input, lang = 'auto') {
     method: 'POST',
     signal: AbortSignal.timeout(45000),
     headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 700, system: whatsappSystemPrompt(lang), messages })
+    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 700, system: whatsappSystemPrompt(lang, derniereQuestion(messages)), messages })
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data?.error?.message || `Claude ${res.status}`);
@@ -40,7 +44,7 @@ async function* streamClaude(input, lang = 'auto', signal) {
     method: 'POST',
     signal: signal || AbortSignal.timeout(90000),
     headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 900, stream: true, system: whatsappSystemPrompt(lang), messages })
+    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001', max_tokens: 900, stream: true, system: whatsappSystemPrompt(lang, derniereQuestion(messages)), messages })
   });
   if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data?.error?.message || `Claude ${res.status}`); }
   const decoder = new TextDecoder();
@@ -68,7 +72,7 @@ async function askOllama(input, lang = 'auto') {
     method: 'POST',
     signal: AbortSignal.timeout(90000),
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, stream: false, messages: [{ role: 'system', content: whatsappSystemPrompt(lang) }, ...messages] })
+    body: JSON.stringify({ model, stream: false, messages: [{ role: 'system', content: whatsappSystemPrompt(lang, derniereQuestion(messages)) }, ...messages] })
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`Ollama ${res.status}`);

@@ -170,13 +170,17 @@ node scripts/whatsapp.js test             # simule un message « menu » depuis 
 
 ## Mode scène (démonstrations en public)
 
-`https://ia.mintaservices.com/scene` affiche Mande-IA en grand, pour un projecteur ou un écran d'ordinateur. Au centre, Mande-IA réagit à la voix. Autour, ses 8 agents spécialistes : Stratège, Chercheur, Bambara, Tech, Marketing, Finance, Rédacteur et Agriculture.
+`https://ia.mintaservices.com/scene` affiche Mande-IA en grand, pour un projecteur ou un écran d'ordinateur. Au centre, Mande-IA réagit à la voix. Autour, ses 9 agents spécialistes : Stratège, Historien, Chercheur, Bambara, Tech, Marketing, Finance, Rédacteur et Agriculture.
 
 Pendant l'appel en direct, Mande-IA choisit l'agent adapté et lui confie la tâche avec l'outil `consulter_agent`. Le serveur fait travailler cet agent (Claude, avec son propre rôle, `connectors/scene.js`), puis Mande-IA lit sa réponse à voix haute. À l'écran, le public voit l'agent s'allumer, le journal des agents se remplir, et le texte de l'instruction et de la réponse.
 
 - Réservé aux comptes Pro : connectez-vous sur ia.mintaservices.com avec un compte Pro, puis ouvrez `/scene` dans le même navigateur. Pour activer Pro sur votre compte : `sudo -u www node scripts/pro.js activer EMAIL JOURS MINUTES`.
 - Touches : **Espace** pour démarrer ou raccrocher, **M** pour couper le micro, **F** pour le plein écran.
 - Un appel dure 15 minutes au plus. Relancez pour continuer.
+
+### Les dossiers vérifiés (`connaissances/`)
+
+Chaque fichier Markdown de `connaissances/` est un dossier vérifié : Kurukan Fuga, par exemple. Quand une question contient l'un de ses mots-clés, Mande-IA le reçoit avant de répondre : dans le chat, sur WhatsApp et chez les agents du mode scène. Il s'appuie dessus, dit « selon la tradition orale » pour les faits anciens, et n'ajoute rien qui n'y figure pas. Pour en ajouter un, suivez `connaissances/README.md`. Le serveur relit le dossier chaque minute, sans redémarrage.
 
 ---
 
