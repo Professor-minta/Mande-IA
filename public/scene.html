@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mande-IA · Mode scène</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#030a18">
+  <link rel="icon" href="/icons/mande-ia.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/scene.css?v=1">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="brand-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span><strong>Mande-IA</strong><small>Mode scène · agents en direct</small></span>
+    </div>
+    <p class="status" id="status"><span class="status-dot"></span><span id="status-text">Prêt</span></p>
+    <p class="clock"><span id="clock">--:--</span><small id="date"></small></p>
+  </header>
+
+  <main class="stage-wrap">
+    <aside class="side side-left">
+      <section class="panel">
+        <h2>Services</h2>
+        <ul class="services" id="services"></ul>
+      </section>
+      <section class="panel">
+        <h2>Session</h2>
+        <dl class="stats">
+          <div><dt>Appel</dt><dd id="stat-time">0:00</dd></div>
+          <div><dt>Agents consultés</dt><dd id="stat-count">0</dd></div>
+          <div><dt>Durée moyenne</dt><dd id="stat-avg">–</dd></div>
+          <div><dt>Langue</dt><dd id="stat-lang">Automatique</dd></div>
+        </dl>
+      </section>
+    </aside>
+
+    <section class="stage" aria-label="Mande-IA et ses agents">
+      <svg id="scene" viewBox="0 0 1000 680" role="img" aria-label="Mande-IA au centre, entouré de ses agents spécialistes">
+        <defs>
+          <radialGradient id="orb-fill" cx="50%" cy="45%" r="55%">
+            <stop offset="0%" stop-color="#03101f"/>
+            <stop offset="70%" stop-color="#052036"/>
+            <stop offset="100%" stop-color="#0b4a63"/>
+          </radialGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g id="strands" class="strands"></g>
+        <circle class="ring ring-far" cx="500" cy="330" r="212"/>
+        <circle class="ring ring-mid" cx="500" cy="330" r="158"/>
+        <g id="links"></g>
+        <g id="orb" class="orb">
+          <circle class="orb-halo" cx="500" cy="330" r="124"/>
+          <circle class="orb-core" cx="500" cy="330" r="112" fill="url(#orb-fill)" filter="url(#glow)"/>
+          <g id="orb-bars" class="orb-bars"></g>
+        </g>
+        <text class="orb-label" id="orb-label" x="500" y="482">EN ATTENTE</text>
+        <g id="nodes"></g>
+      </svg>
+    </section>
+
+    <aside class="side side-right">
+      <section class="panel panel-log">
+        <h2>Journal des agents</h2>
+        <ol class="log" id="log"></ol>
+        <p class="log-empty" id="log-empty">Les agents apparaîtront ici dès que Mande-IA les consultera.</p>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="bottom">
+    <div class="transcript">
+      <p class="line line-user"><span class="who">Instruction</span><span class="said" id="said-user">Appuyez sur Espace ou sur « Démarrer » pour parler à Mande-IA.</span></p>
+      <p class="line line-ai"><span class="who">Mande-IA</span><span class="said" id="said-ai"></span></p>
+    </div>
+    <div class="controls">
+      <label class="lang">Langue
+        <select id="lang">
+          <option value="auto">Automatique</option>
+          <option value="fr">Français</option>
+          <option value="bm">Bambara</option>
+          <option value="en">Anglais</option>
+        </select>
+      </label>
+      <button class="btn btn-mute" id="mute" type="button" aria-pressed="false" disabled>Micro (M)</button>
+      <button class="btn btn-call" id="call" type="button">Démarrer (Espace)</button>
+      <button class="btn btn-full" id="full" type="button">Plein écran (F)</button>
+    </div>
+    <p class="notice" id="notice" hidden></p>
+  </footer>
+
+  <script src="/scene.js?v=1"></script>
+</body>
+</html>

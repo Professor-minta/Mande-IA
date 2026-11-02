@@ -168,6 +168,18 @@ node scripts/whatsapp.js test             # simule un message « menu » depuis 
 
 ---
 
+## Mode scène (démonstrations en public)
+
+`https://ia.mintaservices.com/scene` affiche Mande-IA en grand, pour un projecteur ou un écran d'ordinateur. Au centre, Mande-IA réagit à la voix. Autour, ses 8 agents spécialistes : Stratège, Chercheur, Bambara, Tech, Marketing, Finance, Rédacteur et Agriculture.
+
+Pendant l'appel en direct, Mande-IA choisit l'agent adapté et lui confie la tâche avec l'outil `consulter_agent`. Le serveur fait travailler cet agent (Claude, avec son propre rôle, `connectors/scene.js`), puis Mande-IA lit sa réponse à voix haute. À l'écran, le public voit l'agent s'allumer, le journal des agents se remplir, et le texte de l'instruction et de la réponse.
+
+- Réservé aux comptes Pro : connectez-vous sur ia.mintaservices.com avec un compte Pro, puis ouvrez `/scene` dans le même navigateur. Pour activer Pro sur votre compte : `sudo -u www node scripts/pro.js activer EMAIL JOURS MINUTES`.
+- Touches : **Espace** pour démarrer ou raccrocher, **M** pour couper le micro, **F** pour le plein écran.
+- Un appel dure 15 minutes au plus. Relancez pour continuer.
+
+---
+
 ## Sauvegardes
 
 `scripts/sauvegarde.sh` copie chaque nuit les bases de Mande-IA (`data/mande-ia.db`) et de Data-Collections (`data/data.db`), ainsi que les deux fichiers `.env`. Les bases sont copiées proprement, même pendant que les sites tournent. Le script range une archive dans `/root/sauvegardes`, où il garde les 7 dernières. Si Google Drive est relié, il envoie aussi l'archive et les nouvelles voix, chiffrées, dans le dossier `MintaServices-sauvegardes`, et y garde 60 jours d'archives.
