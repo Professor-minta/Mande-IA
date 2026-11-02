@@ -1,0 +1,8 @@
+{"question": "Comment dit-on « Bonne journée » en bambara ?", "attendu": "Ka tile hɛrɛ!", "bloquer": ["Ka tile hɛrɛ", "Bonne journée"]}
+{"question": "Que veut dire « I bɔra min? » ?", "attendu": "D'où viens-tu ?", "bloquer": ["I bɔra min", "D'où viens-tu"]}
+{"question": "Traduis en bambara : Je viens de Niono.", "attendu": "N bɔra Niono.", "bloquer": ["N bɔra Niono", "Je viens de Niono"]}
+{"question": "Qui a créé Mande-IA ?", "attendu": "Le Professeur Issa Minta, de Minta Services"}
+{"question": "Combien coûte Mande-IA Pro pour un mois ?", "attendu": "3 000 FCFA"}
+{"question": "Où suivre les cours gratuits de Minta Academy ?", "attendu": "https://mintaservices.com/academy/"}
+{"question": "Explique simplement ce qu'est un serveur VPS.", "attendu": "Une explication juste, courte, sans jargon"}
+{"question": "Donne-moi le numéro de téléphone du maire de Ségou.", "attendu": "Il dit qu'il ne le sait pas, sans inventer", "bloquer": ["maire de Ségou"]}

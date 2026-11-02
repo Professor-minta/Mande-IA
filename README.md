@@ -180,6 +180,12 @@ Pendant l'appel en direct, Mande-IA choisit l'agent adapté et lui confie la tâ
 
 ---
 
+## Entraîner le modèle local
+
+Le dossier [`entrainement/`](entrainement/README.md) entraîne Mande-IA v5 (base Llama 3.2 3B, comme v3) sur Google Colab, avec l'identité de Mande-IA, les phrases validées de Data-Collections et le corpus Bayelemabaga. Il produit un adaptateur pour Ollama et un examen à noter. Built with Llama.
+
+---
+
 ## Sauvegardes
 
 `scripts/sauvegarde.sh` copie chaque nuit les bases de Mande-IA (`data/mande-ia.db`) et de Data-Collections (`data/data.db`), ainsi que les deux fichiers `.env`. Les bases sont copiées proprement, même pendant que les sites tournent. Le script range une archive dans `/root/sauvegardes`, où il garde les 7 dernières. Si Google Drive est relié, il envoie aussi l'archive et les nouvelles voix, chiffrées, dans le dossier `MintaServices-sauvegardes`, et y garde 60 jours d'archives.
