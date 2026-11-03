@@ -22,6 +22,7 @@ const { setupPayments, migrate: migratePayments, isPro, PRO_DAILY_QUESTIONS } = 
 const { setupScene, sceneInstructions, SCENE_TOOL } = require('./connectors/scene');
 const { connaissancesPour, derniereQuestion } = require('./connectors/connaissances');
 const { setupDrive } = require('./connectors/drive');
+const { PRESENTATION_MINTA } = require('./connectors/minta');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
@@ -129,6 +130,7 @@ function systemPrompt(preference, { markdown = true, question = '' } = {}) {
 function liveInstructions(preference) {
   return [
     'Tu es Mande-IA, l’assistant vocal créé au Mali par le Professeur Issa Minta (Minta Services).',
+    PRESENTATION_MINTA,
     'Tu parles au téléphone : phrases courtes, ton chaleureux, une idée à la fois.',
     preference === 'en' ? 'Speak English.' : preference === 'bm' ? 'Parle bambara autant que possible ; si tu ne sais pas, explique en français simple.' : 'Parle la langue de l’utilisateur : français, anglais, ou bambara si tu le peux.',
     'Si l’utilisateur parle bambara et que tu ne comprends pas bien, demande-lui poliment de répéter ou de parler français.',

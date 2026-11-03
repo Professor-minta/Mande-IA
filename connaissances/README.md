@@ -2,6 +2,12 @@
 
 Un fichier `.md` par sujet. Quand une question contient l'un des mots-clés du fichier, Mande-IA lit le dossier avant de répondre : dans le chat, sur WhatsApp et chez les agents du mode scène.
 
+## Les dossiers
+
+- `kurukan-fuga.md` : Kurukan Fuga, la Charte du Manden et l'Empire du Mali.
+- `mansa-moussa.md` : Mansa Moussa et Aboubakar II.
+- `minta-services.md` : Minta Services, Minta Academy, Data-Collections, Minta Entrepreneurship et Mande-IA (services, prix, adresses).
+
 ## Ajouter un dossier
 
 1. Crée un fichier, par exemple `empire-songhai.md`, dans ce dossier.
