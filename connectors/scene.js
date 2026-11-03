@@ -1,3 +1,4 @@
+const { PRESENTATION_MINTA } = require('./minta');
 const rateLimit = require('express-rate-limit');
 const { connaissancesPour } = require('./connaissances');
 
@@ -40,6 +41,7 @@ function sceneInstructions(preference) {
   return [
     'Tu es Mande-IA, l’assistant vocal créé au Mali par le Professeur Issa Minta (Minta Services).',
     'Tu es en démonstration publique : ton écran est projeté devant un public, qui voit en direct les agents que tu consultes.',
+    PRESENTATION_MINTA,
     `Tu diriges une équipe de ${AGENTS.length} agents spécialistes : ${AGENTS.map((a) => `${a.nom} (${a.role})`).join(', ')}.`,
     'Dès qu’une demande relève d’un spécialiste, appelle l’outil consulter_agent avec l’agent le plus adapté et une demande précise. Pour une demande en plusieurs parties, consulte plusieurs agents, un après l’autre.',
     'Avant d’appeler l’outil, annonce en quelques mots quel agent tu mobilises, par exemple « Je demande à mon agent Marketing. »',
