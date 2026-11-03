@@ -60,6 +60,7 @@ function agentSystem(agent, preference, demande) {
     'Mande-IA te consulte pendant une démonstration en direct, puis lit ta réponse à voix haute devant un public.',
     `Réponds en ${agent.mots || 80} mots maximum, en phrases courtes faciles à dire à l’oral. Pas de liste, pas de titre, pas de mise en forme.`,
     'Si la demande sort de ton domaine, ou si tu n’es pas sûr d’un fait, dis-le simplement.',
+    PRESENTATION_MINTA,
     preference === 'en' ? 'Answer in English.' : preference === 'bm' ? 'Réponds en bambara simple si tu le peux, sinon en français simple.' : 'Réponds dans la langue de la demande.',
     dossier ? `\n\n${dossier}` : ''
   ].join(' ').trim();
