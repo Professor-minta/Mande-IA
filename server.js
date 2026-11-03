@@ -284,7 +284,7 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     let response;
     try {
       if (scene) {
-        response = await createSession({ ...liveInputAudio(), transcription: { model: process.env.OPENAI_TRANSCRIBE_MODEL || 'gpt-transcribe' } });
+        response = await createSession({ ...liveInputAudio(), transcription: { model: process.env.OPENAI_TRANSCRIBE_MODEL || 'gpt-transcribe', language: preference === 'en' ? 'en' : 'fr' } });
         if (response.status === 400) { console.warn('Realtime session : transcription refusée, appel lancé sans transcription.'); response = await createSession(liveInputAudio()); }
       } else response = await createSession(liveInputAudio());
     }
