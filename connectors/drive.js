@@ -22,7 +22,25 @@ const DRIVE_TOOL = {
     required: ['titre', 'contenu']
   }
 };
-const DRIVE_INSTRUCTION = 'Si on te demande d’enregistrer, de sauvegarder ou de garder un texte dans le Drive, appelle l’outil enregistrer_dans_drive avec un titre court et le texte complet, par exemple la dernière réponse d’un agent, puis confirme en une phrase.';
+const DRIVE_LIRE_TOOL = {
+  type: 'function',
+  name: 'consulter_drive',
+  description: 'Liste les documents que Mande-IA a enregistrés dans le Google Drive du Professeur Minta, ou lit l’un d’eux quand un titre est donné.',
+  parameters: {
+    type: 'object',
+    properties: {
+      titre: { type: 'string', description: 'Le titre, ou un mot du titre, du document à lire. Laisser vide pour obtenir la liste.' }
+    }
+  }
+};
+const driveInstruction = (dossier) => [
+  `Tu as accès au Google Drive du Professeur Minta, dans le dossier « ${dossier} ».`,
+  'Quand on te demande d’enregistrer, de sauvegarder, de garder ou de mettre un texte dans le Drive, appelle tout de suite l’outil enregistrer_dans_drive avec un titre court et le texte complet, par exemple la dernière réponse d’un agent, puis confirme en une phrase.',
+  'Quand on te demande ce qu’il y a dans le Drive, d’ouvrir le Drive ou de lire un document, appelle l’outil consulter_drive : sans titre pour la liste, avec un titre pour lire le document.',
+  'Tu vois seulement les documents que Mande-IA a créés dans ce dossier, pas les autres fichiers du Drive. Ne dis jamais que tu n’as pas accès au Drive.'
+].join(' ');
+
+const simple = (texte) => String(texte || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
 class DriveError extends Error {
   constructor(message, status = 502) { super(message); this.status = status; }
@@ -101,6 +119,11 @@ function setupDrive(app, { db, getUser, now, secret }) {
     return { status: response.status, ok: response.ok, data };
   }
 
+  async function driveTexte(chemin) {
+    const response = await fetch(`${DRIVE_API}${chemin}`, { signal: AbortSignal.timeout(30000), headers: { authorization: `Bearer ${await jetonAcces()}` } });
+    return { status: response.status, ok: response.ok, texte: await response.text().catch(() => '') };
+  }
+
   async function dossier({ recreer = false } = {}) {
     const ligne = compte();
     if (ligne?.dossier_id && !recreer) return ligne.dossier_id;
@@ -137,6 +160,27 @@ function setupDrive(app, { db, getUser, now, secret }) {
     if (resultat.status === 400) resultat = await televerser(nom, texte, 'text/plain', parent);
     if (!resultat.ok) { noter('enregistrement', resultat.status, resultat.data?.error?.message); throw new DriveError('L’enregistrement dans Google Drive a échoué. Réessayez.'); }
     return { titre: resultat.data.name || nom, lien: resultat.data.webViewLink || '' };
+  }
+
+  async function consulter({ titre }) {
+    const parent = await dossier();
+    const q = `'${parent}' in parents and trashed = false and mimeType != '${DOSSIER_TYPE}'`;
+    const liste = await driveFetch(`/drive/v3/files?${new URLSearchParams({ q, orderBy: 'modifiedTime desc', pageSize: '25', fields: 'files(id,name,mimeType,modifiedTime)', spaces: 'drive' })}`);
+    if (!liste.ok) { noter('consultation', liste.status, liste.data?.error?.message); throw new DriveError('Impossible de lire le dossier dans Google Drive.'); }
+    const fichiers = liste.data.files || [];
+    const resume = fichiers.slice(0, 15).map((f) => ({ titre: f.name, date: String(f.modifiedTime || '').slice(0, 10) }));
+    const cherche = simple(titre);
+    if (!cherche) return { dossier: nomDossier(), nombre: fichiers.length, documents: resume };
+    const mots = cherche.split(/\s+/).filter((m) => m.length > 2);
+    const score = (f) => { const nom = simple(f.name); return nom === cherche ? 100 : nom.includes(cherche) ? 50 : mots.filter((m) => nom.includes(m)).length; };
+    const meilleur = fichiers.map((f) => ({ f, s: score(f) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s)[0]?.f;
+    if (!meilleur) return { trouve: false, documents: resume };
+    const lu = meilleur.mimeType === DOC_TYPE
+      ? await driveTexte(`/drive/v3/files/${encodeURIComponent(meilleur.id)}/export?mimeType=text%2Fplain`)
+      : await driveTexte(`/drive/v3/files/${encodeURIComponent(meilleur.id)}?alt=media`);
+    if (!lu.ok) { noter('lecture', lu.status, lu.texte.slice(0, 200)); throw new DriveError('Impossible de lire ce document dans Google Drive.'); }
+    const texte = lu.texte.replace(/^\uFEFF/, '').trim();
+    return { trouve: true, titre: meilleur.name, date: String(meilleur.modifiedTime || '').slice(0, 10), texte: texte.slice(0, 6000), coupe: texte.length > 6000 };
   }
 
   async function verifierDossier() {
@@ -233,8 +277,17 @@ function setupDrive(app, { db, getUser, now, secret }) {
     }
   });
 
+  app.post('/api/drive/consulter', limite, async (req, res) => {
+    if (!estProprietaire(utilisateur(req))) return res.status(403).json({ error: 'Réservé au propriétaire du Drive.' });
+    try {
+      res.json(await consulter({ titre: req.body?.titre }));
+    } catch (error) {
+      res.status(error.status || 502).json({ error: error instanceof DriveError ? error.message : 'Google Drive ne répond pas pour le moment.' });
+    }
+  });
+
   return {
-    outilsScene: (user) => (estProprietaire(user) && connecte() ? { tools: [DRIVE_TOOL], instruction: DRIVE_INSTRUCTION } : { tools: [], instruction: '' })
+    outilsScene: (user) => (estProprietaire(user) && connecte() ? { tools: [DRIVE_TOOL, DRIVE_LIRE_TOOL], instruction: driveInstruction(nomDossier()) } : { tools: [], instruction: '' })
   };
 }
 

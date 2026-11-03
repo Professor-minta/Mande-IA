@@ -272,6 +272,35 @@
     send(call, { type: 'response.create' });
   }
 
+  async function runDriveLire(call, callId, rawArgs) {
+    call.handled = call.handled || new Set();
+    if (call.handled.has(callId)) return;
+    call.handled.add(callId);
+    let args = {};
+    try { args = JSON.parse(rawArgs || '{}'); } catch {}
+    const titre = String(args.titre || '').trim();
+    const log = logEntry({ id: 'drive', nom: 'Google Drive' }, titre ? `Lire « ${titre.slice(0, 80)} »` : 'Voir les documents du Drive');
+    let output;
+    try {
+      const response = await fetch('/api/drive/consulter', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ titre }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'La lecture du Drive a échoué.');
+      log.item.className = '';
+      log.meta.textContent = 'lu';
+      if (data.texte !== undefined) log.answer.textContent = `Document « ${data.titre} » lu.`;
+      else if (data.documents?.length) log.answer.textContent = `${data.documents.length} document${data.documents.length > 1 ? 's' : ''} : ${data.documents.slice(0, 5).map((d) => d.titre).join(', ')}`;
+      else log.answer.textContent = 'Le dossier est encore vide.';
+      output = data;
+    } catch (error) {
+      log.item.className = 'is-error';
+      log.answer.textContent = error.message;
+      output = { erreur: error.message, consigne: 'Dis simplement que la lecture du Drive n’a pas marché.' };
+    }
+    if (state.call !== call) return;
+    send(call, { type: 'conversation.item.create', item: { type: 'function_call_output', call_id: callId, output: JSON.stringify(output) } });
+    send(call, { type: 'response.create' });
+  }
+
   function onEvent(call, data) {
     switch (data.type) {
       case 'input_audio_buffer.speech_started':
@@ -296,10 +325,12 @@
       case 'response.output_item.done':
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_agent') runAgent(call, data.item.call_id, data.item.arguments);
         if (data.item?.type === 'function_call' && data.item.name === 'enregistrer_dans_drive') runDrive(call, data.item.call_id, data.item.arguments);
+        if (data.item?.type === 'function_call' && data.item.name === 'consulter_drive') runDriveLire(call, data.item.call_id, data.item.arguments);
         break;
       case 'response.function_call_arguments.done':
         if (data.name === 'consulter_agent') runAgent(call, data.call_id, data.arguments);
         if (data.name === 'enregistrer_dans_drive') runDrive(call, data.call_id, data.arguments);
+        if (data.name === 'consulter_drive') runDriveLire(call, data.call_id, data.arguments);
         break;
       case 'error':
         console.warn('Mande-IA scène :', data.error?.message || data.error);
