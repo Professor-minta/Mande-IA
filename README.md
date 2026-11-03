@@ -184,6 +184,7 @@ Le propriétaire (`DRIVE_PROPRIETAIRE`) relie son Google Drive une fois, dans **
 
 - dans le chat, un bouton **Drive** apparaît sous chaque réponse et l'enregistre comme document Google Docs ;
 - dans le mode scène, il suffit de dire « Enregistre ça dans mon Drive » : Mande-IA appelle l'outil `enregistrer_dans_drive` et le journal affiche le document créé.
+- dans le mode scène, « Qu'est-ce qu'il y a dans mon Drive ? » ou « Lis-moi le document Kurukan Fuga » : Mande-IA appelle l'outil `consulter_drive`, qui liste les documents du dossier ou lit celui dont le titre correspond.
 
 Les documents vont dans le dossier `DRIVE_DOSSIER` (« Mande-IA Agents » par défaut). Mande-IA ne voit que les fichiers qu'il a créés (accès `drive.file`). Le jeton de Google est chiffré dans la base. **Paramètres → Google Drive** permet aussi de délier le Drive, ce qui révoque l'accès. Les autres comptes ne voient ni le bouton ni l'outil.
 
