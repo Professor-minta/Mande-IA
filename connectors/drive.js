@@ -57,7 +57,17 @@ class DriveError extends Error {
 function setupDrive(app, { db, getUser, now, secret }) {
   db.exec('CREATE TABLE IF NOT EXISTS drive_compte (id INTEGER PRIMARY KEY CHECK (id = 1), jeton TEXT NOT NULL, dossier_id TEXT, connecte_le TEXT NOT NULL)');
   db.exec('CREATE TABLE IF NOT EXISTS drive_erreur (id INTEGER PRIMARY KEY CHECK (id = 1), quand TEXT NOT NULL, etape TEXT NOT NULL, detail TEXT)');
-  const cle = crypto.createHash('sha256').update(`mande-ia-drive:${process.env.DRIVE_CLE || secret}`).digest();
+  db.exec('CREATE TABLE IF NOT EXISTS drive_cle (id INTEGER PRIMARY KEY CHECK (id = 1), cle TEXT NOT NULL)');
+  const cleStockee = () => {
+    const ligne = db.prepare('SELECT cle FROM drive_cle WHERE id = 1').get();
+    if (ligne) return ligne.cle;
+    const nouvelle = crypto.randomBytes(32).toString('hex');
+    db.prepare('INSERT OR IGNORE INTO drive_cle (id, cle) VALUES (1, ?)').run(nouvelle);
+    return db.prepare('SELECT cle FROM drive_cle WHERE id = 1').get().cle;
+  };
+  const deriver = (valeur) => crypto.createHash('sha256').update(`mande-ia-drive:${valeur}`).digest();
+  const cle = deriver(process.env.DRIVE_CLE || cleStockee());
+  const ancienneCle = deriver(process.env.DRIVE_CLE || secret);
   let acces = { jeton: '', expire: 0 };
 
   const proprietaire = () => String(process.env.DRIVE_PROPRIETAIRE || '').trim().toLowerCase();
@@ -75,9 +85,9 @@ function setupDrive(app, { db, getUser, now, secret }) {
     const donnees = Buffer.concat([chiffre.update(texte, 'utf8'), chiffre.final()]);
     return Buffer.concat([iv, chiffre.getAuthTag(), donnees]).toString('base64');
   }
-  function dechiffrer(texte) {
+  function dechiffrer(texte, avec = cle) {
     const brut = Buffer.from(texte, 'base64');
-    const dechiffre = crypto.createDecipheriv('aes-256-gcm', cle, brut.subarray(0, 12));
+    const dechiffre = crypto.createDecipheriv('aes-256-gcm', avec, brut.subarray(0, 12));
     dechiffre.setAuthTag(brut.subarray(12, 28));
     return Buffer.concat([dechiffre.update(brut.subarray(28)), dechiffre.final()]).toString('utf8');
   }
@@ -110,7 +120,17 @@ function setupDrive(app, { db, getUser, now, secret }) {
     const ligne = compte();
     if (!ligne) throw new DriveError('Google Drive n’est pas relié. Reliez-le dans Paramètres.', 409);
     let refresh;
-    try { refresh = dechiffrer(ligne.jeton); } catch { oublier(); throw new DriveError('Google Drive doit être relié à nouveau dans Paramètres.', 409); }
+    try { refresh = dechiffrer(ligne.jeton); }
+    catch {
+      try {
+        refresh = dechiffrer(ligne.jeton, ancienneCle);
+        db.prepare('UPDATE drive_compte SET jeton = ? WHERE id = 1').run(chiffrer(refresh));
+      } catch {
+        noter('jeton', 'la clé de chiffrement a changé depuis la liaison (SESSION_SECRET absent ou modifié dans .env) : reliez le Drive à nouveau');
+        oublier();
+        throw new DriveError('Google Drive doit être relié à nouveau dans Paramètres.', 409);
+      }
+    }
     const { ok, data } = await jetonGoogle({ grant_type: 'refresh_token', refresh_token: refresh });
     if (!ok) {
       if (data.error === 'invalid_grant') { noter('jeton', 'invalid_grant : accès retiré ou expiré, reliez à nouveau'); oublier(); throw new DriveError('L’accès à Google Drive a expiré. Reliez-le à nouveau dans Paramètres.', 409); }
@@ -276,6 +296,7 @@ function setupDrive(app, { db, getUser, now, secret }) {
     lignes.push(`${coche(process.env.GOOGLE_CLIENT_ID)} GOOGLE_CLIENT_ID lu dans .env`);
     lignes.push(`${coche(process.env.GOOGLE_CLIENT_SECRET)} GOOGLE_CLIENT_SECRET lu dans .env`);
     lignes.push(`${coche(proprietaire())} DRIVE_PROPRIETAIRE lu dans .env`);
+    lignes.push(`${coche(process.env.SESSION_SECRET)} SESSION_SECRET lu dans .env${process.env.SESSION_SECRET ? '' : ' (sans lui, tout le monde est déconnecté à chaque redémarrage)'}`);
     if (!configure()) return envoyer([...lignes, '', 'À faire : ajoutez la ligne manquante dans .env, puis redémarrez le projet Node.']);
     lignes.push(`${coche(estProprietaire(user))} Ce compte est le propriétaire du Drive`);
     if (!estProprietaire(user)) return envoyer([...lignes, '', 'À faire : connectez-vous à Mande-IA avec l’adresse écrite dans DRIVE_PROPRIETAIRE (même orthographe), ou corrigez-la dans .env puis redémarrez.']);
@@ -309,6 +330,7 @@ function setupDrive(app, { db, getUser, now, secret }) {
     if (ligne) {
       try { await fetch(`${REVOKE_URL}?${new URLSearchParams({ token: dechiffrer(ligne.jeton) })}`, { method: 'POST', signal: AbortSignal.timeout(15000) }); } catch {}
       oublier();
+      noter('liaison', 'Drive délié volontairement depuis Paramètres');
     }
     res.json({ success: true });
   });

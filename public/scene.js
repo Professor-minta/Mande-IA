@@ -123,6 +123,37 @@
     return { item, meta, answer };
   }
 
+  const defile = { raf: 0, timer: 0 };
+  function stopDefile() {
+    cancelAnimationFrame(defile.raf);
+    clearTimeout(defile.timer);
+    defile.raf = 0;
+  }
+  function defiler(item) {
+    stopDefile();
+    const log = $('#log');
+    log.scrollTop = 0;
+    defile.timer = setTimeout(() => {
+      let position = log.scrollTop;
+      let avant = performance.now();
+      const pas = (instant) => {
+        const fin = Math.min(item.offsetTop + item.offsetHeight - log.clientHeight, log.scrollHeight - log.clientHeight);
+        if (position >= fin) return;
+        position = Math.min(fin, position + (instant - avant) * 0.016);
+        avant = instant;
+        log.scrollTop = position;
+        defile.raf = requestAnimationFrame(pas);
+      };
+      defile.raf = requestAnimationFrame(pas);
+    }, 3000);
+  }
+
+  function montrer(element, texte) {
+    element.textContent = texte.length > 3000 ? texte.slice(-3000) : texte;
+    element.classList.toggle('is-long', element.scrollHeight > element.clientHeight + 2);
+    element.scrollTop = element.scrollHeight;
+  }
+
   function updateStats() {
     $('#stat-count').textContent = String(state.count);
     $('#stat-avg').textContent = state.count ? `${(state.totalMs / state.count / 1000).toFixed(1).replace('.', ',')} s` : '–';
@@ -231,6 +262,7 @@
       log.item.className = '';
       log.meta.textContent = seconds;
       log.answer.textContent = data.texte;
+      defiler(log.item);
       output = { agent: agent.nom, reponse: data.texte };
     } catch (error) {
       markAgent(agent.id, 'error', 'indisponible');
@@ -287,7 +319,10 @@
       if (!response.ok) throw new Error(data.error || 'La lecture du Drive a échoué.');
       log.item.className = '';
       log.meta.textContent = 'lu';
-      if (data.texte !== undefined) log.answer.textContent = `Document « ${data.titre} » lu.`;
+      if (data.texte !== undefined) {
+        log.answer.textContent = `« ${data.titre} »\n\n${data.texte.slice(0, 1500)}${data.coupe || data.texte.length > 1500 ? '…' : ''}`;
+        defiler(log.item);
+      }
       else if (data.documents?.length) log.answer.textContent = `${data.documents.length} document${data.documents.length > 1 ? 's' : ''} : ${data.documents.slice(0, 5).map((d) => d.titre).join(', ')}`;
       else log.answer.textContent = 'Le dossier est encore vide.';
       output = data;
@@ -305,14 +340,14 @@
     switch (data.type) {
       case 'input_audio_buffer.speech_started':
         call.userText = '';
-        $('#said-user').textContent = '…';
+        montrer($('#said-user'), '…');
         break;
       case 'conversation.item.input_audio_transcription.delta':
         call.userText = (call.userText || '') + (data.delta || '');
-        $('#said-user').textContent = call.userText;
+        montrer($('#said-user'), call.userText);
         break;
       case 'conversation.item.input_audio_transcription.completed':
-        if (data.transcript?.trim()) $('#said-user').textContent = data.transcript.trim();
+        if (data.transcript?.trim()) montrer($('#said-user'), data.transcript.trim());
         break;
       case 'response.created':
         call.aiText = '';
@@ -320,7 +355,7 @@
       case 'response.output_audio_transcript.delta':
       case 'response.audio_transcript.delta':
         call.aiText = (call.aiText || '') + (data.delta || '');
-        $('#said-ai').textContent = call.aiText.length > 260 ? `…${call.aiText.slice(-260)}` : call.aiText;
+        montrer($('#said-ai'), call.aiText);
         break;
       case 'response.output_item.done':
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_agent') runAgent(call, data.item.call_id, data.item.arguments);
@@ -448,6 +483,7 @@
   $('#mute').addEventListener('click', onClick(toggleMute));
   $('#full').addEventListener('click', onClick(toggleFullscreen));
   $('#lang').addEventListener('change', () => { $('#stat-lang').textContent = LANGS[$('#lang').value]; });
+  ['wheel', 'touchstart', 'pointerdown'].forEach((type) => $('#log').addEventListener(type, stopDefile, { passive: true }));
   document.addEventListener('keydown', (event) => {
     if (event.target.closest('select') || event.repeat) return;
     if (event.code === 'Space') { event.preventDefault(); toggleCall(); }
