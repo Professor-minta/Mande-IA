@@ -30,6 +30,7 @@ class DriveError extends Error {
 
 function setupDrive(app, { db, getUser, now, secret }) {
   db.exec('CREATE TABLE IF NOT EXISTS drive_compte (id INTEGER PRIMARY KEY CHECK (id = 1), jeton TEXT NOT NULL, dossier_id TEXT, connecte_le TEXT NOT NULL)');
+  db.exec('CREATE TABLE IF NOT EXISTS drive_erreur (id INTEGER PRIMARY KEY CHECK (id = 1), quand TEXT NOT NULL, etape TEXT NOT NULL, detail TEXT)');
   const cle = crypto.createHash('sha256').update(`mande-ia-drive:${process.env.DRIVE_CLE || secret}`).digest();
   let acces = { jeton: '', expire: 0 };
 
@@ -53,6 +54,14 @@ function setupDrive(app, { db, getUser, now, secret }) {
     const dechiffre = crypto.createDecipheriv('aes-256-gcm', cle, brut.subarray(0, 12));
     dechiffre.setAuthTag(brut.subarray(12, 28));
     return Buffer.concat([dechiffre.update(brut.subarray(28)), dechiffre.final()]).toString('utf8');
+  }
+  function noter(etape, ...details) {
+    const detail = details.filter((d) => d !== undefined && d !== null && d !== '').join(' ').slice(0, 300);
+    console.error(`Drive, ${etape} :`, detail);
+    try { db.prepare('INSERT INTO drive_erreur (id, quand, etape, detail) VALUES (1, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET quand = excluded.quand, etape = excluded.etape, detail = excluded.detail').run(now(), etape, detail); } catch {}
+  }
+  function effacerErreur() {
+    try { db.prepare('DELETE FROM drive_erreur WHERE id = 1').run(); } catch {}
   }
   function oublier() {
     db.prepare('DELETE FROM drive_compte WHERE id = 1').run();
@@ -78,8 +87,8 @@ function setupDrive(app, { db, getUser, now, secret }) {
     try { refresh = dechiffrer(ligne.jeton); } catch { oublier(); throw new DriveError('Google Drive doit être relié à nouveau dans Paramètres.', 409); }
     const { ok, data } = await jetonGoogle({ grant_type: 'refresh_token', refresh_token: refresh });
     if (!ok) {
-      if (data.error === 'invalid_grant') { oublier(); throw new DriveError('L’accès à Google Drive a expiré. Reliez-le à nouveau dans Paramètres.', 409); }
-      console.error('Drive, jeton :', data.error, data.error_description);
+      if (data.error === 'invalid_grant') { noter('jeton', 'invalid_grant : accès retiré ou expiré, reliez à nouveau'); oublier(); throw new DriveError('L’accès à Google Drive a expiré. Reliez-le à nouveau dans Paramètres.', 409); }
+      noter('jeton', data.error, data.error_description);
       throw new DriveError('Google Drive ne répond pas pour le moment.');
     }
     acces = { jeton: data.access_token, expire: Date.now() + Math.max(60, (Number(data.expires_in) || 3600) - 120) * 1000 };
@@ -101,7 +110,7 @@ function setupDrive(app, { db, getUser, now, secret }) {
     let id = trouve.ok ? trouve.data.files?.[0]?.id : null;
     if (!id) {
       const cree = await driveFetch('/drive/v3/files?fields=id', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: nom, mimeType: DOSSIER_TYPE }) });
-      if (!cree.ok) { console.error('Drive, dossier :', cree.status, cree.data?.error?.message); throw new DriveError('Impossible de créer le dossier dans Google Drive.'); }
+      if (!cree.ok) { noter('dossier', cree.status, cree.data?.error?.message); throw new DriveError('Impossible de créer le dossier dans Google Drive.'); }
       id = cree.data.id;
     }
     db.prepare('UPDATE drive_compte SET dossier_id = ? WHERE id = 1').run(id);
@@ -126,8 +135,18 @@ function setupDrive(app, { db, getUser, now, secret }) {
     let resultat = await televerser(nom, texte, 'text/markdown', parent);
     if (resultat.status === 404) { parent = await dossier({ recreer: true }); resultat = await televerser(nom, texte, 'text/markdown', parent); }
     if (resultat.status === 400) resultat = await televerser(nom, texte, 'text/plain', parent);
-    if (!resultat.ok) { console.error('Drive, enregistrement :', resultat.status, resultat.data?.error?.message); throw new DriveError('L’enregistrement dans Google Drive a échoué. Réessayez.'); }
+    if (!resultat.ok) { noter('enregistrement', resultat.status, resultat.data?.error?.message); throw new DriveError('L’enregistrement dans Google Drive a échoué. Réessayez.'); }
     return { titre: resultat.data.name || nom, lien: resultat.data.webViewLink || '' };
+  }
+
+  async function verifierDossier() {
+    const id = compte()?.dossier_id;
+    if (id) {
+      const lu = await driveFetch(`/drive/v3/files/${encodeURIComponent(id)}?fields=id,trashed`);
+      if (lu.ok && !lu.data.trashed) return;
+      if (!lu.ok && lu.status !== 404) { noter('dossier', lu.status, lu.data?.error?.message); throw new DriveError('Google Drive refuse l’accès au dossier.'); }
+    }
+    await dossier({ recreer: true });
   }
 
   const limite = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false });
@@ -149,21 +168,50 @@ function setupDrive(app, { db, getUser, now, secret }) {
   app.get('/api/drive/retour', async (req, res) => {
     const attendu = req.session.driveEtat;
     delete req.session.driveEtat;
-    if (!estProprietaire(utilisateur(req)) || !attendu || req.query.state !== attendu) return res.redirect('/?drive=refuse');
-    if (req.query.error || !req.query.code) return res.redirect('/?drive=annule');
+    if (!estProprietaire(utilisateur(req))) return res.redirect('/?drive=refuse');
+    if (!attendu || req.query.state !== attendu) { noter('retour', 'session perdue : rouvrez /api/drive/connecter dans le même navigateur'); return res.redirect('/?drive=refuse'); }
+    if (req.query.error || !req.query.code) { noter('autorisation', req.query.error || 'aucun code reçu de Google'); return res.redirect('/?drive=annule'); }
     try {
       const { ok, data } = await jetonGoogle({ grant_type: 'authorization_code', code: String(req.query.code), redirect_uri: retour() });
-      if (!ok || !data.refresh_token) { console.error('Drive, autorisation :', data.error, data.error_description); return res.redirect('/?drive=erreur'); }
-      if (!String(data.scope || SCOPE).split(' ').includes(SCOPE)) return res.redirect('/?drive=annule');
+      if (!ok || !data.refresh_token) { noter('autorisation', data.error || 'pas de refresh_token', data.error_description); return res.redirect('/?drive=erreur'); }
+      if (!String(data.scope || SCOPE).split(' ').includes(SCOPE)) { noter('autorisation', 'la case Google Drive n’a pas été cochée'); return res.redirect('/?drive=annule'); }
       db.prepare('INSERT INTO drive_compte (id, jeton, dossier_id, connecte_le) VALUES (1, ?, NULL, ?) ON CONFLICT(id) DO UPDATE SET jeton = excluded.jeton, dossier_id = NULL, connecte_le = excluded.connecte_le').run(chiffrer(data.refresh_token), now());
       acces = { jeton: data.access_token || '', expire: data.access_token ? Date.now() + Math.max(60, (Number(data.expires_in) || 3600) - 120) * 1000 : 0 };
-      await dossier().catch((error) => console.error('Drive, dossier :', error.message));
+      effacerErreur();
+      await dossier().catch(() => {});
       console.log('Google Drive relié à Mande-IA.');
       res.redirect('/?drive=ok');
     } catch (error) {
-      console.error('Drive, retour :', error.message);
+      noter('retour', error.message);
       res.redirect('/?drive=erreur');
     }
+  });
+
+  app.get('/api/drive/diagnostic', async (req, res) => {
+    res.set('cache-control', 'no-store');
+    const envoyer = (lignes) => res.type('text/plain; charset=utf-8').send(lignes.join('\n'));
+    const coche = (valeur) => (valeur ? '✅' : '❌');
+    const lignes = ['Diagnostic Google Drive de Mande-IA', ''];
+    const user = utilisateur(req);
+    if (!user) return envoyer([...lignes, '❌ Vous n’êtes pas connecté à Mande-IA dans ce navigateur.', '', 'À faire : connectez-vous à Mande-IA, puis rouvrez cette page.']);
+    lignes.push(`✅ Connecté à Mande-IA : ${user.email}`);
+    lignes.push(`${coche(process.env.GOOGLE_CLIENT_ID)} GOOGLE_CLIENT_ID lu dans .env`);
+    lignes.push(`${coche(process.env.GOOGLE_CLIENT_SECRET)} GOOGLE_CLIENT_SECRET lu dans .env`);
+    lignes.push(`${coche(proprietaire())} DRIVE_PROPRIETAIRE lu dans .env`);
+    if (!configure()) return envoyer([...lignes, '', 'À faire : ajoutez la ligne manquante dans .env, puis redémarrez le projet Node.']);
+    lignes.push(`${coche(estProprietaire(user))} Ce compte est le propriétaire du Drive`);
+    if (!estProprietaire(user)) return envoyer([...lignes, '', 'À faire : connectez-vous à Mande-IA avec l’adresse écrite dans DRIVE_PROPRIETAIRE (même orthographe), ou corrigez-la dans .env puis redémarrez.']);
+    lignes.push(`Adresse de retour déclarée chez Google : ${retour()}`);
+    lignes.push(`${coche(connecte())} Google Drive relié`);
+    if (connecte()) {
+      try { await verifierDossier(); effacerErreur(); lignes.push(`✅ Dossier « ${nomDossier()} » présent dans le Drive`); }
+      catch (error) { lignes.push(`❌ Dossier « ${nomDossier()} » : ${error.message}`); }
+    }
+    const erreur = db.prepare('SELECT quand, etape, detail FROM drive_erreur WHERE id = 1').get();
+    lignes.push('', erreur ? `Dernière erreur (${erreur.quand.slice(0, 16).replace('T', ' ')} UTC), ${erreur.etape} : ${erreur.detail}` : 'Aucune erreur enregistrée.');
+    if (!connecte()) lignes.push('', `À faire : ouvrez ${retour().replace(/retour$/, 'connecter')} et acceptez chez Google.`);
+    else if (!lignes.some((l) => l.startsWith('❌'))) lignes.push('', 'Tout est en ordre : touchez « Drive » sous une réponse de Mande-IA.');
+    envoyer(lignes);
   });
 
   app.post('/api/drive/deconnecter', async (req, res) => {

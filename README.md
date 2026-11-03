@@ -194,6 +194,8 @@ Mise en place, une seule fois, dans [Google Cloud Console](https://console.cloud
 3. **Identifiants → Créer → ID client OAuth → Application Web**, avec l'URI de redirection `https://ia.mintaservices.com/api/drive/retour`.
 4. Copiez l'ID client et le code secret dans `.env` (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`), réglez `DRIVE_PROPRIETAIRE`, puis redémarrez Mande-IA.
 
+En cas de problème, connectez-vous à Mande-IA avec le compte propriétaire et ouvrez `https://ia.mintaservices.com/api/drive/diagnostic`. La page vérifie chaque étape (variables `.env`, compte, liaison, dossier) et affiche la dernière erreur renvoyée par Google, sans jamais montrer de clé.
+
 ### Les dossiers vérifiés (`connaissances/`)
 
 Chaque fichier Markdown de `connaissances/` est un dossier vérifié : Kurukan Fuga, par exemple. Quand une question contient l'un de ses mots-clés, Mande-IA le reçoit avant de répondre : dans le chat, sur WhatsApp et chez les agents du mode scène. Il s'appuie dessus, dit « selon la tradition orale » pour les faits anciens, et n'ajoute rien qui n'y figure pas. Pour en ajouter un, suivez `connaissances/README.md`. Le serveur relit le dossier chaque minute, sans redémarrage.
