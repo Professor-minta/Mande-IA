@@ -42,7 +42,7 @@ const FREE_CALLS_PER_DAY = Number.isFinite(freeCallSetting) && freeCallSetting >
 const OLLAMA_URL = process.env.OLLAMA_API_URL || process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || '';
 const TTS_MODEL = process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
-const TTS_VOICE = process.env.OPENAI_TTS_VOICE || 'marin';
+const TTS_VOICE = process.env.OPENAI_TTS_VOICE || 'cedar';
 const voiceJobs = new Map();
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 if (!process.env.SESSION_SECRET) console.warn('SESSION_SECRET manquant dans .env : secret temporaire utilisé, les utilisateurs seront déconnectés à chaque redémarrage.');
@@ -280,7 +280,7 @@ app.post('/api/live/session', aiLimit, async (req, res, next) => {
     const preference = ['auto', 'bm', 'fr', 'en'].includes(req.body?.language) ? req.body.language : 'auto';
     const outilsDrive = scene ? drive.outilsScene(user) : { tools: [], instruction: '' };
     const safetyId = crypto.createHash('sha256').update(usageIdentity(req)).digest('hex');
-    const createSession = (input) => fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { input, output: { voice: process.env.OPENAI_REALTIME_VOICE || 'marin' } } } }) });
+    const createSession = (input) => fetch(`${OPENAI_BASE_URL}/v1/realtime/client_secrets`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json', 'OpenAI-Safety-Identifier': safetyId }, body: JSON.stringify({ session: { type: 'realtime', model: REALTIME_MODEL, audio: { input, output: { voice: process.env.OPENAI_REALTIME_VOICE || 'cedar' } } } }) });
     let response;
     try {
       if (scene) {

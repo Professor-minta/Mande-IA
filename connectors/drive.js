@@ -1,5 +1,8 @@
 const crypto = require('crypto');
+const path = require('path');
+const { execSync } = require('child_process');
 const rateLimit = require('express-rate-limit');
+const { dossiersVerifies } = require('./connaissances');
 
 const SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
@@ -8,6 +11,9 @@ const REVOKE_URL = process.env.GOOGLE_REVOKE_URL || 'https://oauth2.googleapis.c
 const DRIVE_API = process.env.GOOGLE_DRIVE_API_URL || 'https://www.googleapis.com';
 const DOSSIER_TYPE = 'application/vnd.google-apps.folder';
 const DOC_TYPE = 'application/vnd.google-apps.document';
+const PREFIXE_VERIFIE = 'Dossier vérifié : ';
+const DEMARRE = new Date().toISOString();
+const VERSION = (() => { try { return execSync('git log -1 --format="%h %cs"', { cwd: path.join(__dirname, '..'), stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return 'inconnue'; } })();
 
 const DRIVE_TOOL = {
   type: 'function',
@@ -37,6 +43,8 @@ const driveInstruction = (dossier) => [
   `Tu as accès au Google Drive du Professeur Minta, dans le dossier « ${dossier} ».`,
   'Quand on te demande d’enregistrer, de sauvegarder, de garder ou de mettre un texte dans le Drive, appelle tout de suite l’outil enregistrer_dans_drive avec un titre court et le texte complet, par exemple la dernière réponse d’un agent, puis confirme en une phrase.',
   'Quand on te demande ce qu’il y a dans le Drive, d’ouvrir le Drive ou de lire un document, appelle l’outil consulter_drive : sans titre pour la liste, avec un titre pour lire le document.',
+  'Le dossier contient aussi les dossiers vérifiés de Minta Services, par exemple Kurukan Fuga et Mansa Moussa : pour lire l’un d’eux, appelle consulter_drive avec un mot de son titre, comme « Mansa Moussa ».',
+  'Le Drive ne relève d’aucun agent : pour tout ce qui touche au Drive, n’appelle jamais consulter_agent, utilise seulement enregistrer_dans_drive ou consulter_drive.',
   'Tu vois seulement les documents que Mande-IA a créés dans ce dossier, pas les autres fichiers du Drive. Ne dis jamais que tu n’as pas accès au Drive.'
 ].join(' ');
 
@@ -162,17 +170,43 @@ function setupDrive(app, { db, getUser, now, secret }) {
     return { titre: resultat.data.name || nom, lien: resultat.data.webViewLink || '' };
   }
 
+  async function lister(parent) {
+    const q = `'${parent}' in parents and trashed = false and mimeType != '${DOSSIER_TYPE}'`;
+    const liste = await driveFetch(`/drive/v3/files?${new URLSearchParams({ q, orderBy: 'modifiedTime desc', pageSize: '50', fields: 'files(id,name,mimeType,modifiedTime)', spaces: 'drive' })}`);
+    if (!liste.ok) { noter('consultation', liste.status, liste.data?.error?.message); throw new DriveError('Impossible de lire le dossier dans Google Drive.'); }
+    return liste.data.files || [];
+  }
+
+  async function garnir(parent, fichiers) {
+    const presents = new Set(fichiers.map((f) => f.name));
+    const ajoutes = [];
+    for (const fiche of dossiersVerifies()) {
+      const nom = `${PREFIXE_VERIFIE}${fiche.titre}`.slice(0, 120);
+      if (presents.has(nom)) continue;
+      let resultat = await televerser(nom, fiche.corps, 'text/markdown', parent);
+      if (resultat.status === 400) resultat = await televerser(nom, fiche.corps, 'text/plain', parent);
+      if (!resultat.ok) { noter('dossiers vérifiés', resultat.status, resultat.data?.error?.message); continue; }
+      ajoutes.push({ id: resultat.data.id, name: nom, mimeType: DOC_TYPE, modifiedTime: new Date().toISOString() });
+    }
+    return ajoutes;
+  }
+
   async function consulter({ titre }) {
     const parent = await dossier();
-    const q = `'${parent}' in parents and trashed = false and mimeType != '${DOSSIER_TYPE}'`;
-    const liste = await driveFetch(`/drive/v3/files?${new URLSearchParams({ q, orderBy: 'modifiedTime desc', pageSize: '25', fields: 'files(id,name,mimeType,modifiedTime)', spaces: 'drive' })}`);
-    if (!liste.ok) { noter('consultation', liste.status, liste.data?.error?.message); throw new DriveError('Impossible de lire le dossier dans Google Drive.'); }
-    const fichiers = liste.data.files || [];
+    let fichiers = await lister(parent);
+    fichiers = [...(await garnir(parent, fichiers)), ...fichiers];
     const resume = fichiers.slice(0, 15).map((f) => ({ titre: f.name, date: String(f.modifiedTime || '').slice(0, 10) }));
     const cherche = simple(titre);
     if (!cherche) return { dossier: nomDossier(), nombre: fichiers.length, documents: resume };
     const mots = cherche.split(/\s+/).filter((m) => m.length > 2);
-    const score = (f) => { const nom = simple(f.name); return nom === cherche ? 100 : nom.includes(cherche) ? 50 : mots.filter((m) => nom.includes(m)).length; };
+    const motifs = new Map(dossiersVerifies().map((d) => [`${PREFIXE_VERIFIE}${d.titre}`.slice(0, 120), d.motifs]));
+    const score = (f) => {
+      const nom = simple(f.name);
+      if (nom === cherche) return 100;
+      if (nom.includes(cherche)) return 50;
+      const colles = nom.split(/[^a-z0-9]+/).filter((w) => w.length > 4 && cherche.replace(/\s+/g, '').includes(w)).length;
+      return mots.filter((m) => nom.includes(m)).length + colles + 2 * (motifs.get(f.name) || []).filter((motif) => motif.test(cherche)).length;
+    };
     const meilleur = fichiers.map((f) => ({ f, s: score(f) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s)[0]?.f;
     if (!meilleur) return { trouve: false, documents: resume };
     const lu = meilleur.mimeType === DOC_TYPE
@@ -235,7 +269,7 @@ function setupDrive(app, { db, getUser, now, secret }) {
     res.set('cache-control', 'no-store');
     const envoyer = (lignes) => res.type('text/plain; charset=utf-8').send(lignes.join('\n'));
     const coche = (valeur) => (valeur ? '✅' : '❌');
-    const lignes = ['Diagnostic Google Drive de Mande-IA', ''];
+    const lignes = ['Diagnostic Google Drive de Mande-IA', `Version du serveur : ${VERSION}, démarré le ${DEMARRE.slice(0, 16).replace('T', ' ')} UTC`, ''];
     const user = utilisateur(req);
     if (!user) return envoyer([...lignes, '❌ Vous n’êtes pas connecté à Mande-IA dans ce navigateur.', '', 'À faire : connectez-vous à Mande-IA, puis rouvrez cette page.']);
     lignes.push(`✅ Connecté à Mande-IA : ${user.email}`);
@@ -248,11 +282,22 @@ function setupDrive(app, { db, getUser, now, secret }) {
     lignes.push(`Adresse de retour déclarée chez Google : ${retour()}`);
     lignes.push(`${coche(connecte())} Google Drive relié`);
     if (connecte()) {
-      try { await verifierDossier(); effacerErreur(); lignes.push(`✅ Dossier « ${nomDossier()} » présent dans le Drive`); }
+      try {
+        await verifierDossier();
+        effacerErreur();
+        lignes.push(`✅ Dossier « ${nomDossier()} » présent dans le Drive`);
+        const parent = compte()?.dossier_id;
+        const fichiers = await lister(parent);
+        const ajoutes = await garnir(parent, fichiers);
+        const verifies = [...ajoutes, ...fichiers].filter((f) => f.name.startsWith(PREFIXE_VERIFIE)).length;
+        lignes.push(`${coche(verifies >= dossiersVerifies().length)} Dossiers vérifiés dans le Drive : ${verifies} sur ${dossiersVerifies().length}${ajoutes.length ? ` (${ajoutes.length} copié${ajoutes.length > 1 ? 's' : ''} à l’instant)` : ''}`);
+        lignes.push(`Documents dans le dossier : ${fichiers.length + ajoutes.length}`);
+      }
       catch (error) { lignes.push(`❌ Dossier « ${nomDossier()} » : ${error.message}`); }
     }
     const erreur = db.prepare('SELECT quand, etape, detail FROM drive_erreur WHERE id = 1').get();
     lignes.push('', erreur ? `Dernière erreur (${erreur.quand.slice(0, 16).replace('T', ' ')} UTC), ${erreur.etape} : ${erreur.detail}` : 'Aucune erreur enregistrée.');
+    if (connecte()) lignes.push(`Outils Drive du mode scène : ${[DRIVE_TOOL, DRIVE_LIRE_TOOL].map((t) => t.name).join(', ')}`);
     if (!connecte()) lignes.push('', `À faire : ouvrez ${retour().replace(/retour$/, 'connecter')} et acceptez chez Google.`);
     else if (!lignes.some((l) => l.startsWith('❌'))) lignes.push('', 'Tout est en ordre : touchez « Drive » sous une réponse de Mande-IA.');
     envoyer(lignes);

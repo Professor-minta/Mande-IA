@@ -21,7 +21,7 @@ function lireFiche(nom) {
   }
   const mots = String(meta.mots || '').split(',').map((m) => simple(m).trim()).filter(Boolean);
   if (!mots.length) return null;
-  return { titre: meta.titre || nom, corps: morceaux[2].trim(), motifs: mots.map((m) => new RegExp(`(^|[^a-z0-9])${echapper(m)}`)) };
+  return { titre: meta.titre || nom, corps: morceaux[2].trim(), mots, motifs: mots.map((m) => new RegExp(`(^|[^a-z0-9])${echapper(m)}`)) };
 }
 
 function fiches() {
@@ -67,4 +67,8 @@ function derniereQuestion(messages) {
   return (Array.isArray(dernier.content) ? dernier.content : []).filter((b) => b?.type === 'text').map((b) => b.text).join(' ');
 }
 
-module.exports = { connaissancesPour, derniereQuestion };
+function dossiersVerifies() {
+  return fiches().map((f) => ({ titre: f.titre, corps: f.corps, motifs: f.motifs }));
+}
+
+module.exports = { connaissancesPour, derniereQuestion, dossiersVerifies };
