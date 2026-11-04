@@ -1,6 +1,6 @@
 ---
 titre: Minta Services, Minta Academy et l'écosystème Mande-IA
-mots: minta, mintaservices, minta services, minta academy, mintaservices.com, data-collections, data collections, data.mintaservices, entrepreneurship, entrepreneuriat, mande-ia pro, issa minta, professeur minta, professor minta
+mots: minta, mintaservices, minta services, minta academy, mental academy, mentor academie, mentor academy, mental services, mintaservices.com, data-collections, data collections, data.mintaservices, entrepreneurship, entrepreneuriat, mande-ia pro, issa minta, professeur minta, professor minta
 source: https://mintaservices.com
 ---
 
