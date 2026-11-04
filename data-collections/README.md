@@ -34,6 +34,48 @@ https://data.mintaservices.com/api/admin/export.csv?token=TOKEN&tout=1
 
 La première adresse donne les contributions validées, la seconde tout (en attente et rejetées compris). Les fichiers audio sont dans `data/audio/`, sous le nom indiqué dans la colonne `fichier_audio`. Aucun pseudo n'est exporté, seulement la région, l'âge et le genre.
 
+## Préparer le jeu de données pour entraîner Mande-IA
+
+Chaque voix est enregistrée tout de suite comme un fichier dans `data/audio/`, et la base `data/data.db` garde la phrase, le contributeur et les votes. Le script `scripts/exporter.js` range les contributions **validées** dans un dossier propre, prêt pour l'entraînement :
+
+```text
+data/exports/AAAA-MM-JJ/
+├── README.md            la fiche du jeu de données (chiffres, consentement)
+├── textes.csv           phrases et traductions validées
+└── voix/
+    ├── metadata.csv     un enregistrement par ligne : fichier, bambara, français, durée, locuteur anonyme
+    └── audio/           les voix en WAV 16 kHz mono
+```
+
+```bash
+cd /www/wwwroot/data.mintaservices.com
+node scripts/exporter.js
+```
+
+Le script convertit les voix avec `ffmpeg` (`apt install -y ffmpeg`). Les pseudos ne sortent jamais : chaque contributeur devient un code anonyme. Une contribution supprimée par son auteur disparaît de l'export suivant.
+
+### L'envoyer sur Hugging Face, en privé
+
+Une seule fois, dans le Terminal d'aaPanel :
+
+```bash
+apt install -y ffmpeg python3-venv
+python3 -m venv /root/hf && /root/hf/bin/pip install -U huggingface_hub
+/root/hf/bin/hf auth login
+/root/hf/bin/hf repos create Mintaservices/bambara-data-collections --repo-type dataset --private
+```
+
+`hf auth login` demande un jeton d'écriture créé sur huggingface.co/settings/tokens. Collez-le seulement dans le Terminal.
+
+Ensuite, à chaque export (par exemple chaque vendredi) :
+
+```bash
+cd /www/wwwroot/data.mintaservices.com && node scripts/exporter.js
+/root/hf/bin/hf upload Mintaservices/bambara-data-collections data/exports/$(date +%F) . --repo-type dataset --private --delete "voix/*"
+```
+
+`--delete "voix/*"` retire du dépôt les voix qui ne sont plus dans l'export, par exemple celles qu'un contributeur a supprimées. Le jeu de données reste privé : les contributeurs ont accepté qu'il serve à Mande-IA, pas qu'il soit publié.
+
 ## Mettre en ligne sur aaPanel
 
 On garde le site et le Node project déjà en place (`data_mintaservices_com`, dossier `/www/wwwroot/data.mintaservices.com`, port 3003) : le domaine et le certificat HTTPS ne changent pas. On remplace seulement le contenu, après une sauvegarde.
