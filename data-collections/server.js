@@ -89,13 +89,20 @@ app.get('/api/stats', (req, res) => {
   });
 });
 
+const ressembleContact = (texte) => /@|https?:|www\.|\.(com|net|org|ml)\b|(\d[\s.-]?){8,}/i.test(texte);
+const masquer = (pseudo) => {
+  if (!ressembleContact(pseudo)) return pseudo;
+  const debut = pseudo.split('@')[0].replace(/\d/g, '').trim().slice(0, 3);
+  return debut ? `${debut}…` : 'Contributeur';
+};
+
 app.get('/api/classement', (req, res) => {
   const mois = req.query.periode === 'mois';
   const since = mois ? new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString() : '';
   const rows = db.prepare(`SELECT c.pseudo, c.region, COUNT(i.id) AS contributions, SUM(i.status = 'validee') AS validees
     FROM items i JOIN contributors c ON c.id = i.contributor_id WHERE i.created_at >= ? AND i.status != 'rejetee'
     GROUP BY c.id ORDER BY contributions DESC, validees DESC LIMIT 20`).all(since);
-  res.json({ periode: mois ? 'mois' : 'tout', contributeurs: rows });
+  res.json({ periode: mois ? 'mois' : 'tout', contributeurs: rows.map((r) => ({ ...r, pseudo: masquer(r.pseudo) })) });
 });
 
 app.get('/api/options', (req, res) => res.json({ regions: REGIONS, ages: AGES, genres: GENRES }));
@@ -111,6 +118,7 @@ app.get('/api/moi', (req, res) => {
 app.post('/api/moi', (req, res) => {
   const pseudo = clean(req.body?.pseudo, 30);
   if (pseudo.length < 2) return res.status(400).json({ error: 'Choisissez un pseudo d’au moins 2 lettres.' });
+  if (ressembleContact(pseudo)) return res.status(400).json({ error: 'Pour votre sécurité, ne mettez ni e-mail, ni numéro de téléphone, ni lien dans votre pseudo : il est visible de tous.' });
   const existing = contributor(req);
   const region = pick(req.body?.region, REGIONS); const age = pick(req.body?.age, AGES); const genre = pick(req.body?.genre, GENRES);
   if (existing) {
