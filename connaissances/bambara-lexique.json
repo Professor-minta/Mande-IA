@@ -1,0 +1,434 @@
+[
+  {
+    "categorie": "Salutations",
+    "fr": "Bonjour !",
+    "en": "Hello!",
+    "bm": "Aw ni ce!",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Comment vas-tu ?",
+    "en": "How are you?",
+    "bm": "I ka kɛnɛ wa?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Je vais bien, merci.",
+    "en": "I am well, thank you.",
+    "bm": "N ka kɛnɛ, i ni ce.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Comment t’appelles-tu ?",
+    "en": "What is your name?",
+    "bm": "I tɔgɔ ye mun ye?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Je m’appelle Issa.",
+    "en": "My name is Issa.",
+    "bm": "N tɔgɔ ye Issa ye.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "D’où viens-tu ?",
+    "en": "Where are you from?",
+    "bm": "I bɔra min?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Je viens de Niono.",
+    "en": "I am from Niono.",
+    "bm": "N bɔra Niono.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Pouvons-nous parler ?",
+    "en": "Can we talk?",
+    "bm": "An bɛ se ka kuma?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Oui, nous pouvons parler.",
+    "en": "Yes, we can talk.",
+    "bm": "Ayiwa, an bɛ se ka kuma.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Salutations",
+    "fr": "Bonne journée !",
+    "en": "Have a good day!",
+    "bm": "Ka tile hɛrɛ!",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Je suis le fondateur de Minta Services.",
+    "en": "I am the founder of Minta Services.",
+    "bm": "N ye Minta Services dabaga ye.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "J’ai créé Mande-IA.",
+    "en": "I created Mande-IA.",
+    "bm": "N ye Mande-IA da.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Mande-IA est un assistant en bambara.",
+    "en": "Mande-IA is an assistant in Bambara.",
+    "bm": "Mande-IA ye dɛmɛbagan ye bamanankan na.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Je veux que la technologie aide les gens.",
+    "en": "I want technology to help people.",
+    "bm": "N b’a fɛ ka teknoloji kɛ ka nafa mɔgɔw ma.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Je veux aider à apprendre et écrire le bambara.",
+    "en": "I want to help people learn and write Bambara.",
+    "bm": "N b’a fɛ ka bamanankan kalan ani sɛbɛnni dɛmɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Mande-IA peut répondre en bambara.",
+    "en": "Mande-IA can answer in Bambara.",
+    "bm": "Mande-IA bɛ se ka jaabi di bamanankan na.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Je travaille au Mali.",
+    "en": "I work in Mali.",
+    "bm": "N bɛ baara kɛ Mali la.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Présentation",
+    "fr": "Notre travail concerne la technologie et l’éducation.",
+    "en": "Our work focuses on technology and education.",
+    "bm": "An ka baara ye teknoloji ni kalan ye.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Je veux apprendre le bambara.",
+    "en": "I want to learn Bambara.",
+    "bm": "N b’a fɛ ka bamanankan kalan.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Que signifie ce mot bambara ?",
+    "en": "What does this Bambara word mean?",
+    "bm": "Bamanankan kɔrɔ ye mun ye?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Peux-tu m’expliquer cela ?",
+    "en": "Can you explain this to me?",
+    "bm": "I bɛ se ka o ɲɛfɔ n ye?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Je veux mieux écrire.",
+    "en": "I want to write better.",
+    "bm": "N b’a fɛ ka sɛbɛnni kɛ ka ɲuman.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Peux-tu m’aider à écrire un message ?",
+    "en": "Can you help me write a message?",
+    "bm": "I bɛ se ka n dɛmɛ ka baro sɛbɛn?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Je veux faire une bonne présentation.",
+    "en": "I want to make a good presentation.",
+    "bm": "N b’a fɛ ka janko ɲuman kɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "J’apprends une nouvelle méthode de travail.",
+    "en": "I am learning a new way of working.",
+    "bm": "N bɛ baarakɛcogo kura kalan.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Cette phrase est-elle correcte ?",
+    "en": "Is this sentence correct?",
+    "bm": "Sɛbɛnni in ɲuman wa?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Peux-tu corriger ?",
+    "en": "Can you correct it?",
+    "bm": "I bɛ se ka kɔrɔsili kɛ?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Étude",
+    "fr": "Je veux apprendre avec mes amis.",
+    "en": "I want to learn with my friends.",
+    "bm": "N b’a fɛ ka kalan ni n ka terikɛw ye.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Je vais au marché.",
+    "en": "I am going to the market.",
+    "bm": "N bɛ taa sugu la.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Où est le marché ?",
+    "en": "Where is the market?",
+    "bm": "Sugu bɛ min?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Je veux manger.",
+    "en": "I want to eat.",
+    "bm": "N b’a fɛ ka dumuni kɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Où est l’eau ?",
+    "en": "Where is the water?",
+    "bm": "Ji bɛ min?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Je vais au travail.",
+    "en": "I am going to work.",
+    "bm": "N bɛ taa baara la.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Je viendrai demain.",
+    "en": "I will come tomorrow.",
+    "bm": "N bɛna na sɔgɔma.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "D’accord, nous nous verrons.",
+    "en": "Okay, we will see each other.",
+    "bm": "Ayiwa, an bɛna ɲɔgɔn ye.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Je veux réparer mon téléphone.",
+    "en": "I want to repair my phone.",
+    "bm": "N b’a fɛ ka n ka telefonu labɛn.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Il n’y a pas de réseau ici.",
+    "en": "There is no network here.",
+    "bm": "Réseau tɛ yan.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Vie quotidienne",
+    "fr": "Je peux avoir Internet.",
+    "en": "I can get Internet access.",
+    "bm": "N bɛ se ka internet sɔrɔ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Santé et communauté",
+    "fr": "La santé est importante.",
+    "en": "Health is important.",
+    "bm": "Kɛnɛya ye fɔlɔ ye.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Santé et communauté",
+    "fr": "Prends soin de ta santé.",
+    "en": "Take care of your health.",
+    "bm": "I ka kɛnɛya lajɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Santé et communauté",
+    "fr": "Parlons de l’importance de l’eau propre.",
+    "en": "Let us talk about the importance of clean water.",
+    "bm": "An ka fɔ ji ɲuman nafa kan.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Santé et communauté",
+    "fr": "Je veux aider les enfants à apprendre.",
+    "en": "I want to help children learn.",
+    "bm": "N b’a fɛ ka denmisenw kalan dɛmɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Santé et communauté",
+    "fr": "Faisons de bonnes actions dans notre village.",
+    "en": "Let us do good things in our village.",
+    "bm": "An ka kɛlɛ ɲuman kɛ an ka dugu la.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Santé et communauté",
+    "fr": "Aidons-nous les uns les autres.",
+    "en": "Let us help one another.",
+    "bm": "An ka ɲɔgɔn dɛmɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Je veux commencer un nouveau travail.",
+    "en": "I want to start a new job.",
+    "bm": "N b’a fɛ ka baara kura daminɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Peux-tu m’expliquer ce travail ?",
+    "en": "Can you explain this work to me?",
+    "bm": "I bɛ se ka baara in ɲɛfɔ n ye?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Je veux créer un site web.",
+    "en": "I want to create a website.",
+    "bm": "N b’a fɛ ka site web da.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Je veux apprendre la programmation.",
+    "en": "I want to learn programming.",
+    "bm": "N b’a fɛ ka programme kalan.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Mande-IA aide à produire de nouvelles idées.",
+    "en": "Mande-IA helps generate new ideas.",
+    "bm": "Mande-IA bɛ dɛmɛ ka miiri kura bɔ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Cherchons une nouvelle solution.",
+    "en": "Let us find a new solution.",
+    "bm": "An ka fɛɛrɛ kura ɲini.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Je veux améliorer mon projet.",
+    "en": "I want to improve my project.",
+    "bm": "N b’a fɛ ka n ka projet ɲɛsin.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Peux-tu me donner un plan ?",
+    "en": "Can you give me a plan?",
+    "bm": "I bɛ se ka plan di n ma?",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Je veux faire une démonstration.",
+    "en": "I want to give a demonstration.",
+    "bm": "N b’a fɛ ka demo kɛ.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  },
+  {
+    "categorie": "Travail et innovation",
+    "fr": "Merci de m’aider avec mon projet.",
+    "en": "Thank you for helping me with my project.",
+    "bm": "I ni ce n ka projet dɛmɛ na.",
+    "verifie": false,
+    "source": "Phrases de démonstration de Mande-IA"
+  }
+]

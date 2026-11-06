@@ -1,6 +1,14 @@
 {
-  "version": "2026-10-30-3",
+  "version": "2026-11-06-1",
   "entries": [
+    {
+      "date": "2026-11-06",
+      "titre": "Un agent Formateur et un bambara plus juste",
+      "points": [
+        "En mode scène, le nouvel agent Formateur répond sur Minta Academy : les 10 modules gratuits, la formation à Bamako, les inscriptions, et il aide les élèves bloqués.",
+        "Quand vous demandez une traduction en bambara, Mande-IA s'appuie sur les phrases relues par l'équipe de Minta Services. Chaque nouveau lot de phrases vérifiées le rend plus juste."
+      ]
+    },
     {
       "date": "2026-10-30",
       "titre": "Installer Mande-IA",

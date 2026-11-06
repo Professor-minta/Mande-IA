@@ -1,4 +1,5 @@
 const { connaissancesPour, derniereQuestion } = require('./connaissances');
+const { lexiquePour } = require('./lexique');
 
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
 
@@ -10,7 +11,7 @@ function langInstruction(pref) {
 }
 
 function whatsappSystemPrompt(lang, question = '') {
-  const dossier = connaissancesPour(question);
+  const dossier = [connaissancesPour(question), lexiquePour(question)].filter(Boolean).join('\n\n');
   return [
     'Tu es Mande-IA, l’assistant d’intelligence artificielle créé au Mali par le Professeur Issa Minta et son entreprise Minta Services.',
     'Tu réponds sur WhatsApp : messages courts, faciles à lire sur un téléphone, une idée par paragraphe.',

@@ -1,6 +1,7 @@
 const { PRESENTATION_MINTA } = require('./minta');
 const rateLimit = require('express-rate-limit');
 const { connaissancesPour } = require('./connaissances');
+const { lexiquePour } = require('./lexique');
 
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
 
@@ -9,6 +10,7 @@ const AGENTS = [
   { id: 'historien', nom: 'Historien', role: 'histoire du Mali et de l’Afrique : Kurukan Fuga, Soundiata, Mansa Moussa, les grands empires, les traditions', mots: 110 },
   { id: 'chercheur', nom: 'Chercheur', role: 'explications claires : sciences, santé, géographie, culture générale' },
   { id: 'bambara', nom: 'Bambara', role: 'traductions et petites leçons de bambara' },
+  { id: 'formateur', nom: 'Formateur', role: 'Minta Academy : les 10 modules, la formation à Bamako, les inscriptions et l’aide aux élèves bloqués', mots: 110 },
   { id: 'tech', nom: 'Tech', role: 'serveurs, sites web, code, cloud et IA locale' },
   { id: 'marketing', nom: 'Marketing', role: 'publicités, slogans et publications pour les réseaux sociaux' },
   { id: 'finance', nom: 'Finance', role: 'prix, budgets, calculs en FCFA et rentabilité' },
@@ -47,6 +49,8 @@ function sceneInstructions(preference) {
     'Avant d’appeler l’outil, annonce en quelques mots quel agent tu mobilises, par exemple « Je demande à mon agent Marketing. »',
     'Ensuite, présente la réponse de l’agent à voix haute, en quelques phrases courtes, sans inventer ce qu’il n’a pas dit.',
     'Pour l’histoire du Mali et de l’Afrique, par exemple Kurukan Fuga, Soundiata ou Mansa Moussa, consulte toujours l’agent Historien.',
+    'Pour traduire ou apprendre le bambara, consulte l’agent Bambara.',
+    'Pour Minta Academy, ses cours, ses modules, la formation à Bamako ou un élève bloqué, consulte l’agent Formateur.',
     'Pour une salutation ou une question très simple, réponds directement, sans agent.',
     'Phrases courtes, ton chaleureux et clair, une idée à la fois.',
     languageRule(preference)
@@ -54,7 +58,7 @@ function sceneInstructions(preference) {
 }
 
 function agentSystem(agent, preference, demande) {
-  const dossier = connaissancesPour(demande);
+  const dossier = [connaissancesPour(demande), agent.id === 'bambara' ? lexiquePour(demande, { force: true }) : ''].filter(Boolean).join('\n\n');
   return [
     `Tu es l’agent ${agent.nom} de Mande-IA, l’assistant créé au Mali par le Professeur Issa Minta (Minta Services). Ton domaine : ${agent.role}.`,
     'Mande-IA te consulte pendant une démonstration en direct, puis lit ta réponse à voix haute devant un public.',
