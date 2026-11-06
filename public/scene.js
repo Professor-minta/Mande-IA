@@ -64,7 +64,7 @@
       const angle = ((-90 + 180 / agents.length + (i * 360) / agents.length) * Math.PI) / 180;
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
-      const x = CX + 372 * cos;
+      const x = CX + 352 * cos;
       const y = CY + 238 * sin;
       const sx = CX + 128 * cos;
       const sy = CY + 128 * sin;
