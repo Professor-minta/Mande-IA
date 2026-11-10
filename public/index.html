@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="google" content="notranslate">
-    <meta name="theme-color" content="#061229">
+    <meta name="theme-color" content="#1b1a18">
     <title>Mande-IA — votre voix, notre intelligence</title>
     <meta name="description" content="Mande-IA est un assistant d'intelligence artificielle pour écrire et parler en bambara, en français et en anglais.">
     <link rel="manifest" href="/manifest.webmanifest">
@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap">
-    <link rel="stylesheet" href="/style.css?v=26">
+    <link rel="stylesheet" href="/style.css?v=27">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -98,12 +98,14 @@
           <img src="/icons/mande-ia.svg" alt="" width="36" height="36">
           <span>Mande-IA</span>
         </a>
+        <button class="menu-item" id="menu-new" type="button"><svg><use href="#i-plus"/></svg><span>Nouvelle discussion</span></button>
         <button class="tab" data-target="home" aria-current="page"><svg><use href="#i-home"/></svg><span>Accueil</span></button>
         <button class="tab" data-target="conversations"><svg><use href="#i-chats"/></svg><span>Conversations</span></button>
         <button class="tab" data-target="discover"><svg><use href="#i-compass"/></svg><span>Découvrir</span></button>
         <button class="tab" data-target="settings"><svg><use href="#i-gear"/></svg><span>Paramètres</span></button>
         <button class="rail-account account-button" type="button"><svg><use href="#i-user"/></svg><span class="account-label">Se connecter</span></button>
       </nav>
+      <div class="scrim" id="menu-scrim"></div>
 
       <div class="stage">
         <div class="decor" aria-hidden="true">
@@ -114,7 +116,7 @@
         </div>
 
         <header class="topbar">
-          <button class="icon-button only-mobile" id="open-history" aria-label="Voir mes conversations"><svg><use href="#i-menu"/></svg></button>
+          <button class="icon-button only-mobile" id="open-history" aria-label="Ouvrir le menu" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
           <a class="brand" href="/" aria-label="Mande-IA, accueil">
             <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <span class="brand-text"><strong>Mande-IA</strong><small>Votre voix, notre intelligence</small></span>
@@ -375,6 +377,6 @@
       <article class="about-content" id="about-content"></article>
     </dialog>
 
-    <script src="/app.js?v=26"></script>
+    <script src="/app.js?v=27"></script>
   </body>
 </html>

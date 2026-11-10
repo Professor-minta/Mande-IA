@@ -1,22 +1,22 @@
 :root {
-  --bg: #061229;
-  --bg-glow: #0d3058;
-  --surface: #0b1d3f;
-  --surface-2: #102a55;
-  --line: #1b3a6c;
-  --line-strong: #27508f;
-  --ink: #f2f6ff;
-  --muted: #9bb0d3;
-  --cyan: #22d3e6;
-  --cyan-deep: #0fb1c4;
-  --cyan-ink: #032530;
-  --glow: rgba(34, 211, 230, .38);
+  --bg: #1b1a18;
+  --bg-glow: #1b1a18;
+  --surface: #242321;
+  --surface-2: #2f2d2a;
+  --line: #363430;
+  --line-strong: #4a4741;
+  --ink: #f3f0e8;
+  --muted: #a9a49a;
+  --cyan: #e8b339;
+  --cyan-deep: #d49f24;
+  --cyan-ink: #1f1a0a;
+  --glow: rgba(232, 179, 57, .28);
   --green: #1fbf5b;
   --gold: #fcd116;
   --red: #e63b3f;
   --danger: #ff6b6b;
-  --user-bubble: #22d3e6;
-  --user-ink: #032530;
+  --user-bubble: #34322e;
+  --user-ink: #f3f0e8;
   --motif: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='52' viewBox='0 0 44 52'%3E%3Cg fill='none' stroke='%232a5da6' stroke-width='2'%3E%3Cpath d='M22 3 41 26 22 49 3 26Z'/%3E%3Cpath d='M22 15 31 26 22 37 13 26Z'/%3E%3C/g%3E%3C/svg%3E");
   --font-display: "Sora", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
@@ -25,24 +25,24 @@
 }
 
 :root[data-theme="light"] {
-  --bg: #f2f6fc;
-  --bg-glow: #d3eef4;
+  --bg: #f7f4ed;
+  --bg-glow: #f7f4ed;
   --surface: #ffffff;
-  --surface-2: #eaf1fa;
-  --line: #d4deee;
-  --line-strong: #b4c5df;
-  --ink: #0a1c3d;
-  --muted: #566887;
-  --cyan: #0a9fb3;
-  --cyan-deep: #088597;
+  --surface-2: #ede9df;
+  --line: #e2ddd0;
+  --line-strong: #cbc5b6;
+  --ink: #1f1d1a;
+  --muted: #6b665c;
+  --cyan: #9a6400;
+  --cyan-deep: #7f5200;
   --cyan-ink: #ffffff;
-  --glow: rgba(10, 159, 179, .22);
+  --glow: rgba(154, 100, 0, .2);
   --green: #129a45;
   --gold: #d9a900;
   --red: #d22a2f;
   --danger: #cc2f2f;
-  --user-bubble: #0a1c3d;
-  --user-ink: #f2f6ff;
+  --user-bubble: #e9e4d8;
+  --user-ink: #1f1d1a;
   --motif: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='52' viewBox='0 0 44 52'%3E%3Cg fill='none' stroke='%237d93b8' stroke-width='2'%3E%3Cpath d='M22 3 41 26 22 49 3 26Z'/%3E%3Cpath d='M22 15 31 26 22 37 13 26Z'/%3E%3C/g%3E%3C/svg%3E");
   color-scheme: light;
 }
@@ -419,3 +419,57 @@ body:not([data-view="home"]) .dock { display: none; }
 .camera-shutter { width: 78px; height: 78px; border: 6px solid rgba(255, 255, 255, .35); border-radius: 50%; background: #fff; background-clip: padding-box; }
 .camera-shutter:active { transform: scale(.94); }
 .camera-shutter:disabled { opacity: .5; }
+
+/* ---------- Interface simple : un écran calme, le menu sur le côté ---------- */
+body { background: var(--bg); }
+.decor { display: none; }
+.icon-button { border-color: transparent; background: transparent; }
+.icon-button:hover { border-color: transparent; background: var(--surface-2); }
+.brand-text small { display: none; }
+.brand-text strong { font-size: 19px; }
+.brand-mark { transform: scale(.78); }
+.topbar .account-button.only-mobile { display: none; }
+
+.hero .orb { width: 84px; height: 72px; margin: 0 auto 18px; }
+.hero .orb-ring { display: none; }
+.hero .orb-bars { height: 68px; gap: 6px; }
+.hero .orb-bars i { width: 8px; height: calc(var(--h) * 68px); }
+.greeting { font-size: clamp(30px, 8vw, 38px); font-weight: 600; }
+.lede { margin: 8px auto 24px; font-size: 16px; }
+.suggestions { gap: 8px; }
+.suggestion { gap: 10px; padding: 11px 14px; border-color: var(--line); border-radius: 14px; background: transparent; font-size: 15.5px; }
+.suggestion:hover { border-color: var(--line-strong); }
+.suggestion-icon { width: 28px; height: 28px; background: transparent; color: var(--muted); }
+.suggestion .chevron { display: none; }
+
+.msg.user .bubble { border-radius: 18px; font-weight: 400; }
+.composer { border-color: var(--line); border-radius: 24px; background: var(--surface); box-shadow: none; }
+.composer:focus-within { border-color: var(--line-strong); }
+.round-action { width: 50px; height: 50px; box-shadow: none; }
+.list { border-radius: 16px; background: var(--surface); }
+.row-icon { background: transparent; color: var(--muted); }
+.conversation { border-radius: 14px; background: var(--surface); }
+.conversation:hover, .conversation.is-active { border-color: var(--line-strong); }
+
+.tabbar { background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.tabbar::before { display: none; }
+.tab, .menu-item { flex: none; display: flex; align-items: center; justify-content: flex-start; gap: 14px; width: 100%; height: 48px; padding: 0 14px; border: 0; border-radius: 12px; background: transparent; color: var(--muted); font-size: 15.5px; font-weight: 600; text-align: left; }
+.tab svg, .menu-item svg { width: 22px; height: 22px; }
+.tab:hover, .menu-item:hover { background: var(--surface-2); color: var(--ink); }
+.tab[aria-current="page"] { background: var(--surface-2); color: var(--ink); }
+.tab[aria-current="page"]::after { display: none; }
+.menu-item { margin-bottom: 10px; border: 1px solid var(--line-strong); color: var(--ink); }
+.scrim { display: none; }
+
+@media (max-width: 899px) {
+  .tabbar { position: fixed; inset: 0 auto 0 0; z-index: 60; order: 0; display: flex; flex-direction: column; gap: 4px; width: min(86vw, 320px); height: auto; padding: max(18px, env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom)); border: 0; border-right: 1px solid var(--line); border-radius: 0; overflow-y: auto; transform: translateX(-104%); visibility: hidden; transition: transform .22s ease, visibility 0s .22s; }
+  body.menu-open .tabbar { transform: none; visibility: visible; transition: transform .22s ease; }
+  .rail-brand { display: flex; align-items: center; gap: 10px; margin: 0 8px 18px; text-decoration: none; font: 700 20px/1 var(--font-display); }
+  .rail-brand img { border-radius: 10px; }
+  .rail-account { display: flex; align-items: center; gap: 12px; margin-top: auto; min-height: 50px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 14px; background: transparent; font-size: 15px; font-weight: 600; text-align: left; overflow: hidden; }
+  .rail-account span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .scrim { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, .5); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+  body.menu-open .scrim { opacity: 1; pointer-events: auto; }
+  .dock { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+@media (max-width: 379px) { .tab { font-size: 15px; } }

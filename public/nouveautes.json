@@ -1,6 +1,15 @@
 {
-  "version": "2026-11-06-1",
+  "version": "2026-11-10-1",
   "entries": [
+    {
+      "date": "2026-11-10",
+      "titre": "Une interface plus simple",
+      "points": [
+        "Un écran plus calme : la discussion au centre, et tout le reste dans le menu, en haut à gauche.",
+        "Le menu regroupe Nouvelle discussion, Conversations, Découvrir, Paramètres et votre compte.",
+        "Mande-IA connaît les dates de la formation Minta Academy à Bamako : du 7 au 24 décembre 2026."
+      ]
+    },
     {
       "date": "2026-11-06",
       "titre": "Un agent Formateur et un bambara plus juste",
