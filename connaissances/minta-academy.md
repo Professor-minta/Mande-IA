@@ -46,4 +46,4 @@ Minta Services installe Mande-IA dans les entreprises, écoles et administration
 - Coller une commande : copier seulement la commande, jamais le texte d'explication autour.
 
 ## Contact
-academy@mintaservices.com, WhatsApp +223 77 29 52 59.
+professorminta@gmail.com, WhatsApp +223 77 29 52 59.
