@@ -13,7 +13,8 @@
     ['ollama', 'IA locale hors ligne']
   ];
 
-  const state = { agents: [], nodes: new Map(), call: null, pro: false, count: 0, totalMs: 0, audioCtx: null };
+  const SPEC = 72;
+  const state = { agents: [], nodes: new Map(), call: null, pro: false, count: 0, totalMs: 0, audioCtx: null, spec: [] };
 
   const svg = (tag, attrs = {}) => {
     const el = document.createElementNS(SVG, tag);
@@ -52,6 +53,59 @@
       group.append(rect);
       return rect;
     });
+  }
+
+  // L'anneau de fréquences autour du logo : 72 traits qui suivent le micro (cyan) ou la voix de Mande-IA (or).
+  function drawSpectrum() {
+    const ticks = $('#ticks');
+    for (let i = 0; i < 60; i += 1) {
+      const a = (i / 60) * Math.PI * 2;
+      const long = i % 5 === 0;
+      ticks.append(svg('line', { x1: CX + 184 * Math.cos(a), y1: CY + 184 * Math.sin(a), x2: CX + (long ? 194 : 189) * Math.cos(a), y2: CY + (long ? 194 : 189) * Math.sin(a), class: long ? 'is-long' : '' }));
+    }
+    const group = $('#spectrum');
+    for (let i = 0; i < SPEC; i += 1) {
+      const a = (i / SPEC) * Math.PI * 2 - Math.PI / 2;
+      const line = svg('line', { x1: CX + 132 * Math.cos(a), y1: CY + 132 * Math.sin(a), x2: CX + 137 * Math.cos(a), y2: CY + 137 * Math.sin(a) });
+      group.append(line);
+      state.spec.push({ line, cos: Math.cos(a), sin: Math.sin(a) });
+    }
+  }
+  function paintSpectrum(m, gain) {
+    if (m) m.analyser.getByteFrequencyData(m.freq);
+    state.spec.forEach((s, i) => {
+      const k = i < SPEC / 2 ? i : SPEC - 1 - i;
+      const v = m ? (m.freq[2 + Math.floor(k * 2.4)] / 255) * gain : 0;
+      const r = 137 + Math.min(1, v) * 27;
+      s.line.setAttribute('x2', CX + r * s.cos);
+      s.line.setAttribute('y2', CY + r * s.sin);
+    });
+  }
+  function paintWave(m, color) {
+    const canvas = $('#wave');
+    const c = canvas.getContext('2d');
+    const { width: w, height: h } = canvas;
+    c.clearRect(0, 0, w, h);
+    c.strokeStyle = 'rgba(34, 211, 230, .14)';
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, h / 2); c.lineTo(w, h / 2); c.stroke();
+    if (!m) return;
+    c.strokeStyle = color;
+    c.lineWidth = 2.5;
+    c.beginPath();
+    const step = m.data.length / w;
+    for (let x = 0; x < w; x += 2) {
+      const y = h / 2 + ((m.data[Math.floor(x * step)] - 128) / 128) * h * 1.6;
+      if (x) c.lineTo(x, Math.max(2, Math.min(h - 2, y))); else c.moveTo(x, y);
+    }
+    c.stroke();
+  }
+  function paintVitals(mic, ai, pending) {
+    const pct = (v) => `${Math.round(Math.min(1, v) * 100)}`;
+    $('#vu-mic').style.width = `${pct(mic)}%`; $('#vu-mic-val').textContent = pct(mic);
+    $('#vu-ai').style.width = `${pct(ai)}%`; $('#vu-ai-val').textContent = pct(ai);
+    const total = state.agents.length || 1;
+    $('#vu-agents').style.width = `${Math.min(100, (pending / total) * 100)}%`; $('#vu-agents-val').textContent = String(pending);
   }
 
   function drawAgents(agents) {
@@ -161,7 +215,7 @@
 
   function tickClock() {
     const now = new Date();
-    $('#clock').textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Bamako' });
+    $('#clock').textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Africa/Bamako' });
     $('#date').textContent = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Africa/Bamako' });
   }
 
@@ -199,8 +253,9 @@
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.78;
       source.connect(analyser);
-      return { source, analyser, data: new Uint8Array(analyser.fftSize) };
+      return { source, analyser, data: new Uint8Array(analyser.fftSize), freq: new Uint8Array(analyser.frequencyBinCount) };
     } catch { return null; }
   }
   function level(m) {
@@ -223,8 +278,13 @@
       $('#orb').style.transform = `scale(${1 + value * 0.07})`;
       state.bars.forEach((bar, i) => { bar.style.transform = `scaleY(${0.5 + value * (0.5 + ((i * 37) % 10) / 14)})`; });
       const working = call.pending > 0;
-      const next = working ? 'AGENTS AU TRAVAIL' : Date.now() - lastAi < 450 ? 'MANDE-IA PARLE' : call.muted ? 'MICRO COUPÉ' : 'EN ÉCOUTE';
-      if (next !== label) { label = next; $('#orb-label').textContent = next; }
+      const speaking = Date.now() - lastAi < 450;
+      const next = working ? 'L’IA RÉFLÉCHIT' : speaking ? 'MANDE-IA PARLE' : call.muted ? 'MICRO COUPÉ' : 'ÉCOUTE EN COURS';
+      if (next !== label) { label = next; $('#orb-label').textContent = next; document.body.dataset.voice = working ? 'think' : speaking ? 'ai' : 'mic'; $('#wave-source').textContent = speaking ? 'Mande-IA' : call.muted ? 'micro coupé' : 'micro'; }
+      const source = speaking ? call.aiMeter : call.muted ? null : call.micMeter;
+      paintSpectrum(source, speaking ? 1.5 : 1.9);
+      paintWave(source, speaking ? '#fcd116' : '#22d3e6');
+      paintVitals(mic, ai, call.pending || 0);
       call.frame = requestAnimationFrame(tick);
     };
     tick();
@@ -390,6 +450,9 @@
     $('#orb').style.transform = '';
     state.bars.forEach((bar) => { bar.style.transform = ''; });
     $('#orb-label').textContent = 'EN ATTENTE';
+    delete document.body.dataset.voice;
+    $('#wave-source').textContent = 'en attente';
+    paintSpectrum(null, 0); paintWave(null); paintVitals(0, 0, 0);
     $('#call').textContent = 'Démarrer (Espace)';
     $('#mute').disabled = true;
     $('#mute').setAttribute('aria-pressed', 'false');
@@ -494,7 +557,9 @@
 
   setState('idle', 'Prêt');
   drawStrands();
+  drawSpectrum();
   drawBars();
+  paintWave(null);
   tickClock();
   setInterval(tickClock, 1000);
   loadServices();
