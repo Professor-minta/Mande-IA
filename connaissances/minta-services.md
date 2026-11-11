@@ -8,13 +8,13 @@ source: https://mintaservices.com
 Minta Services (slogan : African Technology Solution) est une entreprise malienne de solutions technologiques, à Ségou et Bamako. Fondateur : le Professeur Issa Minta, professeur de technologie et ingénieur IA full-stack, créateur de Mande-IA et de Minta Academy. Devise : « Inspirer, innover, autonomiser la jeunesse malienne. »
 - Services : sites vitrines et boutiques en ligne ; serveurs VPS installés, sécurisés et gérés avec aaPanel ; noms de domaine avec DNS et e-mails professionnels ; panneau VPN pour les équipes ; Mande-IA installé en entreprise, sans internet ; suivi, sauvegardes et ajustements gratuits après chaque livraison.
 - Un site web prend en général 5 à 10 jours ouvrables. Paiement : Orange Money, Moov Money, Wave ou carte bancaire. Intervention partout au Mali et à distance.
-- Site : https://mintaservices.com. Contact : contact@mintaservices.com, WhatsApp +223 77 29 52 59.
+- Site : https://mintaservices.com. Contact : professorminta@gmail.com, WhatsApp +223 77 29 52 59.
 
 ## Les quatre initiatives
-1. Mande-IA : l'assistant d'intelligence artificielle qui parle bambara, français et anglais. Sur le web (https://ia.mintaservices.com), sur WhatsApp (+223 92 27 58 84) et sans internet avec le modèle professor-minta/mande-ia.v3. E-mail : ia@mintaservices.com.
-2. Minta Academy : la formation gratuite et ouverte, https://mintaservices.com/academy/. E-mail : academy@mintaservices.com.
-3. Data-Collections : la collecte de voix et de textes en bambara qui nourrit l'intelligence artificielle africaine, https://data.mintaservices.com. E-mail : data@mintaservices.com.
-4. Minta Entrepreneurship : l'accompagnement des jeunes entrepreneurs maliens, de l'idée au premier client, https://mintaservices.com/entrepreneuriat/. E-mail : entrepreneuriat@mintaservices.com.
+1. Mande-IA : l'assistant d'intelligence artificielle qui parle bambara, français et anglais. Sur le web (https://ia.mintaservices.com), sur WhatsApp (+223 92 27 58 84) et sans internet avec le modèle professor-minta/mande-ia.v3.
+2. Minta Academy : la formation gratuite et ouverte, https://mintaservices.com/academy/.
+3. Data-Collections : la collecte de voix et de textes en bambara qui nourrit l'intelligence artificielle africaine, https://data.mintaservices.com.
+4. Minta Entrepreneurship : l'accompagnement des jeunes entrepreneurs maliens, de l'idée au premier client, https://mintaservices.com/entrepreneuriat/.
 
 ## Mande-IA
 - Répond en bambara, en français et en anglais ; analyse les photos et les PDF ; lit les réponses à voix haute ; appel vocal en direct ; « Appelle Mamadou » lance un appel depuis le téléphone.
