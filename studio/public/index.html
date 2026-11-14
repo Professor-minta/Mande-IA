@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Studio Live · Minta Services</title>
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="" width="44" height="44">
+  <div><strong>Studio Live</strong><small>Minta Services</small></div>
+  <button id="sortir" class="discret" hidden>Se déconnecter</button>
+</header>
+
+<main id="connexion" hidden>
+  <form id="formConnexion" class="carte etroit">
+    <h1>Connexion</h1>
+    <label for="motDePasse">Mot de passe du studio</label>
+    <input id="motDePasse" type="password" autocomplete="current-password" required>
+    <button class="principal">Entrer</button>
+    <p class="erreur" id="erreurConnexion" role="alert"></p>
+  </form>
+</main>
+
+<main id="studio" hidden>
+  <section class="carte" id="carteSignal">
+    <div class="ligne">
+      <span class="voyant" id="voyant"></span>
+      <div class="grand"><h2 id="titreSignal">En attente d'OBS</h2><p id="detailSignal">Lancez le streaming dans OBS : le signal apparaît ici.</p></div>
+    </div>
+  </section>
+
+  <section class="carte">
+    <div class="tete"><h2>Destinations</h2>
+      <div class="actions"><button id="toutLancer" class="principal">Tout lancer</button><button id="toutArreter">Tout arrêter</button></div>
+    </div>
+    <p class="aide">Une destination « lancée » part en direct dès que le signal d'OBS arrive. Pour un essai sans public, laissez tout arrêté.</p>
+    <ul id="liste"></ul>
+    <p class="vide" id="vide" hidden>Aucune destination pour l'instant. Ajoutez Facebook pour commencer.</p>
+  </section>
+
+  <section class="carte">
+    <h2 id="titreForm">Ajouter une destination</h2>
+    <form id="formDestination">
+      <div class="champs">
+        <div><label for="type">Plateforme</label><select id="type"></select></div>
+        <div><label for="nom">Nom affiché</label><input id="nom" maxlength="40" placeholder="Page Minta Services"></div>
+      </div>
+      <label for="url">Adresse du serveur</label>
+      <input id="url" placeholder="rtmps://…" autocomplete="off" spellcheck="false">
+      <label for="cle">Clé de stream</label>
+      <input id="cle" type="password" autocomplete="off" spellcheck="false">
+      <p class="aide" id="aideType"></p>
+      <div class="actions"><button class="principal" id="boutonForm">Ajouter</button><button type="button" id="annuler" hidden>Annuler</button></div>
+      <p class="erreur" id="erreurForm" role="alert"></p>
+    </form>
+  </section>
+
+  <section class="carte">
+    <h2>Réglages d'OBS</h2>
+    <p class="aide">Dans OBS : Paramètres, Stream, Service « Personnalisé ».</p>
+    <dl>
+      <dt>Serveur</dt><dd><code id="obsServeur"></code><button id="copierServeur">Copier</button></dd>
+      <dt>Clé de stream</dt><dd><code>••••••••••••</code><button id="copierCle">Copier la clé</button></dd>
+      <dt>Sortie conseillée</dt><dd>1280 × 720, 30 images/s, 2500 kbps, image clé toutes les 2 s, audio 128 kbps</dd>
+    </dl>
+    <p class="aide">Les clés ne s'affichent jamais sur cette page : vous pouvez la montrer pendant un live.</p>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
