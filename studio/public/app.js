@@ -10,6 +10,7 @@ let types = {};
 let enEdition = null;
 let minuterie = null;
 let derniere = '';
+let cleObs = '';
 
 async function api(chemin, methode = 'GET', corps) {
   const reponse = await fetch(`/api/${chemin}`, { method: methode, headers: corps ? { 'Content-Type': 'application/json' } : {}, body: corps ? JSON.stringify(corps) : undefined });
@@ -111,10 +112,23 @@ function viderForm() {
   choisirType();
 }
 
-async function copier(texte, bouton) {
-  const avant = bouton.textContent;
-  try { await navigator.clipboard.writeText(texte); bouton.textContent = 'Copié'; } catch { bouton.textContent = 'Copie impossible'; }
-  setTimeout(() => { bouton.textContent = avant; }, 1500);
+function copier(texte, bouton) {
+  const avant = bouton.dataset.texte || (bouton.dataset.texte = bouton.textContent);
+  const fin = (reussi) => {
+    bouton.textContent = reussi ? 'Copié ✓' : 'Copie impossible';
+    setTimeout(() => { bouton.textContent = avant; }, 2000);
+    if (!reussi) prompt('Copiez avec Ctrl+C, puis fermez cette fenêtre.', texte);
+  };
+  const zone = document.createElement('textarea');
+  zone.value = texte; zone.readOnly = true; zone.className = 'hors-ecran';
+  document.body.append(zone);
+  zone.select();
+  let reussi = false;
+  try { reussi = document.execCommand('copy'); } catch { reussi = false; }
+  zone.remove();
+  if (reussi) return fin(true);
+  if (!navigator.clipboard) return fin(false);
+  navigator.clipboard.writeText(texte).then(() => fin(true), () => fin(false));
 }
 
 async function demarrer() {
@@ -127,6 +141,7 @@ async function demarrer() {
     choisirType();
   }
   dessiner(etat);
+  api('cle-obs').then((r) => { cleObs = r.cle; }).catch(() => {});
   clearInterval(minuterie);
   minuterie = setInterval(rafraichir, 2000);
 }
@@ -151,6 +166,9 @@ $('formDestination').addEventListener('submit', async (e) => {
 $('toutLancer').addEventListener('click', () => agir('tout', 'POST', { actif: true }));
 $('toutArreter').addEventListener('click', () => agir('tout', 'POST', { actif: false }));
 $('copierServeur').addEventListener('click', (e) => copier($('obsServeur').textContent, e.currentTarget));
-$('copierCle').addEventListener('click', async (e) => { const b = e.currentTarget; try { copier((await api('cle-obs')).cle, b); } catch { /* connexion redemandée */ } });
+$('copierCle').addEventListener('click', async (e) => {
+  const b = e.currentTarget;
+  try { if (!cleObs) cleObs = (await api('cle-obs')).cle; copier(cleObs, b); } catch { /* connexion redemandée */ }
+});
 
 demarrer();
