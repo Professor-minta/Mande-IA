@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { streamChat } = require('../chats/chatManager');
-const { INTRO, LECONS, texteLecon, commandeCours } = require('./cours');
+const { COURS, PAR_DEFAUT, texteLecon, commandeCours } = require('./cours');
 
 const GRAPH_BASE_URL = process.env.META_GRAPH_BASE_URL || 'https://graph.facebook.com';
 const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION || 'v26.0';
@@ -31,7 +31,7 @@ const MENU = [
   {
     title: 'Demander à Mande-IA',
     rows: [
-      { id: 'tech', title: 'Cours Tech étudiants', description: '10 leçons : smartphone, IA, web, design, programmation' },
+      { id: 'cours_liste', title: 'Cours pour étudiants', description: 'Tech, méthodes d’études, anglais : 10 leçons chacun' },
       { id: 'conseil', title: 'Conseil entrepreneurial', description: 'Lancer une activité au Mali avec peu de moyens', prompt: 'Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens.' },
       { id: 'ecole', title: 'École malienne expliquée', description: 'Du fondamental à l’université, expliqué simplement', prompt: 'Explique-moi simplement comment fonctionne l’école au Mali, du fondamental jusqu’à l’université.' },
       { id: 'lecon', title: 'Leçon du jour', description: 'Une phrase en bambara, traduite et expliquée', prompt: 'Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple.' },
@@ -146,7 +146,7 @@ async function sendWelcome(phoneId, to, name) {
         action: { buttons: [
           { type: 'reply', reply: { id: 'menu', title: 'Voir tout le menu' } },
           { type: 'reply', reply: { id: 'lecon', title: 'Leçon du jour' } },
-          { type: 'reply', reply: { id: 'tech', title: 'Cours Tech' } }
+          { type: 'reply', reply: { id: 'cours_liste', title: 'Cours étudiants' } }
         ] }
       }
     });
@@ -180,7 +180,7 @@ function setupWhatsApp(app, { db, day, now }) {
   if (TEST_MODE) console.log(testNumbers().length ? `WhatsApp : mode test, réponses seulement au ${testNumbers().map(maskNumber).join(', ')}.` : 'WhatsApp : mode test sans WHATSAPP_TEST_RECIPIENT, Mande-IA ne répondra à personne.');
   else console.log('WhatsApp : mode public.');
   console.log(`WhatsApp : webhook sur ${WEBHOOK_PATHS.slice(0, 2).join(' et ')}.`);
-  db.exec('CREATE TABLE IF NOT EXISTS whatsapp_cours (numero TEXT PRIMARY KEY, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL)');
+  db.exec('CREATE TABLE IF NOT EXISTS whatsapp_cours (numero TEXT PRIMARY KEY, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL); CREATE TABLE IF NOT EXISTS whatsapp_parcours (numero TEXT NOT NULL, cours TEXT NOT NULL, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL, PRIMARY KEY(numero, cours)); INSERT OR IGNORE INTO whatsapp_parcours(numero, cours, etape, maj) SELECT numero, \'tech\', etape, maj FROM whatsapp_cours;');
 
   function validSignature(req) {
     if (!process.env.META_APP_SECRET) return TEST_MODE;
@@ -223,9 +223,27 @@ function setupWhatsApp(app, { db, day, now }) {
     if (pending.trim()) await sendText(phoneId, from, pending);
   }
 
-  function etapeCours(from) { return db.prepare('SELECT etape FROM whatsapp_cours WHERE numero = ?').get(from)?.etape || 0; }
-  function noterCours(from, etape) {
-    db.prepare('INSERT INTO whatsapp_cours(numero, etape, maj) VALUES (?, ?, ?) ON CONFLICT(numero) DO UPDATE SET etape = excluded.etape, maj = excluded.maj').run(from, etape, now());
+  function coursActuel(from) {
+    const id = db.prepare('SELECT cours FROM whatsapp_parcours WHERE numero = ? ORDER BY maj DESC LIMIT 1').get(from)?.cours;
+    return COURS[id] ? id : PAR_DEFAUT;
+  }
+  function etapeCours(from, id) { return db.prepare('SELECT etape FROM whatsapp_parcours WHERE numero = ? AND cours = ?').get(from, id)?.etape || 0; }
+  function noterCours(from, id, etape) {
+    db.prepare('INSERT INTO whatsapp_parcours(numero, cours, etape, maj) VALUES (?, ?, ?, ?) ON CONFLICT(numero, cours) DO UPDATE SET etape = excluded.etape, maj = excluded.maj').run(from, id, etape, now());
+  }
+  function sendCourseList(phoneId, to) {
+    return graphPost(phoneId, 'messages', {
+      recipient_type: 'individual',
+      to,
+      type: 'interactive',
+      interactive: {
+        type: 'list',
+        header: { type: 'text', text: 'Cours pour étudiants' },
+        body: { text: 'Trois cours gratuits de 10 leçons chacun. Choisis celui qui t’intéresse : tu peux en suivre plusieurs.' },
+        footer: { text: 'Écris leçon pour la suivante' },
+        action: { button: 'Choisir un cours', sections: [{ title: 'Cours', rows: Object.entries(COURS).map(([id, c]) => ({ id: `cours_${id}`, title: c.nom, description: c.description })) }] }
+      }
+    });
   }
   async function sendButtons(phoneId, to, text, buttons) {
     let body = whatsappFormat(text);
@@ -233,20 +251,24 @@ function setupWhatsApp(app, { db, day, now }) {
     return graphPost(phoneId, 'messages', { recipient_type: 'individual', to, type: 'interactive', interactive: { type: 'button', body: { text: body }, action: { buttons: buttons.map(([id, title]) => ({ type: 'reply', reply: { id, title } })) } } });
   }
   async function cours(phoneId, from, commande) {
-    const faite = commande.action === 'zero' ? 0 : etapeCours(from);
-    if (commande.action === 'zero') noterCours(from, 0);
+    if (commande.action === 'liste') { await sendCourseList(phoneId, from); return; }
+    const id = COURS[commande.cours] ? commande.cours : coursActuel(from);
+    const { nom, intro, lecons } = COURS[id];
+    const faite = commande.action === 'zero' ? 0 : etapeCours(from, id);
     if (commande.action === 'debut' || commande.action === 'zero') {
-      const reprise = faite > 0 && faite < LECONS.length;
-      await sendButtons(phoneId, from, reprise ? `${INTRO}\n\nTu as déjà suivi ${faite} leçon${faite > 1 ? 's' : ''} sur ${LECONS.length}.` : INTRO, [['cours_suite', reprise ? 'Continuer' : 'Commencer'], ['menu', 'Menu']]);
+      noterCours(from, id, faite);
+      const reprise = faite > 0 && faite < lecons.length;
+      await sendButtons(phoneId, from, reprise ? `${intro}\n\nTu as déjà suivi ${faite} leçon${faite > 1 ? 's' : ''} sur ${lecons.length}.` : intro, [['cours_suite', reprise ? 'Continuer' : 'Commencer'], ['cours_liste', 'Autres cours'], ['menu', 'Menu']]);
       return;
     }
     const numero = commande.action === 'numero' ? commande.numero : faite + 1;
-    if (numero > LECONS.length) {
-      await sendButtons(phoneId, from, `Tu as terminé les ${LECONS.length} leçons du Cours Tech. Bravo !\n\nPour continuer gratuitement : https://mintaservices.com/academy/\n\nTu peux poser tes questions à Mande-IA, ou revoir une leçon en écrivant par exemple *leçon 5*.`, [['cours_zero', 'Recommencer'], ['menu', 'Menu']]);
+    if (commande.action === 'numero' && numero > lecons.length) { await sendText(phoneId, from, `Le cours « ${nom} » a ${lecons.length} leçons. Écris par exemple *leçon ${lecons.length}*.`); return; }
+    if (numero > lecons.length) {
+      await sendButtons(phoneId, from, `Tu as terminé les ${lecons.length} leçons du cours « ${nom} ». Bravo !\n\nChoisis un autre cours, ou continue gratuitement avec Minta Academy : https://mintaservices.com/academy/\n\nPour revoir une leçon, écris par exemple *leçon 5*.`, [['cours_liste', 'Autres cours'], ['cours_zero', 'Recommencer'], ['menu', 'Menu']]);
       return;
     }
-    const envoye = await sendButtons(phoneId, from, texteLecon(numero), [['cours_suite', numero < LECONS.length ? 'Leçon suivante' : 'Terminer'], ['menu', 'Menu']]);
-    if (envoye && numero > faite) noterCours(from, numero);
+    const envoye = await sendButtons(phoneId, from, texteLecon(id, numero), [['cours_suite', numero < lecons.length ? 'Leçon suivante' : 'Terminer'], ['menu', 'Menu']]);
+    if (envoye) noterCours(from, id, Math.max(faite, numero));
   }
 
   async function handleMessage(message, phoneId, name) {
@@ -264,7 +286,9 @@ function setupWhatsApp(app, { db, day, now }) {
     if (message.type === 'interactive') {
       const choice = message.interactive?.list_reply || message.interactive?.button_reply;
       if (choice?.id === 'menu') { await sendMenu(phoneId, from, name); return; }
-      if (choice?.id === 'tech') { await cours(phoneId, from, { action: 'debut' }); return; }
+      if (choice?.id === 'cours_liste') { await cours(phoneId, from, { action: 'liste' }); return; }
+      const choisi = choice?.id === 'tech' ? 'tech' : String(choice?.id || '').replace(/^cours_/, '');
+      if (COURS[choisi]) { await cours(phoneId, from, { action: 'debut', cours: choisi }); return; }
       if (choice?.id === 'cours_suite') { await cours(phoneId, from, { action: 'suite' }); return; }
       if (choice?.id === 'cours_zero') { await cours(phoneId, from, { action: 'zero' }); return; }
       const row = ROWS[choice?.id];
