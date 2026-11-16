@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-  <link rel="stylesheet" href="/scene.css?v=4">
+  <link rel="stylesheet" href="/scene.css?v=5">
 </head>
 <body>
   <div class="hud" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -49,12 +49,13 @@
     </aside>
 
     <section class="stage" aria-label="Mande-IA et ses agents">
+      <canvas id="coeur" aria-hidden="true"></canvas>
       <svg id="scene" viewBox="0 0 1000 680" role="img" aria-label="Mande-IA au centre, entouré de ses agents spécialistes">
         <defs>
           <radialGradient id="orb-fill" cx="50%" cy="45%" r="55%">
-            <stop offset="0%" stop-color="#03101f"/>
-            <stop offset="70%" stop-color="#052036"/>
-            <stop offset="100%" stop-color="#0b4a63"/>
+            <stop offset="0%" stop-color="#061a30"/>
+            <stop offset="62%" stop-color="#041326"/>
+            <stop offset="100%" stop-color="#020a16"/>
           </radialGradient>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="8" result="blur"/>
@@ -114,6 +115,7 @@
     <p class="notice" id="notice" hidden></p>
   </footer>
 
-  <script src="/scene.js?v=7"></script>
+  <script src="/scene.js?v=8"></script>
+  <script src="/scene-coeur.js?v=1"></script>
 </body>
 </html>
