@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const { fichesCours } = require('./cours');
+
 const DOSSIER = path.join(__dirname, '..', 'connaissances');
 const LIMITE = 12000;
 const RELIRE_MS = 60 * 1000;
@@ -32,6 +34,10 @@ function fiches() {
       try { return lireFiche(nom); } catch (erreur) { console.error(`Connaissance ${nom} illisible :`, erreur.message); return null; }
     }).filter(Boolean);
   } catch {}
+  for (const f of fichesCours()) {
+    const mots = f.mots.map((m) => simple(m).trim());
+    liste.push({ titre: f.titre, corps: f.corps, mots, motifs: mots.map((m) => new RegExp(`(^|[^a-z0-9])${echapper(m)}`)) });
+  }
   cache = { lu: Date.now(), fiches: liste };
   return liste;
 }
@@ -40,7 +46,7 @@ function connaissancesPour(texte) {
   const cible = simple(texte);
   if (!cible.trim()) return '';
   const trouvees = fiches()
-    .map((f) => ({ f, score: f.motifs.filter((motif) => motif.test(cible)).length }))
+    .map((f) => ({ f, score: f.motifs.reduce((total, motif, i) => total + (motif.test(cible) ? f.mots[i].split(' ').length : 0), 0) }))
     .filter((t) => t.score > 0)
     .sort((a, b) => b.score - a.score);
   if (!trouvees.length) return '';
@@ -48,7 +54,7 @@ function connaissancesPour(texte) {
   let taille = 0;
   for (const { f } of trouvees) {
     const bloc = `### ${f.titre}\n${f.corps}`;
-    if (blocs.length && taille + bloc.length > LIMITE) break;
+    if (blocs.length && taille + bloc.length > LIMITE) continue;
     blocs.push(bloc.slice(0, LIMITE));
     taille += bloc.length;
   }
