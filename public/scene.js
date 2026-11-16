@@ -275,6 +275,7 @@
       const mic = call.muted ? 0 : level(call.micMeter);
       if (ai > 0.06) lastAi = Date.now();
       const value = Math.max(ai, mic * 0.8);
+      window.sceneNiveau = value;
       $('#orb').style.transform = `scale(${1 + value * 0.07})`;
       state.bars.forEach((bar, i) => { bar.style.transform = `scaleY(${0.5 + value * (0.5 + ((i * 37) % 10) / 14)})`; });
       const working = call.pending > 0;
@@ -457,6 +458,7 @@
     $('#mute').disabled = true;
     $('#mute').setAttribute('aria-pressed', 'false');
     $('#lang').disabled = false;
+    window.sceneNiveau = 0;
     setState('idle', 'Prêt');
   }
 
