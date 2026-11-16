@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { streamChat } = require('../chats/chatManager');
+const { INTRO, LECONS, texteLecon, commandeCours } = require('./cours');
 
 const GRAPH_BASE_URL = process.env.META_GRAPH_BASE_URL || 'https://graph.facebook.com';
 const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION || 'v26.0';
@@ -30,6 +31,7 @@ const MENU = [
   {
     title: 'Demander à Mande-IA',
     rows: [
+      { id: 'tech', title: 'Cours Tech étudiants', description: '10 leçons : smartphone, IA, web, design, programmation' },
       { id: 'conseil', title: 'Conseil entrepreneurial', description: 'Lancer une activité au Mali avec peu de moyens', prompt: 'Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens.' },
       { id: 'ecole', title: 'École malienne expliquée', description: 'Du fondamental à l’université, expliqué simplement', prompt: 'Explique-moi simplement comment fonctionne l’école au Mali, du fondamental jusqu’à l’université.' },
       { id: 'lecon', title: 'Leçon du jour', description: 'Une phrase en bambara, traduite et expliquée', prompt: 'Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple.' },
@@ -40,7 +42,6 @@ const MENU = [
   {
     title: 'Minta Services',
     rows: [
-      { id: 'github', title: 'Mande-IA sur GitHub', description: 'Le code ouvert du projet' },
       { id: 'createur', title: 'Qui a créé Mande-IA', description: 'Le Professeur Issa Minta et Minta Services' },
       { id: 'academy', title: 'Rejoindre Minta Academy', description: 'Cours gratuits : cloud, serveurs et IA locale' },
       { id: 'entrepreneuriat', title: 'Minta Entrepreneurship', description: 'Le programme pour les porteurs de projets' },
@@ -51,7 +52,7 @@ const MENU = [
 const ROWS = Object.fromEntries(MENU.flatMap((section) => section.rows).map((row) => [row.id, row]));
 
 const STATIC_REPLIES = {
-  createur: '*Mande-IA* a été créé au Mali par le Professeur *Issa Minta*, professeur de technologie et fondateur de *Minta Services*.\n\nSon objectif : rendre l’intelligence artificielle accessible en bambara, en français et en anglais.\n\nEssayez aussi Mande-IA sur le web : https://ia.mintaservices.com',
+  createur: '*Mande-IA* a été créé au Mali par le Professeur *Issa Minta*, professeur de technologie et fondateur de *Minta Services*.\n\nSon objectif : rendre l’intelligence artificielle accessible en bambara, en français et en anglais.\n\nEssayez aussi Mande-IA sur le web : https://ia.mintaservices.com\nLe code est ouvert : https://github.com/Professor-minta/Mande-IA',
   academy: '*Minta Academy* est une formation *gratuite* en 10 modules : nom de domaine, serveur VPS, aaPanel, Node.js, Python et intelligence artificielle sans internet avec Mande-IA v3.\n\nCommencez ici : https://mintaservices.com/academy/\n\nPour essayer Mande-IA sur votre ordinateur : installez Ollama puis tapez `ollama run professor-minta/mande-ia.v3`',
   entrepreneuriat: '*Minta Entrepreneurship* accompagne les entrepreneurs maliens et africains, de l’idée au premier client : incubation, outils numériques, intelligence artificielle et réseau.\n\nPrésentez votre projet : https://mintaservices.com/entrepreneuriat/\nE-mail : professorminta@gmail.com',
   professeur: 'Pour écrire directement au Professeur Issa Minta : https://wa.me/22377295259'
@@ -145,7 +146,7 @@ async function sendWelcome(phoneId, to, name) {
         action: { buttons: [
           { type: 'reply', reply: { id: 'menu', title: 'Voir tout le menu' } },
           { type: 'reply', reply: { id: 'lecon', title: 'Leçon du jour' } },
-          { type: 'reply', reply: { id: 'conseil', title: 'Conseil d’entreprise' } }
+          { type: 'reply', reply: { id: 'tech', title: 'Cours Tech' } }
         ] }
       }
     });
@@ -179,6 +180,7 @@ function setupWhatsApp(app, { db, day, now }) {
   if (TEST_MODE) console.log(testNumbers().length ? `WhatsApp : mode test, réponses seulement au ${testNumbers().map(maskNumber).join(', ')}.` : 'WhatsApp : mode test sans WHATSAPP_TEST_RECIPIENT, Mande-IA ne répondra à personne.');
   else console.log('WhatsApp : mode public.');
   console.log(`WhatsApp : webhook sur ${WEBHOOK_PATHS.slice(0, 2).join(' et ')}.`);
+  db.exec('CREATE TABLE IF NOT EXISTS whatsapp_cours (numero TEXT PRIMARY KEY, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL)');
 
   function validSignature(req) {
     if (!process.env.META_APP_SECRET) return TEST_MODE;
@@ -221,6 +223,32 @@ function setupWhatsApp(app, { db, day, now }) {
     if (pending.trim()) await sendText(phoneId, from, pending);
   }
 
+  function etapeCours(from) { return db.prepare('SELECT etape FROM whatsapp_cours WHERE numero = ?').get(from)?.etape || 0; }
+  function noterCours(from, etape) {
+    db.prepare('INSERT INTO whatsapp_cours(numero, etape, maj) VALUES (?, ?, ?) ON CONFLICT(numero) DO UPDATE SET etape = excluded.etape, maj = excluded.maj').run(from, etape, now());
+  }
+  async function sendButtons(phoneId, to, text, buttons) {
+    let body = whatsappFormat(text);
+    if (body.length > 1000) { await sendText(phoneId, to, body); body = 'On continue ?'; }
+    return graphPost(phoneId, 'messages', { recipient_type: 'individual', to, type: 'interactive', interactive: { type: 'button', body: { text: body }, action: { buttons: buttons.map(([id, title]) => ({ type: 'reply', reply: { id, title } })) } } });
+  }
+  async function cours(phoneId, from, commande) {
+    const faite = commande.action === 'zero' ? 0 : etapeCours(from);
+    if (commande.action === 'zero') noterCours(from, 0);
+    if (commande.action === 'debut' || commande.action === 'zero') {
+      const reprise = faite > 0 && faite < LECONS.length;
+      await sendButtons(phoneId, from, reprise ? `${INTRO}\n\nTu as déjà suivi ${faite} leçon${faite > 1 ? 's' : ''} sur ${LECONS.length}.` : INTRO, [['cours_suite', reprise ? 'Continuer' : 'Commencer'], ['menu', 'Menu']]);
+      return;
+    }
+    const numero = commande.action === 'numero' ? commande.numero : faite + 1;
+    if (numero > LECONS.length) {
+      await sendButtons(phoneId, from, `Tu as terminé les ${LECONS.length} leçons du Cours Tech. Bravo !\n\nPour continuer gratuitement : https://mintaservices.com/academy/\n\nTu peux poser tes questions à Mande-IA, ou revoir une leçon en écrivant par exemple *leçon 5*.`, [['cours_zero', 'Recommencer'], ['menu', 'Menu']]);
+      return;
+    }
+    const envoye = await sendButtons(phoneId, from, texteLecon(numero), [['cours_suite', numero < LECONS.length ? 'Leçon suivante' : 'Terminer'], ['menu', 'Menu']]);
+    if (envoye && numero > faite) noterCours(from, numero);
+  }
+
   async function handleMessage(message, phoneId, name) {
     const from = String(message.from || '');
     const messageId = String(message.id || '');
@@ -236,14 +264,20 @@ function setupWhatsApp(app, { db, day, now }) {
     if (message.type === 'interactive') {
       const choice = message.interactive?.list_reply || message.interactive?.button_reply;
       if (choice?.id === 'menu') { await sendMenu(phoneId, from, name); return; }
+      if (choice?.id === 'tech') { await cours(phoneId, from, { action: 'debut' }); return; }
+      if (choice?.id === 'cours_suite') { await cours(phoneId, from, { action: 'suite' }); return; }
+      if (choice?.id === 'cours_zero') { await cours(phoneId, from, { action: 'zero' }); return; }
       const row = ROWS[choice?.id];
       if (!row) { await sendText(phoneId, from, TEXT.unknownChoice); return; }
       if (row.prompt) { await answer(phoneId, from, row.prompt, messageId); return; }
-      await sendText(phoneId, from, row.id === 'github' ? await githubReply() : STATIC_REPLIES[row.id]);
+      await sendText(phoneId, from, STATIC_REPLIES[row.id]);
       return;
     }
     if (message.type !== 'text' || !message.text?.body) { await sendText(phoneId, from, TEXT.notText); return; }
     const text = String(message.text.body).trim().slice(0, 4000);
+    const commande = commandeCours(normalize(text));
+    if (commande) { await cours(phoneId, from, commande); return; }
+    if (normalize(text) === 'github') { await sendText(phoneId, from, await githubReply()); return; }
     if (isMenuRequest(text)) { await (MENU_WORDS.test(normalize(text)) ? sendMenu(phoneId, from, name) : sendWelcome(phoneId, from, name)); return; }
     await answer(phoneId, from, text, messageId);
   }

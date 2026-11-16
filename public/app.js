@@ -728,25 +728,28 @@ function stopReply() { state.streamController?.abort(); }
 
 const CONTACTS_KEY = 'mande-contacts';
 const canPickContacts = 'contacts' in navigator && 'ContactsManager' in window;
-const CALL_PREFIX = '(?:(?:mande ?i[ae]|mandeia)\\s+)?(?:(?:je veux|je voudrais|peux tu|tu peux|pouvez vous|vous pouvez|i want to|can you|please|stp|svp|n b a fe ka|a b a fe ka)\\s+)?';
-const CALL_STRONG = new RegExp(`^${CALL_PREFIX}(?:ap+el+(?:e|es|er|ez|i)|telephone a|telephoner a|telephonez a|(?:lance|lancer|lancez|passe|passer|passez|fais|faire|faites) (?:l |un )?appel(?: (?:a|pour|vers|avec))?|we+le)(?:\\s+(?:moi|me))?(?:\\s+(.+))?$`);
+const CALL_NAME = '(?:(?:ok|he|hey|eh|dis|dis moi|bonjour|salut|hello|hi)\\s+)?((?:mande ?i[ae]|mandeia|mande ?ya|mandia|monde ia)\\s+)?';
+const CALL_POLITE = '(?:est ce que tu peux|est ce que tu peut|est ce que vous pouvez|je veux|je voudrais|j aimerais|je souhaite|il faut|peux tu|peut tu|tu peux|tu peut|pourrais tu|pouvez vous|vous pouvez|pourriez vous|veux tu|veuillez|merci de|i want you to|i want to|i would like to|i d like to|i need you to|i need to|can you|could you|would you|will you|please|stp|svp|s il te plait|s il vous plait|n b a fe ka|a b a fe ka)';
+const CALL_PREFIX = `${CALL_NAME}((?:${CALL_POLITE}\\s+){0,2})`;
+const CALL_STRONG = new RegExp(`^${CALL_PREFIX}(?:ap+el+(?:e|es|er|ez|i)|telephone[rz]? a|(?:lance|lancer|lancez|passe|passer|passez|fais|faire|faites|donne|donner|donnez) (?:l |le |un )?(?:appel|coup de fil)(?: (?:a|au|pour|vers|avec))?|(?:make|place|start) a (?:phone )?call (?:to|with)|we+le)(?:\\s+(?:moi|me))?(?:\\s+(.+))?$`);
+const CALL_GIVE = new RegExp(`^${CALL_PREFIX}give (.+?) a (?:phone )?call((?: .+)?)$`);
 const CALL_WEAK = new RegExp(`^${CALL_PREFIX}(?:appel(?: a)?|telephone|telephoner|compose|composer|call|phone|ring)\\s+(.+)$`);
 const CALL_BAMBARA = /^(?:(?:n b a fe ka|a b a fe ka|i ka|aw ka)\s+)?(.+?)\s+we+le$/;
-const CALL_TAIL = /\s+(?:s il te plait|s il vous plait|stp|svp|please|maintenant|now|tout de suite|pour moi|au telephone)$/;
-const NOT_A_NAME = /^(?:t on|t il|t elle|on|ca|cela|ceci|comment|quoi|qui|quel|quelle|pourquoi|en|un|une|des|du|de|what|how|who|it|this|that)(?:\s|$)/;
+const CALL_TAIL = /\s+(?:s il te plait|s il vous plait|stp|svp|please|merci|thanks|thank you|maintenant|now|right now|tout de suite|pour moi|for me|au telephone|on the phone)$/;
+const NOT_A_NAME = /^(?:t on|t il|t elle|on|ca|cela|ceci|comment|quoi|qui|quel|quelle|pourquoi|en|un|une|des|du|de|what|how|who|it|this|that|me|us|back|later|again|plus tard)(?:\s|$)/;
 const PRONOUNS = new Set(['le', 'la', 'les', 'lui', 'moi', 'toi', 'nous', 'vous', 'eux', 'elle', 'il', 'me', 'him', 'her', 'them', 'a']);
 const CALL_SPEECH = {
   fr: {
     ready: (name) => `Touchez le bouton vert pour appeler ${name}.`,
     choose: (name) => `J'ai trouvé plusieurs ${name}. Touchez celui que vous voulez appeler.`,
     missing: (name) => `Je ne trouve pas ${name} dans vos contacts Mande-IA. ${canPickContacts ? 'Touchez « Choisir dans mes contacts ».' : 'Entrez son numéro une seule fois.'}`,
-    who: 'Qui voulez-vous appeler ? Dites « Appelle », puis le nom.'
+    who: 'Qui voulez-vous appeler ? Dites par exemple « Mande-IA, appelle Mamadou ».'
   },
   en: {
     ready: (name) => `Tap the green button to call ${name}.`,
     choose: (name) => `I found several contacts named ${name}. Tap the one you want to call.`,
     missing: (name) => `I can't find ${name} in your Mande-IA contacts. ${canPickContacts ? 'Tap “Choisir dans mes contacts”.' : 'Enter the number once.'}`,
-    who: 'Who do you want to call? Say “Call”, then the name.'
+    who: 'Who do you want to call? Say for example “Mande-IA, call Mamadou”.'
   },
   bm: {
     ready: (name) => `Maka bɔton la ka ${name} wɛlɛ yɛn.`,
@@ -784,10 +787,18 @@ function parseCallIntent(text, { voice = false } = {}) {
   if (!text || text.length > 80) return null;
   const folded = foldText(text);
   let weak = false;
-  let match = folded.match(CALL_STRONG) || folded.match(CALL_BAMBARA);
-  if (!match) { match = folded.match(CALL_WEAK); weak = Boolean(match); }
-  if (!match) return null;
-  const target = (match[1] || '').replace(CALL_TAIL, '').trim();
+  let target = '';
+  const strong = folded.match(CALL_STRONG) || folded.match(CALL_GIVE);
+  if (strong) target = `${strong[3] || ''}${strong[4] || ''}`;
+  else {
+    const bambara = folded.match(CALL_BAMBARA);
+    const loose = bambara ? null : folded.match(CALL_WEAK);
+    if (!bambara && !loose) return null;
+    target = bambara ? bambara[1] : loose[3];
+    weak = Boolean(loose) && !loose[1] && !loose[2];
+  }
+  target = target.trim();
+  while (CALL_TAIL.test(target)) target = target.replace(CALL_TAIL, '').trim();
   if (!target) return { type: 'TRIGGER_PHONE_CALL', name: '', number: '' };
   const withNumber = target.match(/^(.*?)\s*(?:\b(?:au|a|on|at|sur le)\s+)?(\+?\d[\d ]{4,}\d)$/);
   if (withNumber && cleanNumber(withNumber[2])) {
@@ -923,7 +934,7 @@ function showCallMissing(card, name, text, { voice = false } = {}) {
 function showCallWho(card, { voice = false } = {}) {
   const recent = loadContacts().slice(0, 6).map((c) => telLink(c, contactLabel(c)));
   const controls = canPickContacts ? [pickButton('', (contact) => showCallReady(card, contact), recent.length > 0), ...recent] : recent;
-  fillCallCard(card, `Qui voulez-vous appeler ? Dites ou écrivez « Appelle » suivi du nom, par exemple « Appelle Mamadou ».${controls.length ? '' : '\n\nAjoutez d\'abord vos contacts dans Paramètres, puis Mes contacts pour les appels.'}`, ...controls);
+  fillCallCard(card, `Qui voulez-vous appeler ? Dites ou écrivez par exemple « Mande-IA, peux-tu appeler Mamadou pour moi ? ».${controls.length ? '' : '\n\nAjoutez d\'abord vos contacts dans Paramètres, puis Mes contacts pour les appels.'}`, ...controls);
   if (voice) speakHint('who', '', voice);
 }
 function startPhoneCall(intent, text, { voice = false } = {}) {
