@@ -294,7 +294,7 @@ const COURS = {
 const PAR_DEFAUT = 'tech';
 
 const DEBUT = {
-  tech: /^(je suis )?(un |une )?(etudiant|etudiante|etudiants|student|students|eleve|cours tech|tech)$/,
+  tech: /^(je suis )?(un |une )?(etudiant|etudiante|etudiants|student|students|eleve|cours tech|tech)(?: ([a-z]{1,3}\d{1,3}))?$/,
   etudes: /^(cours )?(etudes|etude|methode|methodes|reussir|reussir ses etudes)$/,
   english: /^(cours (d )?)?(english|anglais|english for students)$/
 };
@@ -310,7 +310,10 @@ function texteLecon(cours, n) {
 }
 
 function commandeCours(texteNormalise) {
-  for (const [cours, motif] of Object.entries(DEBUT)) if (motif.test(texteNormalise)) return { action: 'debut', cours };
+  for (const [cours, motif] of Object.entries(DEBUT)) {
+    const trouve = texteNormalise.match(motif);
+    if (trouve) return { action: 'debut', cours, code: cours === PAR_DEFAUT && trouve[4] ? trouve[4].toUpperCase() : '' };
+  }
   if (LISTE.test(texteNormalise)) return { action: 'liste' };
   if (SUITE.test(texteNormalise)) return { action: 'suite' };
   if (ZERO.test(texteNormalise)) return { action: 'zero' };

@@ -180,7 +180,7 @@ function setupWhatsApp(app, { db, day, now }) {
   if (TEST_MODE) console.log(testNumbers().length ? `WhatsApp : mode test, réponses seulement au ${testNumbers().map(maskNumber).join(', ')}.` : 'WhatsApp : mode test sans WHATSAPP_TEST_RECIPIENT, Mande-IA ne répondra à personne.');
   else console.log('WhatsApp : mode public.');
   console.log(`WhatsApp : webhook sur ${WEBHOOK_PATHS.slice(0, 2).join(' et ')}.`);
-  db.exec('CREATE TABLE IF NOT EXISTS whatsapp_cours (numero TEXT PRIMARY KEY, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL); CREATE TABLE IF NOT EXISTS whatsapp_parcours (numero TEXT NOT NULL, cours TEXT NOT NULL, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL, PRIMARY KEY(numero, cours)); INSERT OR IGNORE INTO whatsapp_parcours(numero, cours, etape, maj) SELECT numero, \'tech\', etape, maj FROM whatsapp_cours;');
+  db.exec('CREATE TABLE IF NOT EXISTS whatsapp_cours (numero TEXT PRIMARY KEY, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL); CREATE TABLE IF NOT EXISTS whatsapp_parcours (numero TEXT NOT NULL, cours TEXT NOT NULL, etape INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL, PRIMARY KEY(numero, cours)); INSERT OR IGNORE INTO whatsapp_parcours(numero, cours, etape, maj) SELECT numero, \'tech\', etape, maj FROM whatsapp_cours; CREATE TABLE IF NOT EXISTS whatsapp_parrainages (numero TEXT PRIMARY KEY, code TEXT NOT NULL, date TEXT NOT NULL);');
 
   function validSignature(req) {
     if (!process.env.META_APP_SECRET) return TEST_MODE;
@@ -250,7 +250,20 @@ function setupWhatsApp(app, { db, day, now }) {
     if (body.length > 1000) { await sendText(phoneId, to, body); body = 'On continue ?'; }
     return graphPost(phoneId, 'messages', { recipient_type: 'individual', to, type: 'interactive', interactive: { type: 'button', body: { text: body }, action: { buttons: buttons.map(([id, title]) => ({ type: 'reply', reply: { id, title } })) } } });
   }
+  function admins() { return String(process.env.WHATSAPP_ADMIN || process.env.WHATSAPP_TEST_RECIPIENT || '').split(',').map(digits).filter(Boolean); }
+  function statsCours() {
+    const total = db.prepare('SELECT COUNT(DISTINCT numero) AS n FROM whatsapp_parcours').get().n;
+    const parCours = db.prepare('SELECT cours, COUNT(*) AS n, COALESCE(SUM(etape >= 1), 0) AS lus FROM whatsapp_parcours GROUP BY cours').all();
+    const parCode = db.prepare('SELECT p.code, COUNT(*) AS n, COALESCE(SUM((SELECT MAX(etape) FROM whatsapp_parcours c WHERE c.numero = p.numero) >= 1), 0) AS actifs, COALESCE(SUM((SELECT MAX(etape) FROM whatsapp_parcours c WHERE c.numero = p.numero) >= 3), 0) AS fideles FROM whatsapp_parrainages p GROUP BY p.code ORDER BY actifs DESC, n DESC').all();
+    return [
+      `*Cours pour étudiants : ${total} inscrit${total > 1 ? 's' : ''}*`,
+      parCours.map((c) => `• ${COURS[c.cours]?.nom || c.cours} : ${c.n} inscrits, ${c.lus} ont lu au moins une leçon`).join('\n') || 'Aucun cours commencé pour l’instant.',
+      '*Par code de collaborateur*\n(inscrits · ont lu 1 leçon · ont lu 3 leçons)',
+      parCode.map((c) => `• ${c.code} : ${c.n} · ${c.actifs} · ${c.fideles}`).join('\n') || 'Aucun code utilisé pour l’instant.'
+    ].join('\n\n');
+  }
   async function cours(phoneId, from, commande) {
+    if (commande.code) db.prepare('INSERT OR IGNORE INTO whatsapp_parrainages(numero, code, date) VALUES (?, ?, ?)').run(from, commande.code, now());
     if (commande.action === 'liste') { await sendCourseList(phoneId, from); return; }
     const id = COURS[commande.cours] ? commande.cours : coursActuel(from);
     const { nom, intro, lecons } = COURS[id];
@@ -299,6 +312,7 @@ function setupWhatsApp(app, { db, day, now }) {
     }
     if (message.type !== 'text' || !message.text?.body) { await sendText(phoneId, from, TEXT.notText); return; }
     const text = String(message.text.body).trim().slice(0, 4000);
+    if (normalize(text) === 'stats' && admins().includes(from)) { await sendText(phoneId, from, statsCours()); return; }
     const commande = commandeCours(normalize(text));
     if (commande) { await cours(phoneId, from, commande); return; }
     if (normalize(text) === 'github') { await sendText(phoneId, from, await githubReply()); return; }
