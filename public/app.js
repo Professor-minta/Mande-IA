@@ -13,7 +13,7 @@ const store = {
 const state = {
   user: null, usage: null, conversationId: null, messages: [], conversations: [],
   djelia: false, voiceEnabled: false, canStream: false, filesEnabled: false, liveEnabled: false,
-  installEvent: null, busy: false, streamController: null, attachment: null, drive: { proprietaire: false, connecte: false, dossier: '' },
+  installEvent: null, busy: false, streamController: null, attachment: null, drive: { proprietaire: false, connecte: false, dossier: '' }, gmail: { proprietaire: false, connecte: false },
   recorder: null, chunks: [], recordingStartedAt: 0, recordingTimer: null, transcribing: false,
   speechCache: new Map(), activeAudio: null, activeSpeechButton: null, speechLoading: false,
   audioCtx: null, meterFrame: 0, call: null, camera: null
@@ -331,6 +331,7 @@ async function checkAuth() {
   state.user = data.user; state.usage = data.usage;
   renderUsage();
   loadDrive().catch(() => {});
+  loadGmail().catch(() => {});
   if (state.user) await loadConversations();
 }
 async function loadDrive() {
@@ -345,6 +346,17 @@ async function toggleDrive() {
   if (!state.drive.connecte) { location.href = '/api/drive/connecter'; return; }
   if (!confirm('Délier Google Drive de Mande-IA ? Les documents déjà enregistrés restent dans votre Drive.')) return;
   try { await postJSON('/api/drive/deconnecter', {}); await loadDrive(); setStatus('Google Drive est délié.', { timeout: 5000 }); }
+  catch (error) { setStatus(error.message, { timeout: 6000 }); }
+}
+async function loadGmail() {
+  state.gmail = state.user ? await api('/api/gmail/etat') : { proprietaire: false, connecte: false };
+  $('#settings-gmail').hidden = !state.gmail.proprietaire;
+  $('#settings-gmail-text').textContent = state.gmail.connecte ? 'Relié en lecture seule : en mode scène, demandez « mes nouveaux e-mails ». Touchez pour délier.' : 'Reliez Gmail pour que Mande-IA lise vos e-mails en mode scène (lecture seule)';
+}
+async function toggleGmail() {
+  if (!state.gmail.connecte) { location.href = '/api/gmail/connecter'; return; }
+  if (!confirm('Délier Gmail de Mande-IA ?')) return;
+  try { await postJSON('/api/gmail/deconnecter', {}); await loadGmail(); setStatus('Gmail est délié.', { timeout: 5000 }); }
   catch (error) { setStatus(error.message, { timeout: 6000 }); }
 }
 async function saveToDrive(content, button) {
@@ -364,6 +376,13 @@ async function saveToDrive(content, button) {
   }
 }
 function handleDriveReturn() {
+  const gmail = new URLSearchParams(location.search).get('gmail');
+  if (gmail) {
+    history.replaceState(null, '', location.pathname);
+    const textes = { ok: 'Gmail est relié en lecture seule. Ouvrez le mode scène et demandez vos nouveaux e-mails.', annule: 'Liaison avec Gmail annulée.', refuse: 'Connectez-vous d’abord avec le compte propriétaire.', erreur: 'La liaison avec Gmail a échoué. Réessayez depuis Paramètres.' };
+    setStatus(textes[gmail] || '', { timeout: 8000 });
+    return;
+  }
   const result = new URLSearchParams(location.search).get('drive');
   if (!result) return;
   history.replaceState(null, '', location.pathname);
@@ -1558,6 +1577,7 @@ $('#delete-account-open').onclick = () => { $('#delete-account-open').hidden = t
 $('#delete-form').addEventListener('submit', (event) => { event.preventDefault(); deleteAccount(); });
 $('#settings-auth').onclick = openAuth;
 $('#settings-drive').onclick = toggleDrive;
+$('#settings-gmail').onclick = toggleGmail;
 $('#settings-upgrade').onclick = openUpgrade;
 $('#upgrade-link').href = waLink(UPGRADE_MESSAGE);
 $('#upgrade-link').onclick = openUpgrade;
