@@ -397,6 +397,36 @@
     send(call, { type: 'response.create' });
   }
 
+  async function runGmail(call, callId, rawArgs) {
+    call.handled = call.handled || new Set();
+    if (call.handled.has(callId)) return;
+    call.handled.add(callId);
+    let args = {};
+    try { args = JSON.parse(rawArgs || '{}'); } catch {}
+    const recherche = String(args.recherche || '').trim();
+    const id = String(args.id || '').trim();
+    const log = logEntry({ id: 'gmail', nom: 'Gmail' }, id ? 'Lire un e-mail' : recherche ? `Chercher « ${recherche.slice(0, 60)} »` : 'Voir les nouveaux e-mails');
+    let output;
+    try {
+      const response = await fetch('/api/gmail/consulter', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ recherche, id }) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'La lecture de Gmail a échoué.');
+      log.item.className = '';
+      log.meta.textContent = 'lu';
+      if (data.texte !== undefined) log.answer.textContent = `${data.de} — « ${data.sujet} »`;
+      else if (data.emails?.length) log.answer.textContent = data.emails.slice(0, 5).map((e) => `${e.non_lu ? '● ' : ''}${e.de} — ${e.sujet}`).join('\n');
+      else log.answer.textContent = 'Aucun e-mail trouvé.';
+      output = data;
+    } catch (error) {
+      log.item.className = 'is-error';
+      log.answer.textContent = error.message;
+      output = { erreur: error.message, consigne: 'Dis simplement que la lecture de Gmail n’a pas marché.' };
+    }
+    if (state.call !== call) return;
+    send(call, { type: 'conversation.item.create', item: { type: 'function_call_output', call_id: callId, output: JSON.stringify(output) } });
+    send(call, { type: 'response.create' });
+  }
+
   function onEvent(call, data) {
     switch (data.type) {
       case 'input_audio_buffer.speech_started':
@@ -422,11 +452,13 @@
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_agent') runAgent(call, data.item.call_id, data.item.arguments);
         if (data.item?.type === 'function_call' && data.item.name === 'enregistrer_dans_drive') runDrive(call, data.item.call_id, data.item.arguments);
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_drive') runDriveLire(call, data.item.call_id, data.item.arguments);
+        if (data.item?.type === 'function_call' && data.item.name === 'consulter_gmail') runGmail(call, data.item.call_id, data.item.arguments);
         break;
       case 'response.function_call_arguments.done':
         if (data.name === 'consulter_agent') runAgent(call, data.call_id, data.arguments);
         if (data.name === 'enregistrer_dans_drive') runDrive(call, data.call_id, data.arguments);
         if (data.name === 'consulter_drive') runDriveLire(call, data.call_id, data.arguments);
+        if (data.name === 'consulter_gmail') runGmail(call, data.call_id, data.arguments);
         break;
       case 'error':
         console.warn('Mande-IA scène :', data.error?.message || data.error);
