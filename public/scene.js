@@ -427,6 +427,41 @@
     send(call, { type: 'response.create' });
   }
 
+  async function runReseaux(call, callId, rawArgs, pubs) {
+    call.handled = call.handled || new Set();
+    if (call.handled.has(callId)) return;
+    call.handled.add(callId);
+    let args = {};
+    try { args = JSON.parse(rawArgs || '{}'); } catch {}
+    const log = logEntry(pubs ? { id: 'pubs', nom: 'Publicités Meta' } : { id: 'reseaux', nom: 'Réseaux sociaux' }, pubs ? 'Rapport des publicités' : 'Voir les notifications');
+    let output;
+    try {
+      const response = await fetch(pubs ? '/api/reseaux/pubs' : '/api/reseaux/notifications', { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(args) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'La lecture a échoué.');
+      log.item.className = '';
+      log.meta.textContent = 'lu';
+      if (pubs) {
+        const t = data.total;
+        log.answer.textContent = t ? `${t.portee.toLocaleString('fr-FR')} personnes touchées · ${t.clics.toLocaleString('fr-FR')} clics · ${data.campagnes.length} campagne${data.campagnes.length > 1 ? 's' : ''}` : data.note || 'Aucune publicité.';
+      } else {
+        const parts = [];
+        if (data.facebook) parts.push(`Facebook : ${data.facebook.nouveaux} commentaire${data.facebook.nouveaux > 1 ? 's' : ''}`);
+        if (data.messenger) parts.push(`Messenger : ${data.messenger.non_lus} non lu${data.messenger.non_lus > 1 ? 's' : ''}`);
+        if (data.instagram) parts.push(`Instagram : ${data.instagram.nouveaux} commentaire${data.instagram.nouveaux > 1 ? 's' : ''}`);
+        log.answer.textContent = parts.join('\n') || 'Rien de nouveau.';
+      }
+      output = data;
+    } catch (error) {
+      log.item.className = 'is-error';
+      log.answer.textContent = error.message;
+      output = { erreur: error.message, consigne: 'Dis simplement que la lecture n’a pas marché.' };
+    }
+    if (state.call !== call) return;
+    send(call, { type: 'conversation.item.create', item: { type: 'function_call_output', call_id: callId, output: JSON.stringify(output) } });
+    send(call, { type: 'response.create' });
+  }
+
   function onEvent(call, data) {
     switch (data.type) {
       case 'input_audio_buffer.speech_started':
@@ -453,12 +488,16 @@
         if (data.item?.type === 'function_call' && data.item.name === 'enregistrer_dans_drive') runDrive(call, data.item.call_id, data.item.arguments);
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_drive') runDriveLire(call, data.item.call_id, data.item.arguments);
         if (data.item?.type === 'function_call' && data.item.name === 'consulter_gmail') runGmail(call, data.item.call_id, data.item.arguments);
+        if (data.item?.type === 'function_call' && data.item.name === 'consulter_reseaux') runReseaux(call, data.item.call_id, data.item.arguments, false);
+        if (data.item?.type === 'function_call' && data.item.name === 'rapport_pubs') runReseaux(call, data.item.call_id, data.item.arguments, true);
         break;
       case 'response.function_call_arguments.done':
         if (data.name === 'consulter_agent') runAgent(call, data.call_id, data.arguments);
         if (data.name === 'enregistrer_dans_drive') runDrive(call, data.call_id, data.arguments);
         if (data.name === 'consulter_drive') runDriveLire(call, data.call_id, data.arguments);
         if (data.name === 'consulter_gmail') runGmail(call, data.call_id, data.arguments);
+        if (data.name === 'consulter_reseaux') runReseaux(call, data.call_id, data.arguments, false);
+        if (data.name === 'rapport_pubs') runReseaux(call, data.call_id, data.arguments, true);
         break;
       case 'error':
         console.warn('Mande-IA scène :', data.error?.message || data.error);
