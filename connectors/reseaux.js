@@ -69,8 +69,10 @@ function setupReseaux(app, { getUser }) {
   const cache = new Map();
   let igId = '';
   const proprietaire = () => String(process.env.META_PROPRIETAIRE || process.env.GMAIL_PROPRIETAIRE || process.env.DRIVE_PROPRIETAIRE || '').trim().toLowerCase();
-  const pageOk = () => process.env.RESEAUX_LECTURE !== 'false' && Boolean(process.env.META_PAGE_ID && process.env.META_PAGE_TOKEN && proprietaire());
-  const pubsOk = () => pageOk() && Boolean(process.env.META_ADS_COMPTE && (process.env.META_ADS_TOKEN || process.env.META_PAGE_TOKEN));
+  const systeme = () => process.env.META_SYSTEM_TOKEN || '';
+  const pageOk = () => process.env.RESEAUX_LECTURE !== 'false' && Boolean(process.env.META_PAGE_ID && (process.env.META_PAGE_TOKEN || systeme()) && proprietaire());
+  const pubsOk = () => pageOk() && Boolean(process.env.META_ADS_COMPTE && (systeme() || process.env.META_PAGE_TOKEN));
+  const jetonPubs = () => systeme() || process.env.META_PAGE_TOKEN;
   const estProprietaire = (user) => Boolean(user && pageOk() && String(user.email || '').toLowerCase() === proprietaire());
   const utilisateur = (req) => (req.session.userId ? getUser(req.session.userId) : null);
   const compteAds = () => { const v = String(process.env.META_ADS_COMPTE || '').trim(); return v.startsWith('act_') ? v : `act_${v}`; };
@@ -82,14 +84,23 @@ function setupReseaux(app, { getUser }) {
     if (!response.ok || data.error) {
       const e = data.error || {};
       console.error('Réseaux Meta :', e.code, e.message);
-      if (e.code === 190) throw new ReseauxError('Le jeton Meta a expiré. Créez un nouveau jeton et mettez-le dans .env.', 409);
+      if (e.code === 190) { jetonDePage = ''; throw new ReseauxError('Le jeton Meta a expiré. Créez un nouveau jeton et mettez-le dans .env.', 409); }
       if (e.code === 10 || (e.code >= 200 && e.code < 300)) throw new ReseauxError('Meta refuse cette lecture : une permission manque au jeton.', 403);
       if (e.code === 4 || e.code === 17 || e.code === 32 || e.code === 613) throw new ReseauxError('Meta limite les demandes pour le moment. Réessayez dans quelques minutes.', 429);
       throw new ReseauxError('Meta ne répond pas pour le moment.');
     }
     return data;
   }
-  const page = (chemin, params) => graph(`${process.env.META_PAGE_ID}${chemin}`, params, process.env.META_PAGE_TOKEN);
+  let jetonDePage = '';
+  async function jetonPage() {
+    if (process.env.META_PAGE_TOKEN) return process.env.META_PAGE_TOKEN;
+    if (!jetonDePage) {
+      jetonDePage = (await graph(String(process.env.META_PAGE_ID), { fields: 'access_token' }, systeme())).access_token || '';
+      if (!jetonDePage) throw new ReseauxError('L’utilisateur système n’a pas accès à la page Facebook. Ajoutez la page à ses éléments dans Meta Business.', 403);
+    }
+    return jetonDePage;
+  }
+  const page = async (chemin, params) => graph(`${process.env.META_PAGE_ID}${chemin}`, params, await jetonPage());
 
   async function instagramId() {
     if (process.env.META_IG_ID) return process.env.META_IG_ID;
@@ -122,7 +133,7 @@ function setupReseaux(app, { getUser }) {
 
   async function instagram(depuis) {
     const ig = await instagramId();
-    const data = await graph(`${ig}/media`, { limit: '8', fields: 'caption,timestamp,like_count,comments_count,comments.limit(10){username,text,timestamp}' }, process.env.META_PAGE_TOKEN);
+    const data = await graph(`${ig}/media`, { limit: '8', fields: 'caption,timestamp,like_count,comments_count,comments.limit(10){username,text,timestamp}' }, await jetonPage());
     const commentaires = [];
     for (const media of data.data || []) {
       for (const c of media.comments?.data || []) {
@@ -164,7 +175,7 @@ function setupReseaux(app, { getUser }) {
     if (!pubsOk()) throw new ReseauxError('Le compte publicitaire n’est pas configuré (META_ADS_COMPTE dans .env).', 409);
     const p = PERIODES[periode] ? periode : '7jours';
     return memoire(`p:${p}`, async () => {
-      const jeton = process.env.META_ADS_TOKEN || process.env.META_PAGE_TOKEN;
+      const jeton = jetonPubs();
       const champs = 'spend,impressions,reach,clicks,ctr,cpc,actions,account_currency';
       const [total, campagnes] = await Promise.all([
         graph(`${compteAds()}/insights`, { date_preset: PERIODES[p], fields: champs }, jeton),
@@ -197,8 +208,8 @@ function setupReseaux(app, { getUser }) {
     const essai = async (nom, travail) => { try { etat[nom] = await travail(); } catch (e) { etat[nom] = { erreur: e.message }; } };
     await essai('page', async () => ({ ok: true, nom: (await page('', { fields: 'name' })).name }));
     await essai('messenger', async () => { await page('/conversations', { platform: 'messenger', limit: '1', fields: 'id' }); return { ok: true }; });
-    await essai('instagram', async () => ({ ok: true, compte: (await graph(await instagramId(), { fields: 'username' }, process.env.META_PAGE_TOKEN)).username }));
-    if (pubsOk()) await essai('pubs', async () => ({ ok: true, compte: (await graph(compteAds(), { fields: 'name,account_status' }, process.env.META_ADS_TOKEN || process.env.META_PAGE_TOKEN)).name }));
+    await essai('instagram', async () => ({ ok: true, compte: (await graph(await instagramId(), { fields: 'username' }, await jetonPage())).username }));
+    if (pubsOk()) await essai('pubs', async () => ({ ok: true, compte: (await graph(compteAds(), { fields: 'name,account_status' }, jetonPubs())).name }));
     else etat.pubs = { erreur: 'META_ADS_COMPTE manquant dans .env.' };
     res.json(etat);
   });
