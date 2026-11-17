@@ -2,6 +2,7 @@ const { PRESENTATION_MINTA } = require('./minta');
 const rateLimit = require('express-rate-limit');
 const { connaissancesPour } = require('./connaissances');
 const { lexiquePour } = require('./lexique');
+const { preparerWeb, pageWebPour } = require('./web');
 
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
 
@@ -58,7 +59,7 @@ function sceneInstructions(preference) {
 }
 
 function agentSystem(agent, preference, demande) {
-  const dossier = [connaissancesPour(demande), agent.id === 'bambara' ? lexiquePour(demande, { force: true }) : ''].filter(Boolean).join('\n\n');
+  const dossier = [connaissancesPour(demande), agent.id === 'bambara' ? lexiquePour(demande, { force: true }) : '', pageWebPour(demande)].filter(Boolean).join('\n\n');
   return [
     `Tu es l’agent ${agent.nom} de Mande-IA, l’assistant créé au Mali par le Professeur Issa Minta (Minta Services). Ton domaine : ${agent.role}.`,
     'Mande-IA te consulte pendant une démonstration en direct, puis lit ta réponse à voix haute devant un public.',
@@ -72,6 +73,7 @@ function agentSystem(agent, preference, demande) {
 
 async function askAgent(agent, demande, preference) {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY manquant');
+  await preparerWeb(demande);
   const response = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, {
     method: 'POST',
     signal: AbortSignal.timeout(25000),

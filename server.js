@@ -21,6 +21,7 @@ const { setupWhatsApp, isWebhookPath } = require('./connectors/whatsapp');
 const { setupPayments, migrate: migratePayments, isPro, PRO_DAILY_QUESTIONS } = require('./connectors/paiement');
 const { setupScene, sceneInstructions, SCENE_TOOL } = require('./connectors/scene');
 const { connaissancesPour, derniereQuestion } = require('./connectors/connaissances');
+const { preparerWeb, pageWebPour } = require('./connectors/web');
 const { setupDrive } = require('./connectors/drive');
 const { PRESENTATION_MINTA } = require('./connectors/minta');
 
@@ -114,7 +115,7 @@ app.delete('/api/conversations/:id', requireUser, (req, res) => { const result =
 function selectedConversation(req, conversationId) { if (!req.session.userId || !conversationId) return null; return db.prepare('SELECT id, title FROM conversations WHERE id = ? AND user_id = ?').get(conversationId, req.session.userId); }
 function languageInstruction(p) { if (p === 'bm') return 'Réponds uniquement en Bambara (bamanankan), simple et court.'; if (p === 'fr') return 'Réponds uniquement en français simple et court.'; if (p === 'en') return 'Reply only in clear, concise English.'; return 'Réponds dans la langue du dernier message de l’utilisateur : bambara, français ou anglais.'; }
 function systemPrompt(preference, { markdown = true, question = '' } = {}) {
-  const dossier = connaissancesPour(question);
+  const dossier = [connaissancesPour(question), pageWebPour(question)].filter(Boolean).join('\n\n');
   return [
     'Tu es Mande-IA, l’assistant d’intelligence artificielle créé au Mali par le Professeur Issa Minta et son entreprise Minta Services.',
     'Tu aides les Maliens et l’Afrique de l’Ouest : éducation, entrepreneuriat, technologie, culture et vie pratique.',
@@ -159,6 +160,7 @@ async function* streamClaude({ messages, preference, file, signal }) {
     const block = file.mimetype === 'application/pdf' ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data } } : { type: 'image', source: { type: 'base64', media_type: file.mimetype, data } };
     const last = payload[payload.length - 1]; last.content = [block, { type: 'text', text: last.content }];
   }
+  await preparerWeb(derniereQuestion(messages));
   const response = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, { method: 'POST', signal, headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 1500, system: systemPrompt(preference, { question: derniereQuestion(messages) }), messages: payload, stream: true }) });
   if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('Claude stream:', response.status, data?.error?.message); throw httpError(`Mande-IA est momentanément indisponible. Réessayez dans un instant. (code claude-${response.status})`); }
   for await (const event of sseEvents(response.body)) {
@@ -169,6 +171,7 @@ async function* streamClaude({ messages, preference, file, signal }) {
 async function* streamGemini({ messages, preference, file, signal }) {
   const contents = messages.map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   contents[contents.length - 1].parts.unshift({ inlineData: { mimeType: file.mimetype, data: file.buffer.toString('base64') } });
+  await preparerWeb(derniereQuestion(messages));
   const url = `${GEMINI_BASE_URL}/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:streamGenerateContent?alt=sse`;
   const response = await fetch(url, { method: 'POST', signal, headers: { 'content-type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify({ systemInstruction: { parts: [{ text: systemPrompt(preference, { question: derniereQuestion(messages) }) }] }, contents, generationConfig: { maxOutputTokens: 2048 } }) });
   if (!response.ok) { const data = await response.json().catch(() => ({})); console.error('Gemini stream:', response.status, data?.error?.message); throw httpError(`L’analyse du fichier est momentanément indisponible. Réessayez dans un instant. (code gemini-${response.status})`); }
@@ -179,6 +182,7 @@ async function* streamGemini({ messages, preference, file, signal }) {
 }
 async function* streamOllama({ messages, preference, signal }) {
   if (!OLLAMA_MODEL) throw httpError('Modèle local non configuré.', 503);
+  await preparerWeb(derniereQuestion(messages));
   let response;
   try { response = await fetch(`${OLLAMA_URL}/api/chat`, { method: 'POST', signal, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ model: OLLAMA_MODEL, stream: true, messages: [{ role: 'system', content: systemPrompt(preference, { question: derniereQuestion(messages) }) }, ...messages] }) }); }
   catch (error) { if (error.name === 'AbortError') throw error; throw httpError('Le modèle local est injoignable. (code ollama-offline)'); }
@@ -210,6 +214,7 @@ function saveExchange(conversation, userContent, reply) {
 }
 async function askClaude(messages, preference = 'auto', maxTokens = 300) {
   if (!process.env.ANTHROPIC_API_KEY) { const error = new Error('Clé Claude non configurée.'); error.status = 503; throw error; }
+  await preparerWeb(derniereQuestion(messages));
   const response = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: maxTokens, system: systemPrompt(preference, { markdown: false, question: derniereQuestion(messages) }), messages }) });
   const data = await response.json(); if (!response.ok) { const error = new Error(data?.error?.message || 'Erreur externe.'); error.status = 502; throw error; }
   const reply = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim(); if (!reply) { const error = new Error('Réponse vide.'); error.status = 502; throw error; } return reply;

@@ -1,5 +1,6 @@
 const { connaissancesPour, derniereQuestion } = require('./connaissances');
 const { lexiquePour } = require('./lexique');
+const { preparerWeb, pageWebPour } = require('./web');
 
 const ANTHROPIC_BASE_URL = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
 
@@ -11,7 +12,7 @@ function langInstruction(pref) {
 }
 
 function whatsappSystemPrompt(lang, question = '') {
-  const dossier = [connaissancesPour(question), lexiquePour(question)].filter(Boolean).join('\n\n');
+  const dossier = [connaissancesPour(question), lexiquePour(question), pageWebPour(question)].filter(Boolean).join('\n\n');
   return [
     'Tu es Mande-IA, l’assistant d’intelligence artificielle créé au Mali par le Professeur Issa Minta et son entreprise Minta Services.',
     'Tu réponds sur WhatsApp : messages courts, faciles à lire sur un téléphone, une idée par paragraphe.',
@@ -27,6 +28,7 @@ function whatsappSystemPrompt(lang, question = '') {
 async function askClaude(input, lang = 'auto') {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY manquant');
   const messages = Array.isArray(input) ? input : [{ role: 'user', content: String(input) }];
+  await preparerWeb(derniereQuestion(messages));
   const res = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, {
     method: 'POST',
     signal: AbortSignal.timeout(45000),
@@ -41,6 +43,7 @@ async function askClaude(input, lang = 'auto') {
 async function* streamClaude(input, lang = 'auto', signal) {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY manquant');
   const messages = Array.isArray(input) ? input : [{ role: 'user', content: String(input) }];
+  await preparerWeb(derniereQuestion(messages));
   const res = await fetch(`${ANTHROPIC_BASE_URL}/v1/messages`, {
     method: 'POST',
     signal: signal || AbortSignal.timeout(90000),
@@ -69,6 +72,7 @@ async function askOllama(input, lang = 'auto') {
   if (!model) throw new Error('OLLAMA_MODEL non configuré');
   const base = process.env.OLLAMA_API_URL || process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
   const messages = Array.isArray(input) ? input : [{ role: 'user', content: String(input) }];
+  await preparerWeb(derniereQuestion(messages));
   const res = await fetch(`${base}/api/chat`, {
     method: 'POST',
     signal: AbortSignal.timeout(90000),
