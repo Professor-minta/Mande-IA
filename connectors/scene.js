@@ -11,7 +11,7 @@ const AGENTS = [
   { id: 'historien', nom: 'Historien', role: 'histoire du Mali et de l’Afrique : Kurukan Fuga, Soundiata, Mansa Moussa, les grands empires, les traditions', mots: 110 },
   { id: 'chercheur', nom: 'Chercheur', role: 'explications claires : sciences, santé, géographie, culture générale' },
   { id: 'bambara', nom: 'Bambara', role: 'traductions et petites leçons de bambara' },
-  { id: 'formateur', nom: 'Formateur', role: 'Minta Academy : les 10 modules, la formation à Bamako, les inscriptions et l’aide aux élèves bloqués', mots: 110 },
+  { id: 'formateur', nom: 'Formateur', role: 'Minta Academy : les 10 modules, la formation en direct depuis Ségou, les inscriptions et l’aide aux élèves bloqués', mots: 110 },
   { id: 'tech', nom: 'Tech', role: 'serveurs, sites web, code, cloud et IA locale' },
   { id: 'marketing', nom: 'Marketing', role: 'publicités, slogans et publications pour les réseaux sociaux' },
   { id: 'finance', nom: 'Finance', role: 'prix, budgets, calculs en FCFA et rentabilité' },
@@ -51,7 +51,7 @@ function sceneInstructions(preference) {
     'Ensuite, présente la réponse de l’agent à voix haute, en quelques phrases courtes, sans inventer ce qu’il n’a pas dit.',
     'Pour l’histoire du Mali et de l’Afrique, par exemple Kurukan Fuga, Soundiata ou Mansa Moussa, consulte toujours l’agent Historien.',
     'Pour traduire ou apprendre le bambara, consulte l’agent Bambara.',
-    'Pour Minta Academy, ses cours, ses modules, la formation à Bamako ou un élève bloqué, consulte l’agent Formateur.',
+    'Pour Minta Academy, ses cours, ses modules, la formation en direct ou un élève bloqué, consulte l’agent Formateur.',
     'Pour une salutation ou une question très simple, réponds directement, sans agent.',
     'Phrases courtes, ton chaleureux et clair, une idée à la fois.',
     languageRule(preference)
