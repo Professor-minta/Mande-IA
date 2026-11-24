@@ -7,7 +7,7 @@ Un fichier `.md` par sujet. Quand une question contient l'un des mots-clés du f
 - `kurukan-fuga.md` : Kurukan Fuga, la Charte du Manden et l'Empire du Mali.
 - `mansa-moussa.md` : Mansa Moussa et Aboubakar II.
 - `minta-services.md` : Minta Services, Minta Academy, Data-Collections, Minta Entrepreneurship et Mande-IA (services, prix, adresses).
-- `minta-academy.md` : Minta Academy en détail, pour l'agent Formateur : les 10 modules, les règles de sécurité, le projet final, la formation à Bamako et l'aide aux élèves bloqués.
+- `minta-academy.md` : Minta Academy en détail, pour l'agent Formateur : les 10 modules, les règles de sécurité, le projet final, la formation en direct et l'aide aux élèves bloqués.
 
 ## Ajouter un dossier
 
