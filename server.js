@@ -25,6 +25,7 @@ const { preparerWeb, pageWebPour } = require('./connectors/web');
 const { setupDrive } = require('./connectors/drive');
 const { setupGmail } = require('./connectors/gmail');
 const { setupReseaux } = require('./connectors/reseaux');
+const { setupStats } = require('./connectors/stats');
 const { PRESENTATION_MINTA } = require('./connectors/minta');
 
 const app = express();
@@ -421,6 +422,7 @@ setupScene(app, { getUser, isPro });
 const drive = setupDrive(app, { db, getUser, now, secret: SESSION_SECRET });
 const gmail = setupGmail(app, { db, getUser, now });
 const reseaux = setupReseaux(app, { getUser });
+setupStats(app, { db, getUser });
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', app: 'mande-ia.v3', whatsapp: Boolean((process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_ROOT_TOKEN) && process.env.WHATSAPP_PHONE_NUMBER_ID), multiAgent: true, chatManager: true, ollama: Boolean(OLLAMA_MODEL), stream: true, claude: Boolean(process.env.ANTHROPIC_API_KEY), djelia: Boolean(process.env.DJELIA_API_KEY), files: Boolean(process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY), live: Boolean(process.env.OPENAI_API_KEY), voice: Boolean(process.env.OPENAI_API_KEY || process.env.DJELIA_API_KEY) }));
 app.get('/sitemap.xml', (req, res) => { res.type('application/xml'); res.sendFile(path.join(PUBLIC_DIR, 'sitemap.xml')); });
