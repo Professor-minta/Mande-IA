@@ -16,7 +16,7 @@ const PROFILE_PICTURE = path.join(__dirname, '..', 'public', 'icons', 'whatsapp-
 const PROFILE = {
   about: 'Assistant IA en bambara, français et anglais. Par Minta Services.',
   description: 'Mande-IA répond à vos questions en bambara, en français et en anglais : conseils, école, entrepreneuriat, technologie et culture du Mali. Créé par le Professeur Issa Minta (Minta Services). Tapez menu pour voir les sujets.',
-  email: 'professorminta@gmail.com',
+  email: 'contact@mintaservices.com',
   websites: ['https://ia.mintaservices.com', 'https://mintaservices.com'],
   vertical: 'EDU'
 };
