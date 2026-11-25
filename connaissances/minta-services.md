@@ -8,7 +8,7 @@ source: https://mintaservices.com
 Minta Services (slogan : African Technology Solution) est une entreprise malienne de solutions technologiques, à Ségou et Bamako. Fondateur : le Professeur Issa Minta, professeur de technologie et ingénieur IA full-stack, créateur de Mande-IA et de Minta Academy. Devise : « Inspirer, innover, autonomiser la jeunesse malienne. »
 - Services : sites vitrines et boutiques en ligne ; serveurs VPS installés, sécurisés et gérés avec aaPanel ; noms de domaine avec DNS et e-mails professionnels ; panneau VPN pour les équipes ; Mande-IA installé en entreprise, sans internet ; suivi, sauvegardes et ajustements gratuits après chaque livraison.
 - Un site web prend en général 5 à 10 jours ouvrables. Paiement : Orange Money, Moov Money, Wave ou carte bancaire. Intervention partout au Mali et à distance.
-- Site : https://mintaservices.com. Contact : professorminta@gmail.com, WhatsApp +223 77 29 52 59.
+- Site : https://mintaservices.com. Contact : contact@mintaservices.com, WhatsApp +223 77 29 52 59.
 
 ## Les quatre initiatives
 1. Mande-IA : l'assistant d'intelligence artificielle qui parle bambara, français et anglais. Sur le web (https://ia.mintaservices.com), sur WhatsApp (+223 92 27 58 84) et sans internet avec le modèle professor-minta/mande-ia.v3.
