@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Mande-IA · Statistiques</title>
+<link rel="icon" href="/icon-192.png">
+<style>
+  :root { --bg:#f3f1ec; --carte:#ffffff; --texte:#14222f; --doux:#5b6670; --ligne:#e1ded6; --teal:#377479; --orange:#d9822b; --marine:#0e263e; --vert:#1e7a4c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1724; --carte:#132535; --texte:#e8edf1; --doux:#9db0bf; --ligne:#24384a; --teal:#6fb3b8; --orange:#e8953a; --marine:#e8edf1; --vert:#5fd38a; color-scheme: dark; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--texte); font:15px/1.45 Inter, system-ui, Arial, sans-serif; padding:20px max(16px, env(safe-area-inset-left)) 40px max(16px, env(safe-area-inset-right)); }
+  .tete { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:10px; max-width:1100px; margin:0 auto 18px; }
+  h1 { margin:0; font-size:1.6rem; letter-spacing:-.3px; }
+  h1 span { color:var(--orange); }
+  .maj { color:var(--doux); font-size:.85rem; }
+  button { font:600 .85rem inherit; border:1px solid var(--ligne); background:var(--carte); color:var(--texte); border-radius:8px; padding:7px 12px; cursor:pointer; }
+  .grille { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:12px; max-width:1100px; margin:0 auto; }
+  .kpi { background:var(--carte); border:1px solid var(--ligne); border-radius:14px; padding:14px 16px; }
+  .kpi .v { font-size:2.1rem; font-weight:800; letter-spacing:-1px; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .kpi .l { color:var(--doux); font-size:.85rem; margin-top:4px; }
+  .kpi.principal { grid-column:span 2; border-color:var(--teal); }
+  .kpi.principal .v { font-size:3rem; color:var(--teal); }
+  .graph { background:var(--carte); border:1px solid var(--ligne); border-radius:14px; padding:16px; max-width:1100px; margin:12px auto 0; }
+  .graph h2 { margin:0 0 4px; font-size:1rem; }
+  .graph p { margin:0 0 10px; color:var(--doux); font-size:.85rem; }
+  .graph svg { width:100%; height:auto; display:block; }
+  .legende { display:flex; gap:16px; font-size:.82rem; color:var(--doux); margin-bottom:6px; }
+  .legende i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:-1px; }
+  .erreur { max-width:1100px; margin:12px auto; color:#c0392b; }
+  body.video .maj, body.video #rafraichir { display:none; }
+  @media (max-width:520px) { .kpi.principal { grid-column:span 1; } }
+</style>
+</head>
+<body>
+<div class="tete">
+  <div><h1>Mande-IA <span>en chiffres</span></h1><div class="maj" id="maj">Chargement…</div></div>
+  <div><button id="rafraichir" type="button">Actualiser</button> <button id="video" type="button">Mode vidéo</button></div>
+</div>
+<div class="grille" id="kpis"></div>
+<div class="graph"><h2>Comptes créés sur le site</h2><p>Total cumulé, 30 derniers jours</p><svg id="g-comptes" viewBox="0 0 1000 260" role="img" aria-label="Comptes cumulés"></svg></div>
+<div class="graph"><h2>Personnes actives chaque jour</h2><p>Personnes différentes qui ont posé au moins une question, 30 derniers jours</p>
+  <div class="legende"><span><i style="background:var(--teal)"></i>Site web</span><span><i style="background:var(--orange)"></i>WhatsApp</span></div>
+  <svg id="g-actifs" viewBox="0 0 1000 260" role="img" aria-label="Personnes actives par jour"></svg></div>
+<div class="erreur" id="erreur" hidden></div>
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var fmt = new Intl.NumberFormat('fr-FR');
+  function el(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function txt(tag, attrs, s, parent) { var e = el(tag, attrs, parent); e.textContent = s; return e; }
+  function pas(max) { if (max <= 5) return 1; var p = Math.pow(10, Math.floor(Math.log10(max / 4))); var c = [1, 2, 5, 10].map(function (m) { return m * p; }).find(function (s) { return max / s <= 5; }); return c || p * 10; }
+  function axe(svg, max, G) {
+    var s = pas(max), haut = Math.max(s, Math.ceil(max / s) * s);
+    for (var v = 0; v <= haut; v += s) {
+      var y = G.b - (v / haut) * (G.b - G.t);
+      el('line', { x1: G.l, x2: G.r, y1: y, y2: y, stroke: 'var(--ligne)', 'stroke-width': 1 }, svg);
+      txt('text', { x: G.l - 8, y: y + 4, 'text-anchor': 'end', 'font-size': 13, fill: 'var(--doux)' }, fmt.format(v), svg);
+    }
+    return haut;
+  }
+  function dates(svg, serie, G, x) {
+    [0, 7, 14, 21, serie.length - 1].forEach(function (i) {
+      var d = serie[i].jour.split('-');
+      txt('text', { x: x(i), y: G.b + 22, 'text-anchor': 'middle', 'font-size': 13, fill: 'var(--doux)' }, d[2] + '/' + d[1], svg);
+    });
+  }
+  function ligne(svg, serie) {
+    svg.textContent = '';
+    var G = { l: 56, r: 980, t: 16, b: 222 }, max = Math.max.apply(null, serie.map(function (p) { return p.comptes; }).concat([1]));
+    var haut = axe(svg, max, G);
+    var x = function (i) { return G.l + i * (G.r - G.l) / (serie.length - 1); }, y = function (v) { return G.b - (v / haut) * (G.b - G.t); };
+    var pts = serie.map(function (p, i) { return x(i) + ',' + y(p.comptes); });
+    el('path', { d: 'M' + G.l + ',' + G.b + ' L' + pts.join(' L') + ' L' + G.r + ',' + G.b + ' Z', fill: 'var(--teal)', 'fill-opacity': .12 }, svg);
+    el('polyline', { points: pts.join(' '), fill: 'none', stroke: 'var(--teal)', 'stroke-width': 3, 'stroke-linejoin': 'round' }, svg);
+    var dernier = serie[serie.length - 1];
+    el('circle', { cx: x(serie.length - 1), cy: y(dernier.comptes), r: 6, fill: 'var(--teal)' }, svg);
+    txt('text', { x: x(serie.length - 1) - 10, y: y(dernier.comptes) - 12, 'text-anchor': 'end', 'font-size': 15, 'font-weight': 700, fill: 'var(--texte)' }, fmt.format(dernier.comptes), svg);
+    dates(svg, serie, G, x);
+  }
+  function barres(svg, serie) {
+    svg.textContent = '';
+    var G = { l: 56, r: 980, t: 16, b: 222 }, max = Math.max.apply(null, serie.map(function (p) { return p.web + p.whatsapp; }).concat([1]));
+    var haut = axe(svg, max, G), larg = (G.r - G.l) / serie.length, b = larg * 0.7;
+    var x = function (i) { return G.l + i * larg + larg / 2; }, h = function (v) { return (v / haut) * (G.b - G.t); };
+    serie.forEach(function (p, i) {
+      var hw = h(p.web), hwa = h(p.whatsapp);
+      if (hw) el('rect', { x: x(i) - b / 2, y: G.b - hw, width: b, height: hw, fill: 'var(--teal)' }, svg);
+      if (hwa) el('rect', { x: x(i) - b / 2, y: G.b - hw - hwa, width: b, height: hwa, fill: 'var(--orange)' }, svg);
+      var t = el('title', {}, null); t.textContent = p.jour + ' : ' + p.web + ' site, ' + p.whatsapp + ' WhatsApp, ' + p.questions + ' questions';
+      el('rect', { x: x(i) - larg / 2, y: G.t, width: larg, height: G.b - G.t, fill: 'transparent' }, svg).appendChild(t);
+    });
+    dates(svg, serie, G, x);
+  }
+  function kpis(t) {
+    var liste = [
+      ['principal', t.comptes, 'comptes sur le site'],
+      ['', t.pro, 'abonnés Pro'],
+      ['', t.nouveaux7, 'nouveaux comptes (7 jours)'],
+      ['', t.whatsapp30, 'personnes sur WhatsApp (30 jours)'],
+      ['', t.visiteurs30, 'visiteurs sans compte (30 jours)'],
+      ['', t.questionsAujourdhui, "questions aujourd'hui"],
+      ['', t.coursTech, 'inscrits au Cours Tech'],
+    ];
+    if (t.paiements) liste.push(['', t.paiements.nombre, 'paiements reçus (' + fmt.format(t.paiements.montant) + ' FCFA)']);
+    var box = document.getElementById('kpis'); box.textContent = '';
+    liste.forEach(function (k) {
+      var d = document.createElement('div'); d.className = 'kpi ' + k[0];
+      var v = document.createElement('div'); v.className = 'v'; v.textContent = fmt.format(k[1] || 0);
+      var l = document.createElement('div'); l.className = 'l'; l.textContent = k[2];
+      d.appendChild(v); d.appendChild(l); box.appendChild(d);
+    });
+  }
+  function charger() {
+    fetch('/api/admin/stats', { credentials: 'same-origin' }).then(function (r) { if (!r.ok) throw new Error('Accès refusé (' + r.status + ')'); return r.json(); }).then(function (d) {
+      kpis(d.totaux); ligne(document.getElementById('g-comptes'), d.serie); barres(document.getElementById('g-actifs'), d.serie);
+      document.getElementById('maj').textContent = 'Mis à jour à ' + new Date(d.genere).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('erreur').hidden = true;
+    }).catch(function (e) { var x = document.getElementById('erreur'); x.textContent = e.message; x.hidden = false; });
+  }
+  document.getElementById('rafraichir').addEventListener('click', charger);
+  document.getElementById('video').addEventListener('click', function () { document.body.classList.toggle('video'); this.textContent = document.body.classList.contains('video') ? 'Quitter le mode vidéo' : 'Mode vidéo'; });
+  charger(); setInterval(charger, 60000);
+})();
+</script>
+</body>
+</html>
