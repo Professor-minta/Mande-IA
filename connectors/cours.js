@@ -303,12 +303,6 @@ const SUITE = /^(lecon|lecons|lecon suivante|la suite|suite|suivant|suivante|nex
 const NUMERO = /^(?:lecon|lesson) (\d{1,2})$/;
 const ZERO = /^recommencer( le cours)?$/;
 
-function texteLecon(cours, n) {
-  const { lecons } = COURS[cours];
-  const lecon = lecons[n - 1];
-  return [`*Leçon ${n}/${lecons.length} · ${lecon.titre}*`, ...lecon.corps, `*À faire aujourd’hui :* ${lecon.exercice}`].join('\n\n');
-}
-
 function commandeCours(texteNormalise) {
   for (const [cours, motif] of Object.entries(DEBUT)) {
     const trouve = texteNormalise.match(motif);
@@ -323,16 +317,7 @@ function commandeCours(texteNormalise) {
 }
 
 function fichesCours() {
-  const catalogue = [
-    'Mande-IA propose trois cours gratuits pour les étudiants, de 10 leçons chacun. Sur WhatsApp (+223 92 27 58 84), on écrit « Étudiant » ou « cours », puis « leçon » pour la suivante.',
-    ...Object.values(COURS).map((c) => `${c.nom} : ${c.lecons.map((l, i) => `${i + 1}. ${l.titre}`).join(' ; ')}.`),
-    'Ne confonds pas ces leçons avec les 10 modules de Minta Academy (https://mintaservices.com/academy/), qui portent sur les serveurs, les sites web et l’IA locale.',
-    'Si la personne demande « une leçon » ou « la leçon 4 » sans dire de quel cours, demande-lui lequel des trois elle veut. N’invente jamais un titre de leçon ou de module.'
-  ].join('\n\n');
-  return [
-    { titre: 'Les cours pour étudiants de Mande-IA', corps: catalogue, mots: ['lecon', 'lecons', 'lesson', 'lessons', 'cours whatsapp', 'cours etudiant', 'cours etudiants', 'cours pour etudiant', 'cours gratuit', 'cours gratuits'] },
-    ...Object.values(COURS).map((c) => ({ titre: `${c.nom} : les ${c.lecons.length} leçons`, corps: c.lecons.map((l, i) => [`Leçon ${i + 1} : ${l.titre}`, ...l.corps, `À faire : ${l.exercice}`].join('\n')).join('\n\n').replace(/\*/g, ''), mots: c.mots }))
-  ];
+  return [];
 }
 
-module.exports = { COURS, PAR_DEFAUT, texteLecon, commandeCours, fichesCours };
+module.exports = { COURS, PAR_DEFAUT, commandeCours, fichesCours };

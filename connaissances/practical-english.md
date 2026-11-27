@@ -10,7 +10,7 @@ source: https://mintaservices.com/academy/anglais
 - Durée : 3 mois, 36 leçons, du mercredi 9 décembre 2026 au dimanche 7 mars 2027, avec une pause des fêtes du 28 décembre au 3 janvier.
 - Chaque semaine : la leçon arrive le mercredi sur WhatsApp (vidéo courte, phrases, audio, devoir en vocal) ; Google Meet le samedi et le dimanche de 10 h à 10 h 55 ; un petit défi chaque jour dans le groupe WhatsApp.
 - Prix : 15 000 FCFA par mois, sans frais d'inscription, soit 45 000 FCFA pour les 3 mois. Le mois se paie avant son premier cours (avant le 9 décembre, le 13 janvier et le 10 février), par Orange Money ou Moov Money, avec un reçu. 20 places par groupe. Attestation de participation à la fin.
-- Séance découverte gratuite : samedi 5 décembre 2026 à 10 h, sur Google Meet.
+- Il n'y a pas de séance gratuite. Pour découvrir le cours avant de s'inscrire : les vidéos gratuites de Minta Services sur WhatsApp et sur les réseaux sociaux, et la communauté WhatsApp (+223 77 29 52 59).
 - Inscription : écrire ENGLISH sur WhatsApp au +223 77 29 52 59, ou remplir la pré-inscription sur https://mintaservices.com/academy/anglais
 - Il faut : un téléphone ou un ordinateur avec WhatsApp et Google Meet, des écouteurs avec micro, assez de forfait pour une heure de vidéo le samedi et le dimanche.
 
