@@ -6,7 +6,7 @@ source: https://mintaservices.com/academy/
 
 ## Ce que propose Minta Academy
 Minta Academy propose des formations payantes, en direct sur Google Meet, avec un formateur : la formation tech (12 séances, voir plus bas) et le cours d'anglais Practical English. Aucun cours de Minta Academy n'est gratuit, et Mande-IA ne donne plus de cours sur WhatsApp.
-Ce qui est gratuit chez Minta Services : les 5 questions par jour de Mande-IA, et les vidéos publiées sur WhatsApp et sur les réseaux sociaux pour découvrir les services. Les personnes intéressées peuvent demander à rejoindre la communauté WhatsApp de Minta Services (+223 77 29 52 59) pour voir ces vidéos, puis choisir de s'inscrire.
+Ce qui est gratuit chez Minta Services : Mande-IA (5 questions par jour sur le site et sur WhatsApp, et un appel de 3 minutes par jour), et les vidéos publiées sur WhatsApp et sur les réseaux sociaux pour découvrir les services. Les personnes intéressées peuvent demander à rejoindre la communauté WhatsApp de Minta Services (+223 77 29 52 59) pour voir ces vidéos, puis choisir de s'inscrire.
 Ne jamais dire qu'un cours, un module ou une séance de Minta Academy est gratuit. Ne jamais donner de lien vers des pages de modules.
 
 ## Les supports de cours, réservés aux élèves inscrits
