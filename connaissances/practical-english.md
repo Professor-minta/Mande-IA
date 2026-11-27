@@ -1,6 +1,6 @@
 ---
 titre: Le cours Practical English de Minta Academy : dates, prix, programme des 36 leçons et exemple de leçon
-mots: anglais, english, cours d'anglais, parler anglais, practical english, apprendre l'anglais, lecon d'anglais, leçon d'anglais, module d'anglais, programme d'anglais, exemple de lecon, exemple de leçon, manuel d'anglais
+mots: anglais, english, cours d'anglais, parler anglais, practical english, apprendre l'anglais, lecon d'anglais, leçon d'anglais, module d'anglais, programme d'anglais, anglais professionnel, anglais des affaires, business english, cadre, cadres, professionnel, banque, entreprise, exemple de lecon, exemple de leçon, manuel d'anglais
 source: https://mintaservices.com/academy/anglais
 ---
 
@@ -13,6 +13,12 @@ source: https://mintaservices.com/academy/anglais
 - Séance découverte gratuite : samedi 5 décembre 2026 à 10 h, sur Google Meet.
 - Inscription : écrire ENGLISH sur WhatsApp au +223 77 29 52 59, ou remplir la pré-inscription sur https://mintaservices.com/academy/anglais
 - Il faut : un téléphone ou un ordinateur avec WhatsApp et Google Meet, des écouteurs avec micro, assez de forfait pour une heure de vidéo le samedi et le dimanche.
+
+## Pour les cadres et les professionnels
+- Le cours convient aux cadres, aux employés de banque, d'ONG et de grandes entreprises : les leçons se passent le samedi et le dimanche matin, en dehors des heures de bureau, et la leçon du mercredi se suit à son rythme sur WhatsApp.
+- L'anglais du travail y occupe une grande place : réseau et présentations professionnelles, réunions et points d'avancement, e-mails professionnels (semaine 6) ; négociation, questions difficiles, service client (semaine 11) ; entretien d'embauche, présentation d'un projet devant un public (semaines 9 et 12).
+- Même prix pour tous : 15 000 FCFA par mois, sans frais d'inscription.
+- Pour une équipe (banque, entreprise, ONG, administration) : Minta Services peut organiser un groupe réservé à l'équipe, aux horaires de l'entreprise, en ligne. Le prix se fait sur devis : écrire ENGLISH PRO sur WhatsApp au +223 77 29 52 59 ou à contact@mintaservices.com.
 
 ## Le programme : 12 semaines, 36 leçons
 - Semaine 1 · English and me : leçons 1 à 3 — What is English? ; Why English matters in the world ; My English journey and personal goals.
