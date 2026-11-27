@@ -224,6 +224,7 @@ function setupWhatsApp(app, { db, day, now }) {
     if (pending.trim()) await sendText(phoneId, from, pending);
   }
 
+  function admins() { return String(process.env.WHATSAPP_ADMIN || process.env.WHATSAPP_TEST_RECIPIENT || '').split(',').map(digits).filter(Boolean); }
   function statsCours() {
     const total = db.prepare('SELECT COUNT(DISTINCT numero) AS n FROM whatsapp_parcours').get().n;
     const parCours = db.prepare('SELECT cours, COUNT(*) AS n, COALESCE(SUM(etape >= 1), 0) AS lus FROM whatsapp_parcours GROUP BY cours').all();
