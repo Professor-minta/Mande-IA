@@ -261,7 +261,7 @@ async function shareText(content, button) {
 function proSummary() {
   const until = state.user?.proUntil ? new Date(state.user.proUntil) : null;
   if (!until || Number.isNaN(until.getTime())) return 'Plan Pro : questions illimitées.';
-  const date = until.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  const date = until.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   const minutes = Number(state.user.callMinutes) || 0;
   return `Plan Pro jusqu’au ${date} · ${minutes} min d’appel restante${minutes > 1 ? 's' : ''}.`;
 }
