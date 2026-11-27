@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { streamChat } = require('../chats/chatManager');
-const { COURS, PAR_DEFAUT, texteLecon, commandeCours } = require('./cours');
+const { COURS, commandeCours } = require('./cours');
 
 const GRAPH_BASE_URL = process.env.META_GRAPH_BASE_URL || 'https://graph.facebook.com';
 const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION || 'v26.0';
@@ -31,7 +31,7 @@ const MENU = [
   {
     title: 'Demander à Mande-IA',
     rows: [
-      { id: 'cours_liste', title: 'Cours pour étudiants', description: 'Tech, méthodes d’études, anglais : 10 leçons chacun' },
+      { id: 'formations', title: 'Nos formations', description: 'Formation tech et anglais en direct : programmes et prix' },
       { id: 'conseil', title: 'Conseil entrepreneurial', description: 'Lancer une activité au Mali avec peu de moyens', prompt: 'Donne-moi un conseil entrepreneurial concret pour lancer une petite entreprise au Mali avec peu de moyens.' },
       { id: 'ecole', title: 'École malienne expliquée', description: 'Du fondamental à l’université, expliqué simplement', prompt: 'Explique-moi simplement comment fonctionne l’école au Mali, du fondamental jusqu’à l’université.' },
       { id: 'lecon', title: 'Leçon du jour', description: 'Une phrase en bambara, traduite et expliquée', prompt: 'Donne-moi une courte leçon du jour en bambara, avec la traduction en français et un exemple.' },
@@ -43,7 +43,7 @@ const MENU = [
     title: 'Minta Services',
     rows: [
       { id: 'createur', title: 'Qui a créé Mande-IA', description: 'Le Professeur Issa Minta et Minta Services' },
-      { id: 'academy', title: 'Rejoindre Minta Academy', description: 'Cours gratuits : cloud, serveurs et IA locale' },
+      { id: 'academy', title: 'Rejoindre Minta Academy', description: 'Formation tech en direct sur Google Meet' },
       { id: 'entrepreneuriat', title: 'Minta Entrepreneurship', description: 'Le programme pour les porteurs de projets' },
       { id: 'professeur', title: 'Rencontrer Pr Issa Minta', description: 'Écrire au Professeur sur WhatsApp' }
     ]
@@ -53,7 +53,8 @@ const ROWS = Object.fromEntries(MENU.flatMap((section) => section.rows).map((row
 
 const STATIC_REPLIES = {
   createur: '*Mande-IA* a été créé au Mali par le Professeur *Issa Minta*, professeur de technologie et fondateur de *Minta Services*.\n\nSon objectif : rendre l’intelligence artificielle accessible en bambara, en français et en anglais.\n\nEssayez aussi Mande-IA sur le web : https://ia.mintaservices.com\nLe code est ouvert : https://github.com/Professor-minta/Mande-IA',
-  academy: '*Minta Academy* est une formation *gratuite* en 10 modules : nom de domaine, serveur VPS, aaPanel, Node.js, Python et intelligence artificielle sans internet avec Mande-IA v3.\n\nCommencez ici : https://mintaservices.com/academy/\n\nPour essayer Mande-IA sur votre ordinateur : installez Ollama puis tapez `ollama run professor-minta/mande-ia.v3`',
+  academy: '*Minta Academy* est la formation tech de Minta Services, en direct sur Google Meet avec un formateur : 12 séances, du nom de domaine et du serveur jusqu’à l’intelligence artificielle sans internet. Du 7 au 24 décembre 2026, du lundi au jeudi de 18 h à 20 h. 75 000 FCFA, 50 000 FCFA pour les étudiants.\n\nProgramme et pré-inscription : https://mintaservices.com/academy/bamako',
+  formations: '*Les formations Minta Academy* ont lieu en direct sur Google Meet, avec le Professeur Issa Minta :\n\n• *Formation tech* : 12 séances du 7 au 24 décembre 2026, du lundi au jeudi de 18 h à 20 h. 75 000 FCFA, 50 000 FCFA pour les étudiants. https://mintaservices.com/academy/bamako\n• *Practical English* : 3 mois, Google Meet le samedi et le dimanche à 10 h. 15 000 FCFA par mois. https://mintaservices.com/academy/anglais\n\nAvant de t’inscrire, regarde nos vidéos gratuites sur WhatsApp et sur nos réseaux. Pour rejoindre la communauté ou t’inscrire : https://wa.me/22377295259',
   entrepreneuriat: '*Minta Entrepreneurship* accompagne les entrepreneurs maliens et africains, de l’idée au premier client : incubation, outils numériques, intelligence artificielle et réseau.\n\nPrésentez votre projet : https://mintaservices.com/entrepreneuriat/\nE-mail : contact@mintaservices.com',
   professeur: 'Pour écrire directement au Professeur Issa Minta : https://wa.me/22377295259'
 };
@@ -146,7 +147,7 @@ async function sendWelcome(phoneId, to, name) {
         action: { buttons: [
           { type: 'reply', reply: { id: 'menu', title: 'Voir tout le menu' } },
           { type: 'reply', reply: { id: 'lecon', title: 'Leçon du jour' } },
-          { type: 'reply', reply: { id: 'cours_liste', title: 'Cours étudiants' } }
+          { type: 'reply', reply: { id: 'formations', title: 'Nos formations' } }
         ] }
       }
     });
@@ -223,34 +224,6 @@ function setupWhatsApp(app, { db, day, now }) {
     if (pending.trim()) await sendText(phoneId, from, pending);
   }
 
-  function coursActuel(from) {
-    const id = db.prepare('SELECT cours FROM whatsapp_parcours WHERE numero = ? ORDER BY maj DESC LIMIT 1').get(from)?.cours;
-    return COURS[id] ? id : PAR_DEFAUT;
-  }
-  function etapeCours(from, id) { return db.prepare('SELECT etape FROM whatsapp_parcours WHERE numero = ? AND cours = ?').get(from, id)?.etape || 0; }
-  function noterCours(from, id, etape) {
-    db.prepare('INSERT INTO whatsapp_parcours(numero, cours, etape, maj) VALUES (?, ?, ?, ?) ON CONFLICT(numero, cours) DO UPDATE SET etape = excluded.etape, maj = excluded.maj').run(from, id, etape, now());
-  }
-  function sendCourseList(phoneId, to) {
-    return graphPost(phoneId, 'messages', {
-      recipient_type: 'individual',
-      to,
-      type: 'interactive',
-      interactive: {
-        type: 'list',
-        header: { type: 'text', text: 'Cours pour étudiants' },
-        body: { text: 'Trois cours gratuits de 10 leçons chacun. Choisis celui qui t’intéresse : tu peux en suivre plusieurs.' },
-        footer: { text: 'Écris leçon pour la suivante' },
-        action: { button: 'Choisir un cours', sections: [{ title: 'Cours', rows: Object.entries(COURS).map(([id, c]) => ({ id: `cours_${id}`, title: c.nom, description: c.description })) }] }
-      }
-    });
-  }
-  async function sendButtons(phoneId, to, text, buttons) {
-    let body = whatsappFormat(text);
-    if (body.length > 1000) { await sendText(phoneId, to, body); body = 'On continue ?'; }
-    return graphPost(phoneId, 'messages', { recipient_type: 'individual', to, type: 'interactive', interactive: { type: 'button', body: { text: body }, action: { buttons: buttons.map(([id, title]) => ({ type: 'reply', reply: { id, title } })) } } });
-  }
-  function admins() { return String(process.env.WHATSAPP_ADMIN || process.env.WHATSAPP_TEST_RECIPIENT || '').split(',').map(digits).filter(Boolean); }
   function statsCours() {
     const total = db.prepare('SELECT COUNT(DISTINCT numero) AS n FROM whatsapp_parcours').get().n;
     const parCours = db.prepare('SELECT cours, COUNT(*) AS n, COALESCE(SUM(etape >= 1), 0) AS lus FROM whatsapp_parcours GROUP BY cours').all();
@@ -264,24 +237,7 @@ function setupWhatsApp(app, { db, day, now }) {
   }
   async function cours(phoneId, from, commande) {
     if (commande.code) db.prepare('INSERT OR IGNORE INTO whatsapp_parrainages(numero, code, date) VALUES (?, ?, ?)').run(from, commande.code, now());
-    if (commande.action === 'liste') { await sendCourseList(phoneId, from); return; }
-    const id = COURS[commande.cours] ? commande.cours : coursActuel(from);
-    const { nom, intro, lecons } = COURS[id];
-    const faite = commande.action === 'zero' ? 0 : etapeCours(from, id);
-    if (commande.action === 'debut' || commande.action === 'zero') {
-      noterCours(from, id, faite);
-      const reprise = faite > 0 && faite < lecons.length;
-      await sendButtons(phoneId, from, reprise ? `${intro}\n\nTu as déjà suivi ${faite} leçon${faite > 1 ? 's' : ''} sur ${lecons.length}.` : intro, [['cours_suite', reprise ? 'Continuer' : 'Commencer'], ['cours_liste', 'Autres cours'], ['menu', 'Menu']]);
-      return;
-    }
-    const numero = commande.action === 'numero' ? commande.numero : faite + 1;
-    if (commande.action === 'numero' && numero > lecons.length) { await sendText(phoneId, from, `Le cours « ${nom} » a ${lecons.length} leçons. Écris par exemple *leçon ${lecons.length}*.`); return; }
-    if (numero > lecons.length) {
-      await sendButtons(phoneId, from, `Tu as terminé les ${lecons.length} leçons du cours « ${nom} ». Bravo !\n\nChoisis un autre cours, ou continue gratuitement avec Minta Academy : https://mintaservices.com/academy/\n\nPour revoir une leçon, écris par exemple *leçon 5*.`, [['cours_liste', 'Autres cours'], ['cours_zero', 'Recommencer'], ['menu', 'Menu']]);
-      return;
-    }
-    const envoye = await sendButtons(phoneId, from, texteLecon(id, numero), [['cours_suite', numero < lecons.length ? 'Leçon suivante' : 'Terminer'], ['menu', 'Menu']]);
-    if (envoye) noterCours(from, id, Math.max(faite, numero));
+    await sendText(phoneId, from, `Mande-IA ne donne plus de cours sur WhatsApp.\n\n${STATIC_REPLIES.formations}`);
   }
 
   async function handleMessage(message, phoneId, name) {
@@ -299,11 +255,7 @@ function setupWhatsApp(app, { db, day, now }) {
     if (message.type === 'interactive') {
       const choice = message.interactive?.list_reply || message.interactive?.button_reply;
       if (choice?.id === 'menu') { await sendMenu(phoneId, from, name); return; }
-      if (choice?.id === 'cours_liste') { await cours(phoneId, from, { action: 'liste' }); return; }
-      const choisi = choice?.id === 'tech' ? 'tech' : String(choice?.id || '').replace(/^cours_/, '');
-      if (COURS[choisi]) { await cours(phoneId, from, { action: 'debut', cours: choisi }); return; }
-      if (choice?.id === 'cours_suite') { await cours(phoneId, from, { action: 'suite' }); return; }
-      if (choice?.id === 'cours_zero') { await cours(phoneId, from, { action: 'zero' }); return; }
+      if (choice?.id === 'tech' || /^cours_/.test(String(choice?.id || ''))) { await cours(phoneId, from, {}); return; }
       const row = ROWS[choice?.id];
       if (!row) { await sendText(phoneId, from, TEXT.unknownChoice); return; }
       if (row.prompt) { await answer(phoneId, from, row.prompt, messageId); return; }
